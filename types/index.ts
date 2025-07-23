@@ -1,69 +1,102 @@
 // Global type definitions for the Akarii application
+// These align with Convex schema definitions
+
+import { Id } from '../convex/_generated/dataModel'
 
 export interface Message {
-  id: string
+  _id: Id<'messages'>
   content: string
   userId: string
   conversationId: string
-  timestamp: Date
-  analysisId?: string
+  timestamp: number
+  analysisId?: Id<'analyses'>
 }
 
 export interface Analysis {
-  id: string
-  messageId: string
+  _id: Id<'analyses'>
+  messageId: Id<'messages'>
   statementType: 'question' | 'opinion' | 'fact' | 'request' | 'other'
   beliefs: string[]
   tradeOffs: string[]
   confidenceLevel: number
-  rawData: Record<string, unknown>
+  rawData: any
   thumbsUp: number
   thumbsDown: number
   userVotes: Record<string, 'up' | 'down'>
-  createdAt: Date
+  createdAt: number
 }
 
 export interface Conversation {
-  id: string
+  _id: Id<'conversations'>
   title: string
   participants: string[]
-  createdAt: Date
-  updatedAt: Date
+  createdAt: number
+  updatedAt: number
   isActive: boolean
 }
 
 export interface User {
-  id: string
+  _id: Id<'users'>
   email: string
   name?: string
   avatar?: string
   role: 'member' | 'admin'
-  joinedAt: Date
+  joinedAt: number
 }
 
 export interface Team {
-  id: string
+  _id: Id<'teams'>
   name: string
-  members: User[]
-  inviteLinks: InviteLink[]
-  createdAt: Date
+  members: string[] // User IDs
+  createdAt: number
 }
 
 export interface InviteLink {
-  id: string
-  teamId: string
+  _id: Id<'inviteLinks'>
+  teamId: Id<'teams'>
   token: string
-  expiresAt: Date
+  expiresAt: number
   createdBy: string
   isActive: boolean
 }
 
 export interface UsageMetrics {
-  id: string
-  teamId: string
+  _id: Id<'usageMetrics'>
+  teamId: Id<'teams'>
   userId: string
   tokensUsed: number
   cost: number
   requestCount: number
-  date: Date
+  date: number
 }
+
+// Helper types for form inputs and API responses
+export type CreateMessageInput = Omit<
+  Message,
+  '_id' | 'timestamp' | 'analysisId'
+>
+export type CreateAnalysisInput = Omit<
+  Analysis,
+  '_id' | 'createdAt' | 'thumbsUp' | 'thumbsDown' | 'userVotes'
+>
+export type CreateConversationInput = Omit<
+  Conversation,
+  '_id' | 'createdAt' | 'updatedAt'
+>
+
+// Vote types
+export type VoteType = 'up' | 'down'
+
+// Analysis statement types
+export type StatementType =
+  | 'question'
+  | 'opinion'
+  | 'fact'
+  | 'request'
+  | 'other'
+
+// User roles
+export type UserRole = 'member' | 'admin'
+
+// Export analysis types
+export * from './analysis'
