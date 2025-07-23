@@ -1,0 +1,119 @@
+# Overview
+
+**Conversational Prism (codename TBD)** is a live "thought‑x‑ray" layer for real‑time chats and meetings. It exposes the hidden **beliefs, values, trade‑offs, and confidence** embedded in every line of dialogue, giving teams that care about clarity an immediate mirror of their collective reasoning.
+
+* **Problem** – Most disagreements stem from unspoken assumptions. Traditional note‑taking or post‑mortems surface content, not motive.
+* **Audience** – Early‑stage founders, decision‑heavy teams, facilitators, coaches—people who bleed for clarity.
+* **Value** – Faster alignment, better decisions, less political drift. "See the why while you talk."
+
+---
+
+# Core Features
+
+| Feature                   | What it does                                                                 | Why it matters                                | How it works                                    |
+| ------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| **Live Chat**             | Real‑time text room (Convex)                                                 | Quick demo surface; zero install              | Convex mutation & subscription                  |
+| **Prism Panel**           | Streams analysis per message (statement type, belief, trade‑off, confidence) | Surfaces hidden structure instantly           | Server action calls LLM → stores & streams JSON |
+| **Thumb Vote**            | Users mark analysis 👍/👎                                                    | Human‑in‑loop quality metric & fine‑tune data | Convex update; counts visible in UI             |
+| **Magic‑Link Auth**       | Clerk email links                                                            | Zero‑friction invite for pilot teams          | Clerk + Convex session integration              |
+| **Review Mode (stretch)** | Scrollable chat w/ inline analyses                                           | Async reflection & decision docs              | Same data, alternative view                     |
+
+---
+
+# User Experience
+
+### Personas
+
+* **Founder Alex** – running a YC seed‑team; wants alignment fast.
+* **Facilitator Mina** – mediates strategic off‑sites; needs live insight.
+
+### Key Flow (MVP)
+
+1. Alex clicks invite link → magic‑link auth.
+2. Types a message → hits enter.
+3. Within ≤2 s the Prism Panel shows the inference row.
+4. Team clicks 👍/👎 if the inference resonates.
+5. Conversation continues; side‑panel scrolls live.
+
+### UI / UX Notes
+
+* Split‑pane layout; chat left, Prism right.
+* Analysis rows collapsible; click opens drawer with raw JSON.
+* Latency indicator (sub‑2‑second goal) subtle in corner.
+* Mobile view can hide panel for focus.
+
+---
+
+# Technical Architecture
+
+* **Frontend** – Next.js 14 App Router + Tailwind + shadcn/ui.
+* **Real‑time & DB** – Convex (mutations, queries, actions).
+* **LLM** – OpenAI o4‑mini‑high via server action `analyzeMessage`.
+* **Auth** – Clerk magic‑link; WorkOS considered post‑MVP.
+* **Infra** – Vercel (Next) + Convex cloud; no custom websockets.
+* **Data Models** – `messages`, `analyses`, `convos` (see Appendix).
+* **APIs** – `/api/generateTranscriptAnalysis` (stretch); Convex RPCs (`sendMessage`, `thumbVote`).
+
+---
+
+# Development Roadmap
+
+*### Phase 0 – Scaffold*
+
+* Repo, lint, Tailwind, shadcn.
+* Convex project, schema stub.
+
+*### Phase 1 – MVP (usable demo)*
+
+* Live chat UI + Convex live queries.
+* `analyzeMessage` action w/ OpenAI prompt.
+* Prism Panel streaming results.
+* Clerk magic‑link auth.
+
+*### Phase 2 – Quality & Feedback*
+
+* Thumb vote loop; store feedback.
+* Prompt tuning to hit ≥70 % 👍.
+* Simple cost dashboard (token usage per team).
+
+*### Phase 3 – Enhancements*
+
+* Review Mode view.
+* Transcript bulk endpoint.
+* WorkOS SSO option.
+* Belief taxonomy & search.
+* Token caps & billing hooks.
+
+---
+
+# Logical Dependency Chain
+
+1. **Foundations** – Repo, Next/Tailwind, Convex schema.
+2. **Core Flow** – Live chat mutations + query subscription.
+3. **Analysis Pipeline** – `analyzeMessage` server action & OpenAI key.
+4. **Prism Panel UI** – Consume merged stream. Visible value!
+5. **Auth** – Clerk integration (can slot earlier if needed).
+6. **Feedback Loop** – Thumb votes & aggregation.
+7. **Secondary Views** – Review Mode, analytics, etc.
+
+---
+
+# Risks and Mitigations
+
+| Risk                              | Mitigation                                                                 |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| LLM latency spikes                | Batch messages, cache identical lines, aggressive streaming                |
+| Analysis nonsense / hallucination | Prompt guardrails + thumbs‑down monitoring + “confidence < 0.4” greyed‑out |
+| Token cost blow‑up                | Track per‑team usage; cap in Phase 2                                       |
+| Scope creep                       | Roadmap phases keep MVP atomic; parking‑lot extras                         |
+| Convex lock‑in                    | Abstract repo layer; data export script early                              |
+
+---
+
+# Appendix
+
+* **Version history table** (kept from previous doc).
+* **Data models (TS)** snippet (above).
+* **Prompt sketch**: `SYSTEM: Socratic Analyst…`.
+* **Open questions**: taxonomy, privacy, SSO, pricing.
+* **Research**: links to “clarity tools” landscape, YC founder interviews (to be added).
