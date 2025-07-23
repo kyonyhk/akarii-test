@@ -1,0 +1,169 @@
+{
+  "project": "Akarii Multi-Agent Development",
+  "branch": "multi-agent-parallel-dev",
+  "created": "2025-07-23T22:00:00.000Z",
+  "updated": "2025-07-23T22:00:00.000Z",
+  "agents": {
+    "agent-prism": {
+      "id": "agent-prism",
+      "name": "Prism Panel Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "ready",
+      "specialization": "UI Components & Analysis Display",
+      "assigned_tasks": ["5.2", "5.3", "5.4"],
+      "current_task": "5.2",
+      "next_tasks": ["5.3", "5.4"],
+      "blocked_by": [],
+      "estimated_completion": "2h"
+    },
+    "agent-realtime": {
+      "id": "agent-realtime",
+      "name": "Real-time Data Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "ready",
+      "specialization": "Convex Subscriptions & Data Flow",
+      "assigned_tasks": ["5.5", "5.6", "5.7"],
+      "current_task": "5.5",
+      "next_tasks": ["5.6", "5.7"],
+      "blocked_by": [],
+      "estimated_completion": "3h"
+    },
+    "agent-auth": {
+      "id": "agent-auth",
+      "name": "Authentication Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "ready",
+      "specialization": "Clerk Integration & User Management",
+      "assigned_tasks": ["6.1", "6.2", "6.3", "6.4", "6.5", "6.6"],
+      "current_task": "6.1",
+      "next_tasks": ["6.2", "6.3", "6.4", "6.5", "6.6"],
+      "blocked_by": [],
+      "estimated_completion": "4h"
+    },
+    "agent-analytics": {
+      "id": "agent-analytics",
+      "name": "Analytics & Cost Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "waiting",
+      "specialization": "Usage Tracking & Dashboard",
+      "assigned_tasks": ["9.1", "9.2", "9.3", "9.4", "9.5", "9.6"],
+      "current_task": null,
+      "next_tasks": ["9.1"],
+      "blocked_by": ["6.3"],
+      "estimated_completion": "3h"
+    },
+    "agent-quality": {
+      "id": "agent-quality",
+      "name": "Quality & Feedback Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "waiting",
+      "specialization": "Voting System & Analysis Quality",
+      "assigned_tasks": [
+        "7.1",
+        "7.2",
+        "7.3",
+        "7.4",
+        "7.5",
+        "7.6",
+        "8.1",
+        "8.2",
+        "8.3",
+        "8.4",
+        "8.5",
+        "8.6",
+        "8.7"
+      ],
+      "current_task": null,
+      "next_tasks": ["7.1"],
+      "blocked_by": ["5.2", "6.3"],
+      "estimated_completion": "6h"
+    },
+    "agent-review": {
+      "id": "agent-review",
+      "name": "Review Mode Specialist",
+      "branch": "multi-agent-parallel-dev",
+      "status": "waiting",
+      "specialization": "Review Interface & Export Features",
+      "assigned_tasks": [
+        "10.1",
+        "10.2",
+        "10.3",
+        "10.4",
+        "10.5",
+        "10.6",
+        "10.7"
+      ],
+      "current_task": null,
+      "next_tasks": ["10.1"],
+      "blocked_by": ["5.7"],
+      "estimated_completion": "5h"
+    }
+  },
+  "execution_phases": {
+    "phase_1": {
+      "name": "Immediate Parallel Start",
+      "agents": ["agent-prism", "agent-realtime", "agent-auth"],
+      "duration": "2-4h",
+      "description": "Core foundation tasks that can run in parallel",
+      "dependencies_resolved": true
+    },
+    "phase_2": {
+      "name": "Mid-tier Dependencies",
+      "agents": ["agent-analytics", "agent-quality"],
+      "duration": "3-6h",
+      "description": "Tasks requiring some phase 1 completion",
+      "dependencies_resolved": false,
+      "waiting_for": ["6.3", "5.2"]
+    },
+    "phase_3": {
+      "name": "Final Integration",
+      "agents": ["agent-review"],
+      "duration": "5h",
+      "description": "Final features requiring most systems complete",
+      "dependencies_resolved": false,
+      "waiting_for": ["5.7"]
+    }
+  },
+  "coordination_rules": {
+    "branch_strategy": {
+      "main_branch": "multi-agent-parallel-dev",
+      "feature_branches": {
+        "agent-prism": "feature/prism-components",
+        "agent-realtime": "feature/realtime-subscriptions",
+        "agent-auth": "feature/clerk-auth",
+        "agent-analytics": "feature/cost-dashboard",
+        "agent-quality": "feature/voting-quality",
+        "agent-review": "feature/review-mode"
+      },
+      "merge_strategy": "Feature branches merge to multi-agent-parallel-dev, then to main"
+    },
+    "conflict_prevention": {
+      "file_ownership": {
+        "components/analysis/": ["agent-prism"],
+        "components/auth/": ["agent-auth"],
+        "convex/auth.ts": ["agent-auth"],
+        "convex/mutations.ts": ["shared"],
+        "convex/queries.ts": ["shared"],
+        "convex/schema.ts": ["shared"],
+        "app/": ["shared"],
+        "types/": ["shared"]
+      },
+      "shared_files_protocol": "Use PR review for shared files, coordinate via comments"
+    },
+    "communication": {
+      "status_updates": "Update agent-assignments.json status every 30min",
+      "blocking_issues": "Comment in task file when blocked",
+      "completion_notifications": "Update status to 'completed' and notify next agents"
+    }
+  },
+  "task_handoff_triggers": {
+    "5.2_complete": ["agent-quality can start 7.1"],
+    "6.3_complete": [
+      "agent-analytics can start 9.1",
+      "agent-quality can start 7.1"
+    ],
+    "5.7_complete": ["agent-review can start 10.1"],
+    "task_5_complete": ["agent-review can start 10.1"],
+    "task_6_complete": ["agent-analytics can start full task 9"]
+  }
+}
