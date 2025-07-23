@@ -7,17 +7,22 @@
 
 ## Git Workflow Requirements
 
-**ALWAYS push changes to the remote repository and create a pull request whenever you finish with a subtask.** Follow this workflow:
+**ALWAYS create a new branch, push changes to the remote repository, and create a pull request whenever you start working on a task.** Follow this workflow:
 
-1. **After completing any subtask**, commit all changes with a descriptive commit message
-2. Push the changes to the remote repository (`git push origin main`)
-3. Create a pull request using the GitHub CLI (`gh pr create`)
-4. Include a summary of what was accomplished in the PR description
-5. Reference the completed subtask ID and task in the commit message and PR title
+1. **Before starting a task**, create a new feature branch (`git checkout -b feature/task-X-description`)
+2. **After completing any subtask**, commit all changes with a descriptive commit message
+3. Push the changes to the remote repository (`git push origin feature/task-X-description`)
+4. Create a pull request using the GitHub CLI (`gh pr create`)
+5. Include a summary of what was accomplished in the PR description
+6. Reference the completed subtask ID and task in the commit message and PR title
 
 **Example workflow:**
 
 ```bash
+# Start new task
+git checkout -b feature/task-4-openai-integration
+
+# Work on subtasks and commit progress
 git add .
 git commit -m "feat: Complete subtask 4.2 - Prompt Template Design for Message Analysis
 
@@ -28,7 +33,10 @@ git commit -m "feat: Complete subtask 4.2 - Prompt Template Design for Message A
 🤖 Generated with [Claude Code](https://claude.ai/code)
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-git push origin main
+# Push to feature branch
+git push origin feature/task-4-openai-integration
+
+# Create PR when task is complete
 gh pr create --title "Complete Task 4.2: Prompt Template Design" --body "$(cat <<'EOF'
 ## Summary
 - ✅ Implemented comprehensive prompt templates for message analysis
@@ -47,7 +55,9 @@ EOF
 
 **This ensures:**
 
-- All progress is tracked in version control
-- Each subtask completion is documented
-- Team members can review incremental progress
+- All work is done in feature branches, keeping main clean
+- All progress is tracked in version control with clear branch history
+- Each task completion is documented via pull requests
+- Team members can review incremental progress before merging
 - No work is lost between sessions
+- Easy rollback and cherry-pick capabilities
