@@ -10,15 +10,25 @@ import {
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Analysis } from '@/types'
+import { useScrollSync } from '@/contexts/scroll-sync-context'
 
 interface AnalysisRowProps {
   analysis: Analysis
   onViewRawJSON?: (analysis: Analysis) => void
+  isActive?: boolean
 }
 
-export function AnalysisRow({ analysis, onViewRawJSON }: AnalysisRowProps) {
+export function AnalysisRow({
+  analysis,
+  onViewRawJSON,
+  isActive = false,
+}: AnalysisRowProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const isLowConfidence = analysis.confidenceLevel < 40
+  const { syncToMessage, activeMessageId } = useScrollSync()
+
+  // Determine if this analysis is currently active
+  const isCurrentlyActive = isActive || activeMessageId === analysis.messageId
 
   const statementTypeColors = {
     question:
@@ -44,13 +54,21 @@ export function AnalysisRow({ analysis, onViewRawJSON }: AnalysisRowProps) {
     onViewRawJSON?.(analysis)
   }
 
+  const handleRowClick = () => {
+    // Sync to the corresponding message when analysis row is clicked
+    syncToMessage(analysis.messageId, 'analysis')
+  }
+
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
       <div
+        data-analysis-message-id={analysis.messageId}
+        onClick={handleRowClick}
         className={cn(
-          'rounded-lg border bg-card p-3 transition-all hover:shadow-sm',
+          'cursor-pointer rounded-lg border bg-card p-3 transition-all hover:shadow-sm',
           isLowConfidence && 'opacity-40',
-          isExpanded && 'shadow-sm ring-1 ring-primary/20'
+          isExpanded && 'shadow-sm ring-1 ring-primary/20',
+          isCurrentlyActive && 'bg-accent/10 ring-2 ring-accent'
         )}
       >
         <CollapsibleTrigger asChild>

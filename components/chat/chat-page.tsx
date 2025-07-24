@@ -1,10 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChatContainer, ChatInput, MessageBubble } from '@/components/chat'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useChat } from '@/hooks/use-chat'
 import { Loader2 } from 'lucide-react'
+import {
+  useScrollSync,
+  useChatScrollDetection,
+} from '@/contexts/scroll-sync-context'
 
 interface ChatPageProps {
   conversationId: string
@@ -23,6 +27,22 @@ export function ChatPage({
   })
 
   const [isScrolledUp, setIsScrolledUp] = useState(false)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const { registerChatScroll, activeMessageId, isScrollSyncing } =
+    useScrollSync()
+  const { handleScroll: handleSyncScroll } = useChatScrollDetection()
+
+  // Register scroll container with sync context
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      ) as HTMLElement
+      if (viewport) {
+        registerChatScroll({ current: viewport })
+      }
+    }
+  }, [registerChatScroll])
 
   const handleSendMessage = async (content: string) => {
     try {
@@ -37,6 +57,11 @@ export function ChatPage({
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10
     setIsScrolledUp(!isAtBottom)
+
+    // Only handle sync scroll detection if not programmatically scrolling
+    if (!isScrollSyncing) {
+      handleSyncScroll(e)
+    }
   }
 
   // Auto-scroll to bottom when new messages arrive (if not scrolled up)
@@ -69,7 +94,11 @@ export function ChatPage({
 
   return (
     <ChatContainer title={`Chat (${messages.length} messages)`}>
-      <ScrollArea className="flex-1 p-2" onScrollCapture={handleScroll}>
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="flex-1 p-2"
+        onScrollCapture={handleScroll}
+      >
         <div className="space-y-1">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground">
@@ -79,6 +108,7 @@ export function ChatPage({
             messages.map(message => (
               <MessageBubble
                 key={message._id}
+                messageId={message._id}
                 content={message.content}
                 authorId={message.userId}
                 authorName={
@@ -88,6 +118,7 @@ export function ChatPage({
                 }
                 timestamp={message.timestamp}
                 isOwn={message.userId === userId}
+                isActive={activeMessageId === message._id}
               />
             ))
           )}

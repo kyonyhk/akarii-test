@@ -3,6 +3,7 @@
 import { MainLayout } from '@/components/layout/main-layout'
 import { ChatPage } from '@/components/chat'
 import { PrismPanel } from '@/components/analysis'
+import { ScrollSyncProvider } from '@/contexts/scroll-sync-context'
 import {
   Card,
   CardContent,
@@ -29,36 +30,38 @@ export default function Home() {
         </div>
 
         {/* Chat Demo Section - Split Pane Layout */}
-        <div className="flex h-[600px] flex-col gap-4 rounded-lg border bg-card lg:flex-row">
-          {/* Left side - Chat Interface */}
-          <div className="flex min-h-0 flex-1 flex-col space-y-4 p-4">
-            <h2 className="text-xl font-semibold">Live Chat Interface</h2>
-            <div className="min-h-0 flex-1">
-              <ChatPage
-                conversationId={demoConversationId}
-                userId={demoUserId}
-                userName="Demo User"
-              />
+        <ScrollSyncProvider>
+          <div className="flex h-[600px] flex-col gap-4 rounded-lg border bg-card lg:flex-row">
+            {/* Left side - Chat Interface */}
+            <div className="flex min-h-0 flex-1 flex-col space-y-4 p-4">
+              <h2 className="text-xl font-semibold">Live Chat Interface</h2>
+              <div className="min-h-0 flex-1">
+                <ChatPage
+                  conversationId={demoConversationId}
+                  userId={demoUserId}
+                  userName="Demo User"
+                />
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden w-px bg-border lg:block" />
+            <div className="h-px bg-border lg:hidden" />
+
+            {/* Right side - Analysis Prism Panel */}
+            <div className="flex min-h-0 w-full flex-col space-y-4 p-4 lg:w-80">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Analysis Prism</h2>
+                <span className="text-xs text-muted-foreground lg:hidden">
+                  Swipe or scroll to explore
+                </span>
+              </div>
+              <div className="min-h-0 flex-1">
+                <PrismPanel conversationId={demoConversationId} />
+              </div>
             </div>
           </div>
-
-          {/* Divider */}
-          <div className="hidden w-px bg-border lg:block" />
-          <div className="h-px bg-border lg:hidden" />
-
-          {/* Right side - Analysis Prism Panel */}
-          <div className="flex min-h-0 w-full flex-col space-y-4 p-4 lg:w-80">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Analysis Prism</h2>
-              <span className="text-xs text-muted-foreground lg:hidden">
-                Swipe or scroll to explore
-              </span>
-            </div>
-            <div className="min-h-0 flex-1">
-              <PrismPanel conversationId={demoConversationId} />
-            </div>
-          </div>
-        </div>
+        </ScrollSyncProvider>
 
         {/* Features Overview Section */}
         <div className="space-y-4">
