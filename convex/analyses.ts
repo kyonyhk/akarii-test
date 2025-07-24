@@ -40,7 +40,7 @@ export const createAnalysis = mutation({
       rawData: args.rawData,
       thumbsUp: 0,
       thumbsDown: 0,
-      userVotes: {},
+      userVotes: [],
       createdAt: getCurrentTimestamp(),
     })
 
@@ -190,6 +190,91 @@ export const updateAnalysis = mutation({
     await ctx.db.patch(args.analysisId, updates)
 
     return args.analysisId
+  },
+})
+
+// Thumb vote mutation with proper schema compliance
+export const thumbVote = mutation({
+  args: {
+    analysisId: v.id('analyses'),
+    userId: v.string(),
+    voteType: v.union(v.literal('up'), v.literal('down')),
+  },
+  handler: async (ctx, args) => {
+    // Validate that the analysis exists
+    const analysis = await ctx.db.get(args.analysisId)
+    if (!analysis) {
+      throw new Error('Analysis not found')
+    }
+
+    // Validate userId
+    if (!args.userId || args.userId.trim() === '') {
+      throw new Error('User ID is required')
+    }
+
+    // Get current user votes (properly typed as array per schema)
+    const currentUserVotes = analysis.userVotes as Array<{
+      userId: string
+      voteType: 'up' | 'down'
+      timestamp: number
+    }>
+
+    // Find existing vote by this user
+    const existingVoteIndex = currentUserVotes.findIndex(
+      vote => vote.userId === args.userId
+    )
+
+    const existingVote =
+      existingVoteIndex >= 0 ? currentUserVotes[existingVoteIndex] : null
+
+    // Calculate new vote counts
+    let newThumbsUp = analysis.thumbsUp
+    let newThumbsDown = analysis.thumbsDown
+    const newUserVotes = [...currentUserVotes]
+
+    // Remove previous vote if exists
+    if (existingVote) {
+      if (existingVote.voteType === 'up') {
+        newThumbsUp--
+      } else if (existingVote.voteType === 'down') {
+        newThumbsDown--
+      }
+      // Remove the old vote
+      newUserVotes.splice(existingVoteIndex, 1)
+    }
+
+    // Add new vote if different from existing or if no existing vote
+    if (!existingVote || existingVote.voteType !== args.voteType) {
+      if (args.voteType === 'up') {
+        newThumbsUp++
+      } else {
+        newThumbsDown++
+      }
+      // Add the new vote with timestamp
+      newUserVotes.push({
+        userId: args.userId,
+        voteType: args.voteType,
+        timestamp: getCurrentTimestamp(),
+      })
+    }
+    // If same vote type, it's already removed above (toggle off)
+
+    // Atomic update of the analysis
+    await ctx.db.patch(args.analysisId, {
+      thumbsUp: newThumbsUp,
+      thumbsDown: newThumbsDown,
+      userVotes: newUserVotes,
+    })
+
+    return {
+      analysisId: args.analysisId,
+      thumbsUp: newThumbsUp,
+      thumbsDown: newThumbsDown,
+      userVote:
+        existingVote && existingVote.voteType === args.voteType
+          ? null
+          : args.voteType,
+    }
   },
 })
 
