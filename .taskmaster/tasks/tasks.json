@@ -317,7 +317,7 @@
             "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
             "dependencies": ["5.2"],
             "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -709,7 +709,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-24T16:59:45.031Z",
+      "updated": "2025-07-24T17:03:09.063Z",
       "description": "Tasks for master context"
     }
   }
