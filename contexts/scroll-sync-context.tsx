@@ -21,8 +21,8 @@ interface ScrollSyncContextType extends ScrollSyncState {
   setActiveMessage: (messageId: string | null) => void
 
   // Ref registration
-  registerChatScroll: (ref: React.RefObject<HTMLElement>) => void
-  registerAnalysisScroll: (ref: React.RefObject<HTMLElement>) => void
+  registerChatScroll: (element: HTMLElement | null) => void
+  registerAnalysisScroll: (element: HTMLElement | null) => void
 
   // Scroll utilities
   scrollToMessage: (messageId: string, behavior?: ScrollBehavior) => void
@@ -280,7 +280,9 @@ export function useChatScrollDetection() {
         })
 
         if (closestElement) {
-          const messageId = closestElement.getAttribute('data-message-id')
+          const messageId = (closestElement as Element).getAttribute(
+            'data-message-id'
+          )
           if (messageId && messageId !== visibleMessageId) {
             setVisibleMessageId(messageId)
             syncToMessage(messageId, 'chat')

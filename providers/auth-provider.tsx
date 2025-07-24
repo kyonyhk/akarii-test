@@ -2,11 +2,11 @@
 
 import { createContext, useContext, ReactNode } from 'react'
 import { useUser } from '@/hooks/useUser'
-import { User } from '@clerk/nextjs/server'
+import { UserResource } from '@clerk/types'
 import { Id } from '@/convex/_generated/dataModel'
 
 interface AuthContextType {
-  clerkUser: User | null | undefined
+  clerkUser: UserResource | null | undefined
   convexUser:
     | {
         _id: Id<'users'>

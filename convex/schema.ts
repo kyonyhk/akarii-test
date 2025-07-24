@@ -77,6 +77,7 @@ export default defineSchema({
     messageId: v.optional(v.id('messages')),
     teamId: v.optional(v.id('teams')),
     userId: v.string(), // Keep as string for compatibility with existing functions
+    userId: v.string(),
     model: v.string(),
     inputTokens: v.number(),
     outputTokens: v.number(),

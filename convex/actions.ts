@@ -24,6 +24,12 @@ import {
   recordAnalysisMetrics,
   getPerformanceMetrics,
 } from './analysis_utils'
+import {
+  countChatTokens,
+  countTokens,
+  createTokenUsage,
+  extractTokenUsageFromResponse,
+} from './token_utils'
 import { api } from './_generated/api'
 
 // Action to analyze a message using OpenAI
@@ -71,8 +77,23 @@ export const analyzeMessage = action({
         return analysis
       }
 
+      // Prepare messages for token counting
+      const messages = [
+        {
+          role: 'system' as const,
+          content: ANALYSIS_SYSTEM_PROMPT,
+        },
+        {
+          role: 'user' as const,
+          content: ANALYSIS_USER_PROMPT_TEMPLATE(args.content),
+        },
+      ]
+
+      // Count input tokens
+      const inputTokens = countChatTokens(messages)
+
       // Make OpenAI API call with enhanced retry logic and error handling
-      const analysisResult = await withRetry(
+      const { analysisResult, tokenUsage } = await withRetry(
         async () => {
           // Check timeout (target: sub-2-second)
           tracker.checkTimeout(1800) // Leave 200ms buffer
@@ -81,16 +102,7 @@ export const analyzeMessage = action({
             const response = await openai.chat.completions.create(
               {
                 model: ANALYSIS_MODEL,
-                messages: [
-                  {
-                    role: 'system',
-                    content: ANALYSIS_SYSTEM_PROMPT,
-                  },
-                  {
-                    role: 'user',
-                    content: ANALYSIS_USER_PROMPT_TEMPLATE(args.content),
-                  },
-                ],
+                messages,
                 max_tokens: MAX_TOKENS,
                 temperature: TEMPERATURE,
                 response_format: { type: 'json_object' },
@@ -105,8 +117,20 @@ export const analyzeMessage = action({
               throw new Error('No response received from OpenAI')
             }
 
+            // Extract token usage from API response
+            const apiTokenUsage = extractTokenUsageFromResponse(response)
+
+            // Create token usage record
+            const tokenUsage = createTokenUsage(
+              apiTokenUsage.inputTokens || inputTokens, // Use API data if available, fallback to our count
+              apiTokenUsage.outputTokens || countTokens(openaiResponse), // Use API data if available, fallback to our count
+              ANALYSIS_MODEL
+            )
+
             // Parse and validate the response
-            return parseAnalysisResponse(openaiResponse)
+            const analysisResult = parseAnalysisResponse(openaiResponse)
+
+            return { analysisResult, tokenUsage }
           } catch (error) {
             // Check if this error should be retried
             if (!isRetryableError(error)) {
@@ -123,6 +147,23 @@ export const analyzeMessage = action({
         3,
         750
       ) // Max 3 retries, 750ms base delay for better rate limit handling
+
+      // Record token usage in database
+      try {
+        await ctx.runMutation(api.usage_tracking.recordUsage, {
+          messageId: args.messageId,
+          userId: args.userId,
+          model: ANALYSIS_MODEL,
+          inputTokens: tokenUsage.inputTokens,
+          outputTokens: tokenUsage.outputTokens,
+          totalTokens: tokenUsage.totalTokens,
+          cost: tokenUsage.cost,
+          operationType: 'analysis',
+        })
+      } catch (usageError) {
+        console.error('Failed to record token usage:', usageError)
+        // Continue execution even if usage recording fails
+      }
 
       // Cache the successful result for future use
       setCachedAnalysis(args.content, analysisResult)
@@ -141,6 +182,12 @@ export const analyzeMessage = action({
           modelUsed: ANALYSIS_MODEL,
           processingTimeMs: tracker.getElapsedMs(),
           cached: false,
+          tokenUsage: {
+            inputTokens: tokenUsage.inputTokens,
+            outputTokens: tokenUsage.outputTokens,
+            totalTokens: tokenUsage.totalTokens,
+            cost: tokenUsage.cost,
+          },
         },
       }
 
@@ -180,36 +227,76 @@ export const analyzeMessage = action({
 
 // Test action to verify OpenAI connectivity
 export const testOpenAIConnection = action({
-  args: {},
-  handler: async (): Promise<{ success: boolean; error?: string }> => {
+  args: {
+    userId: v.optional(v.string()),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Promise<{ success: boolean; error?: string; tokenUsage?: any }> => {
     try {
       if (!validateOpenAIConfig()) {
         return { success: false, error: 'OpenAI API key not configured' }
       }
 
+      const messages = [
+        {
+          role: 'system' as const,
+          content:
+            'You are a test assistant. Respond with "OK" if you can receive this message.',
+        },
+        {
+          role: 'user' as const,
+          content: 'Test connection',
+        },
+      ]
+
+      // Count input tokens
+      const inputTokens = countChatTokens(messages)
+
       // Test with a simple completion request
       const response = await openai.chat.completions.create({
         model: ANALYSIS_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a test assistant. Respond with "OK" if you can receive this message.',
-          },
-          {
-            role: 'user',
-            content: 'Test connection',
-          },
-        ],
+        messages,
         max_tokens: 10,
         temperature: 0,
       })
 
       const content = response.choices[0]?.message?.content
+
+      // Extract token usage
+      const apiTokenUsage = extractTokenUsageFromResponse(response)
+      const tokenUsage = createTokenUsage(
+        apiTokenUsage.inputTokens || inputTokens,
+        apiTokenUsage.outputTokens || (content ? countTokens(content) : 0),
+        ANALYSIS_MODEL
+      )
+
+      // Record token usage if userId provided
+      if (args.userId) {
+        try {
+          await ctx.runMutation(api.usage_tracking.recordUsage, {
+            userId: args.userId,
+            model: ANALYSIS_MODEL,
+            inputTokens: tokenUsage.inputTokens,
+            outputTokens: tokenUsage.outputTokens,
+            totalTokens: tokenUsage.totalTokens,
+            cost: tokenUsage.cost,
+            operationType: 'test',
+          })
+        } catch (usageError) {
+          console.error('Failed to record test token usage:', usageError)
+        }
+      }
+
       if (content && content.toLowerCase().includes('ok')) {
-        return { success: true }
+        return { success: true, tokenUsage }
       } else {
-        return { success: false, error: 'Unexpected response from OpenAI' }
+        return {
+          success: false,
+          error: 'Unexpected response from OpenAI',
+          tokenUsage,
+        }
       }
     } catch (error) {
       console.error('OpenAI connection test failed:', error)

@@ -410,7 +410,7 @@
             "description": "Integrate authenticated user information with chat functionality",
             "dependencies": ["6.3"],
             "details": "Update Convex schema to include user ID in messages and conversations, modify sendMessage mutation to include authenticated user context, display user information in message components, implement user-specific conversation filtering",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -581,7 +581,7 @@
             "description": "Add token counting and usage tracking to the OpenAI API calls in the analyzeMessage Convex action",
             "dependencies": [],
             "details": "Modify the analyzeMessage action to count tokens in both input prompts and API responses, store usage data with messageId, teamId, tokensUsed, cost, and timestamp in a new usage table",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -590,7 +590,7 @@
             "description": "Define Convex schema for token usage tracking and cost analytics",
             "dependencies": ["9.1"],
             "details": "Create usage table schema with fields: id, messageId, teamId, tokensUsed, cost, timestamp, model, and actionType. Add indexes for efficient querying by teamId and timestamp ranges",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -599,7 +599,7 @@
             "description": "Create dashboard interface showing team token consumption and cost metrics",
             "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -647,7 +647,7 @@
             "description": "Build the main Review Mode component with navigation and layout structure",
             "dependencies": [],
             "details": "Create ReviewMode component with header navigation, toggle between Review and Live modes, implement responsive layout with proper routing, add breadcrumb navigation for conversation selection",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -656,7 +656,7 @@
             "description": "Build scrollable message history view with conversation timeline display",
             "dependencies": ["10.1"],
             "details": "Create MessageHistory component with virtualized scrolling for performance, implement conversation timeline with timestamps, add message grouping by time periods, ensure smooth scrolling with proper message pagination",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
