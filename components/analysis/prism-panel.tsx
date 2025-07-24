@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Analysis } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronRight, ChevronDown, Settings, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AnalysisRow } from './analysis-row'
 
 interface PrismPanelProps {
   className?: string
@@ -22,24 +24,32 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
   const [isVisible, setIsVisible] = useState(true)
 
   // Mock data for development - will be replaced with real-time subscription
-  const mockAnalyses = [
+  const mockAnalyses: Analysis[] = [
     {
-      id: '1',
-      messageId: 'msg-1',
+      _id: '1' as any,
+      messageId: 'msg-1' as any,
       statementType: 'question' as const,
       beliefs: ['Users want better UX', 'Speed is critical'],
       tradeOffs: ['Performance vs Features', 'Complexity vs Simplicity'],
       confidenceLevel: 85,
-      timestamp: Date.now(),
+      rawData: {},
+      thumbsUp: 0,
+      thumbsDown: 0,
+      userVotes: {},
+      createdAt: Date.now(),
     },
     {
-      id: '2',
-      messageId: 'msg-2',
+      _id: '2' as any,
+      messageId: 'msg-2' as any,
       statementType: 'opinion' as const,
       beliefs: ['AI should be transparent'],
       tradeOffs: ['Transparency vs Performance'],
       confidenceLevel: 25, // Low confidence example
-      timestamp: Date.now() - 30000,
+      rawData: {},
+      thumbsUp: 0,
+      thumbsDown: 0,
+      userVotes: {},
+      createdAt: Date.now() - 30000,
     },
   ]
 
@@ -106,7 +116,14 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
               <ScrollArea className="flex-1">
                 <div className="space-y-2 p-4">
                   {mockAnalyses.map(analysis => (
-                    <AnalysisPreview key={analysis.id} analysis={analysis} />
+                    <AnalysisRow
+                      key={analysis._id}
+                      analysis={analysis}
+                      onViewRawJSON={analysis => {
+                        // TODO: Open raw JSON drawer
+                        console.log('Open raw JSON for:', analysis._id)
+                      }}
+                    />
                   ))}
                 </div>
               </ScrollArea>
@@ -126,123 +143,5 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
         </CollapsibleContent>
       </Collapsible>
     </Card>
-  )
-}
-
-interface AnalysisPreviewProps {
-  analysis: {
-    id: string
-    messageId: string
-    statementType: 'question' | 'opinion' | 'fact' | 'request' | 'other'
-    beliefs: string[]
-    tradeOffs: string[]
-    confidenceLevel: number
-    timestamp: number
-  }
-}
-
-function AnalysisPreview({ analysis }: AnalysisPreviewProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const isLowConfidence = analysis.confidenceLevel < 40
-
-  const statementTypeColors = {
-    question: 'text-blue-600 bg-blue-50 border-blue-200',
-    opinion: 'text-purple-600 bg-purple-50 border-purple-200',
-    fact: 'text-green-600 bg-green-50 border-green-200',
-    request: 'text-orange-600 bg-orange-50 border-orange-200',
-    other: 'text-gray-600 bg-gray-50 border-gray-200',
-  }
-
-  return (
-    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-      <div
-        className={cn(
-          'rounded-lg border bg-card p-3 transition-all',
-          isLowConfidence && 'opacity-50',
-          isExpanded && 'ring-1 ring-primary/20'
-        )}
-      >
-        <CollapsibleTrigger asChild>
-          <button className="flex w-full items-start justify-between text-left">
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    'inline-flex rounded-full border px-2 py-0.5 text-xs font-medium',
-                    statementTypeColors[analysis.statementType]
-                  )}
-                >
-                  {analysis.statementType}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {analysis.confidenceLevel}% confidence
-                </span>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {analysis.beliefs.length} beliefs • {analysis.tradeOffs.length}{' '}
-                trade-offs
-              </div>
-            </div>
-            <ChevronRight
-              className={cn(
-                'h-4 w-4 shrink-0 transition-transform',
-                isExpanded && 'rotate-90'
-              )}
-            />
-          </button>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent className="mt-3 space-y-3">
-          {analysis.beliefs.length > 0 && (
-            <div className="space-y-1">
-              <h4 className="text-xs font-medium text-foreground">Beliefs</h4>
-              <ul className="space-y-1">
-                {analysis.beliefs.map((belief, index) => (
-                  <li key={index} className="text-xs text-muted-foreground">
-                    • {belief}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysis.tradeOffs.length > 0 && (
-            <div className="space-y-1">
-              <h4 className="text-xs font-medium text-foreground">
-                Trade-offs
-              </h4>
-              <ul className="space-y-1">
-                {analysis.tradeOffs.map((tradeOff, index) => (
-                  <li key={index} className="text-xs text-muted-foreground">
-                    • {tradeOff}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between border-t pt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-xs"
-              onClick={e => {
-                e.stopPropagation()
-                // TODO: Open raw JSON drawer
-                console.log('Open raw JSON for:', analysis.id)
-              }}
-            >
-              View Raw JSON
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              {new Date(analysis.timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </span>
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
   )
 }
