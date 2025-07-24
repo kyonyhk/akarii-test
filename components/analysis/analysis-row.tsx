@@ -13,7 +13,7 @@ import { Analysis } from '@/types'
 
 interface AnalysisRowProps {
   analysis: Analysis
-  onViewRawJSON?: (analysis: Analysis) => void
+  onViewRawJSON?: (analysis: Analysis) => React.ReactNode
 }
 
 export function AnalysisRow({ analysis, onViewRawJSON }: AnalysisRowProps) {
@@ -39,10 +39,7 @@ export function AnalysisRow({ analysis, onViewRawJSON }: AnalysisRowProps) {
     })
   }
 
-  const handleViewRawJSON = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onViewRawJSON?.(analysis)
-  }
+  const rawJSONElement = onViewRawJSON?.(analysis)
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -148,14 +145,15 @@ export function AnalysisRow({ analysis, onViewRawJSON }: AnalysisRowProps) {
 
           {/* Footer with actions and timestamp */}
           <div className="flex items-center justify-between border-t pt-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              onClick={handleViewRawJSON}
-            >
-              View Raw JSON
-            </Button>
+            {rawJSONElement || (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                View Raw JSON
+              </Button>
+            )}
             <span className="text-xs text-muted-foreground">
               {formatTimestamp(analysis.createdAt)}
             </span>
