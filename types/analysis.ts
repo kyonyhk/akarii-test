@@ -18,6 +18,12 @@ export interface MessageAnalysis {
     modelUsed: string
     processingTimeMs?: number
     cached?: boolean
+    tokenUsage?: {
+      inputTokens: number
+      outputTokens: number
+      totalTokens: number
+      cost: number
+    }
   }
 }
 

@@ -47,7 +47,7 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
         '[data-radix-scroll-area-viewport]'
       ) as HTMLElement
       if (viewport) {
-        registerAnalysisScroll({ current: viewport })
+        registerAnalysisScroll(viewport)
       }
     }
   }, [registerAnalysisScroll])
