@@ -581,7 +581,7 @@
             "description": "Add token counting and usage tracking to the OpenAI API calls in the analyzeMessage Convex action",
             "dependencies": [],
             "details": "Modify the analyzeMessage action to count tokens in both input prompts and API responses, store usage data with messageId, teamId, tokensUsed, cost, and timestamp in a new usage table",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {

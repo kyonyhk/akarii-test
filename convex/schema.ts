@@ -74,14 +74,24 @@ export default defineSchema({
     .index('by_active', ['isActive']),
 
   usageMetrics: defineTable({
-    teamId: v.id('teams'),
+    messageId: v.optional(v.id('messages')),
+    teamId: v.optional(v.id('teams')),
     userId: v.string(),
-    tokensUsed: v.number(),
+    model: v.string(),
+    inputTokens: v.number(),
+    outputTokens: v.number(),
+    totalTokens: v.number(),
     cost: v.number(),
-    requestCount: v.number(),
-    date: v.number(),
+    operationType: v.union(
+      v.literal('analysis'),
+      v.literal('bulk_analysis'),
+      v.literal('test')
+    ),
+    timestamp: v.number(),
   })
+    .index('by_message', ['messageId'])
     .index('by_team', ['teamId'])
     .index('by_user', ['userId'])
-    .index('by_date', ['date']),
+    .index('by_timestamp', ['timestamp'])
+    .index('by_operation', ['operationType']),
 })
