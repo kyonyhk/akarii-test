@@ -45,12 +45,14 @@ export default defineSchema({
     .index('by_active', ['isActive']),
 
   users: defineTable({
+    clerkId: v.string(),
     email: v.string(),
     name: v.optional(v.string()),
     avatar: v.optional(v.string()),
     role: v.union(v.literal('member'), v.literal('admin')),
     joinedAt: v.number(),
   })
+    .index('by_clerk_id', ['clerkId'])
     .index('by_email', ['email'])
     .index('by_role', ['role']),
 
