@@ -14,6 +14,7 @@ import { ChevronRight, ChevronDown, Settings, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AnalysisRow } from './analysis-row'
 import { useScrollSync } from '@/contexts/scroll-sync-context'
+import { RawJSONDrawer } from './raw-json-drawer'
 
 interface PrismPanelProps {
   className?: string
@@ -48,10 +49,28 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       beliefs: ['Users want better UX', 'Speed is critical'],
       tradeOffs: ['Performance vs Features', 'Complexity vs Simplicity'],
       confidenceLevel: 85,
-      rawData: {},
-      thumbsUp: 0,
+      rawData: {
+        originalMessage:
+          'How can we improve the user experience while maintaining performance?',
+        analysisTimestamp: Date.now(),
+        modelUsed: 'gpt-4o-mini',
+        processingTimeMs: 1200,
+        cached: false,
+        openaiResponse: {
+          id: 'chatcmpl-ABC123',
+          object: 'chat.completion',
+          created: 1699999999,
+          model: 'gpt-4o-mini',
+          usage: {
+            prompt_tokens: 150,
+            completion_tokens: 75,
+            total_tokens: 225,
+          },
+        },
+      },
+      thumbsUp: 2,
       thumbsDown: 0,
-      userVotes: {},
+      userVotes: { 'user-1': 'up', 'user-2': 'up' },
       createdAt: Date.now(),
     },
     {
@@ -61,10 +80,30 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       beliefs: ['AI should be transparent'],
       tradeOffs: ['Transparency vs Performance'],
       confidenceLevel: 25, // Low confidence example
-      rawData: {},
+      rawData: {
+        originalMessage:
+          'I think AI systems should show their reasoning process.',
+        analysisTimestamp: Date.now() - 30000,
+        modelUsed: 'gpt-4o-mini',
+        processingTimeMs: 950,
+        cached: true,
+        reasoning:
+          'Low confidence due to ambiguous phrasing and lack of context',
+        openaiResponse: {
+          id: 'chatcmpl-DEF456',
+          object: 'chat.completion',
+          created: 1699999969,
+          model: 'gpt-4o-mini',
+          usage: {
+            prompt_tokens: 120,
+            completion_tokens: 45,
+            total_tokens: 165,
+          },
+        },
+      },
       thumbsUp: 0,
-      thumbsDown: 0,
-      userVotes: {},
+      thumbsDown: 1,
+      userVotes: { 'user-3': 'down' },
       createdAt: Date.now() - 30000,
     },
     {
@@ -152,10 +191,17 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
                       key={analysis._id}
                       analysis={analysis}
                       isActive={activeMessageId === analysis.messageId}
-                      onViewRawJSON={analysis => {
-                        // TODO: Open raw JSON drawer
-                        console.log('Open raw JSON for:', analysis._id)
-                      }}
+                      onViewRawJSON={analysis => (
+                        <RawJSONDrawer analysis={analysis}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            View Raw JSON
+                          </Button>
+                        </RawJSONDrawer>
+                      )}
                     />
                   ))}
                 </div>

@@ -14,7 +14,7 @@ import { useScrollSync } from '@/contexts/scroll-sync-context'
 
 interface AnalysisRowProps {
   analysis: Analysis
-  onViewRawJSON?: (analysis: Analysis) => void
+  onViewRawJSON?: (analysis: Analysis) => React.ReactNode
   isActive?: boolean
 }
 
@@ -49,10 +49,7 @@ export function AnalysisRow({
     })
   }
 
-  const handleViewRawJSON = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onViewRawJSON?.(analysis)
-  }
+  const rawJSONElement = onViewRawJSON?.(analysis)
 
   const handleRowClick = () => {
     // Sync to the corresponding message when analysis row is clicked
@@ -166,14 +163,15 @@ export function AnalysisRow({
 
           {/* Footer with actions and timestamp */}
           <div className="flex items-center justify-between border-t pt-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              onClick={handleViewRawJSON}
-            >
-              View Raw JSON
-            </Button>
+            {rawJSONElement || (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                View Raw JSON
+              </Button>
+            )}
             <span className="text-xs text-muted-foreground">
               {formatTimestamp(analysis.createdAt)}
             </span>

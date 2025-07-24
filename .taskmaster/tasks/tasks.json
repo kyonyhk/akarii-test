@@ -317,7 +317,7 @@
             "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
             "dependencies": ["5.2"],
             "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -326,7 +326,7 @@
             "description": "Build click-to-expand drawer showing complete raw JSON analysis data",
             "dependencies": ["5.2"],
             "details": "Implement drawer using shadcn/ui Drawer component, add JSON syntax highlighting, create toggle button to open/close drawer, format raw analysis data for readable display, add copy-to-clipboard functionality",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
