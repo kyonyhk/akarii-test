@@ -608,7 +608,7 @@
             "description": "Create Convex queries for aggregating token usage data by team and time periods",
             "dependencies": ["9.2"],
             "details": "Build queries for daily/weekly/monthly usage totals, team-level aggregations, cost calculations, and usage trends. Include filtering by date ranges and team members",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -709,7 +709,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-24T20:28:11.366Z",
+      "updated": "2025-07-24T20:53:43.439Z",
       "description": "Tasks for master context"
     }
   }
