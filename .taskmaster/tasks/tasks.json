@@ -374,7 +374,7 @@
             "description": "Set up Clerk authentication service with magic-link configuration",
             "dependencies": [],
             "details": "Install @clerk/nextjs package, configure environment variables (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY), set up Clerk dashboard with magic-link authentication enabled, configure email templates and branding",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -709,7 +709,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-24T17:51:35.590Z",
+      "updated": "2025-07-24T18:14:00.164Z",
       "description": "Tasks for master context"
     }
   }
