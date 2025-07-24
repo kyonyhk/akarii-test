@@ -114,7 +114,7 @@ export function ChatPage({
                 authorName={
                   message.userId === userId
                     ? userName
-                    : `User ${message.userId.slice(-4)}`
+                    : message.user?.name || `User ${message.userId.slice(-4)}`
                 }
                 timestamp={message.timestamp}
                 isOwn={message.userId === userId}
