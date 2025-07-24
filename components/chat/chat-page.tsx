@@ -39,7 +39,7 @@ export function ChatPage({
         '[data-radix-scroll-area-viewport]'
       ) as HTMLElement
       if (viewport) {
-        registerChatScroll({ current: viewport })
+        registerChatScroll(viewport)
       }
     }
   }, [registerChatScroll])
