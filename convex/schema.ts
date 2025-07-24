@@ -28,11 +28,19 @@ export default defineSchema({
     rawData: v.any(),
     thumbsUp: v.number(),
     thumbsDown: v.number(),
-    userVotes: v.object({}), // Will store userId -> 'up' | 'down'
+    userVotes: v.array(
+      v.object({
+        userId: v.string(),
+        voteType: v.union(v.literal('up'), v.literal('down')),
+        timestamp: v.number(),
+      })
+    ),
     createdAt: v.number(),
   })
     .index('by_message', ['messageId'])
-    .index('by_created_at', ['createdAt']),
+    .index('by_created_at', ['createdAt'])
+    .index('by_thumbs_up', ['thumbsUp'])
+    .index('by_thumbs_down', ['thumbsDown']),
 
   conversations: defineTable({
     title: v.string(),
@@ -77,7 +85,6 @@ export default defineSchema({
     messageId: v.optional(v.id('messages')),
     teamId: v.optional(v.id('teams')),
     userId: v.string(), // Keep as string for compatibility with existing functions
-    userId: v.string(),
     model: v.string(),
     inputTokens: v.number(),
     outputTokens: v.number(),
