@@ -59,8 +59,9 @@ pids
 *.seed
 *.pid.lock
 
-# Convex (will be added later)
+# Convex
 .convex/
+convex/_generated/
 
 # Temporary files
 .tmp
