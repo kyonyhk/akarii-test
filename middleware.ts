@@ -5,6 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/profile(.*)',
   '/settings(.*)',
+  '/invite(.*)',
 ])
 
 const isPublicRoute = createRouteMatcher([
