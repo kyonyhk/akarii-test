@@ -1,21 +1,46 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { MainLayout } from '@/components/layout/main-layout'
 import { ChatPage } from '@/components/chat'
 import { PrismPanel } from '@/components/analysis'
 import { ScrollSyncProvider } from '@/contexts/scroll-sync-context'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function Home() {
+  const { isSignedIn, isLoaded } = useAuth()
+  const router = useRouter()
+
   // Demo conversation ID - in production this would come from routing or user selection
   const demoConversationId = 'demo-conversation-123'
   const demoUserId = 'demo-user-456'
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/chat')
+    }
+  }, [isSignedIn, isLoaded, router])
+
+  if (!isLoaded) {
+    return (
+      <MainLayout title="Welcome to Akarii">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  if (isSignedIn) {
+    return null // Will redirect to /chat
+  }
 
   return (
     <MainLayout title="Welcome to Akarii">
@@ -27,6 +52,14 @@ export default function Home() {
           <p className="text-xl text-muted-foreground">
             AI-powered real-time message analysis platform
           </p>
+          <div className="flex justify-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/sign-up">Sign Up</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Chat Demo Section - Split Pane Layout */}
