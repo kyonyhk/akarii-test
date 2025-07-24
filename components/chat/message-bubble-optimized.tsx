@@ -3,14 +3,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { InlineAnalysisCard } from '@/components/analysis/inline-analysis-card'
-import { useQuery, useMutation } from 'convex/react'
+import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import type { Doc } from '@/convex/_generated/dataModel'
 
 type Analysis = Doc<'analyses'>
 
-interface MessageBubbleProps {
+interface MessageBubbleOptimizedProps {
   messageId: string
   content: string
   authorId: string
@@ -22,9 +22,10 @@ interface MessageBubbleProps {
   isActive?: boolean
   showAnalysis?: boolean
   analysisMode?: 'inline' | 'compact' | 'none'
+  analysis?: Analysis | null // Pre-fetched analysis data
 }
 
-export function MessageBubble({
+export function MessageBubbleOptimized({
   messageId,
   content,
   authorId,
@@ -36,12 +37,8 @@ export function MessageBubble({
   isActive = false,
   showAnalysis = true,
   analysisMode = 'inline',
-}: MessageBubbleProps) {
-  // Fetch analysis data for this message
-  const analysis = useQuery(api.analyses.getAnalysisByMessage, {
-    messageId: messageId as Id<'messages'>,
-  })
-
+  analysis = null,
+}: MessageBubbleOptimizedProps) {
   // Vote on analysis mutation
   const voteOnAnalysis = useMutation(api.analyses.voteOnAnalysis)
 

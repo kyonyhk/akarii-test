@@ -126,15 +126,11 @@ export const getUsageInRange = query({
     teamId: v.optional(v.id('teams')),
   },
   handler: async (ctx, args) => {
-    let baseQuery = ctx.db.query('usage')
-
-    if (args.teamId) {
-      baseQuery = baseQuery.withIndex('by_team_timestamp', q =>
-        q.eq('teamId', args.teamId)
-      )
-    } else {
-      baseQuery = baseQuery.withIndex('by_timestamp')
-    }
+    let baseQuery = args.teamId
+      ? ctx.db
+          .query('usage')
+          .withIndex('by_team_timestamp', q => q.eq('teamId', args.teamId!))
+      : ctx.db.query('usage').withIndex('by_timestamp')
 
     return await baseQuery
       .filter(q =>

@@ -258,6 +258,35 @@ export const getAnalysesForConversation = query({
 })
 
 // Get analysis statistics (optimized with indexed queries)
+// Get analyses for multiple messages (bulk fetch for optimization)
+export const getAnalysesForMessages = query({
+  args: {
+    messageIds: v.array(v.id('messages')),
+  },
+  handler: async (ctx, args) => {
+    // Fetch all analyses in parallel for better performance
+    const analysisPromises = args.messageIds.map(async messageId => {
+      const analysis = await ctx.db
+        .query('analyses')
+        .withIndex('by_message', q => q.eq('messageId', messageId))
+        .first()
+      return { messageId, analysis }
+    })
+
+    const results = await Promise.all(analysisPromises)
+
+    // Return as a map for easy lookup
+    const analysisMap: Record<string, any> = {}
+    results.forEach(({ messageId, analysis }) => {
+      if (analysis) {
+        analysisMap[messageId] = analysis
+      }
+    })
+
+    return analysisMap
+  },
+})
+
 export const getAnalysisStats = query({
   args: {
     conversationId: v.optional(v.string()),

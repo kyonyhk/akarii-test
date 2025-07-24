@@ -106,9 +106,8 @@ export function ReviewHistoryPage({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Conversation</label>
                 <ConversationSelector
-                  selectedConversationId={selectedConversationId}
+                  selectedConversation={selectedConversationId}
                   onConversationSelect={handleConversationSelect}
-                  placeholder="Select conversation..."
                 />
               </div>
             </div>
@@ -129,10 +128,8 @@ export function ReviewHistoryPage({
             </CardHeader>
             <CardContent className="p-0">
               <ConversationSelector
-                selectedConversationId={selectedConversationId}
+                selectedConversation={selectedConversationId}
                 onConversationSelect={handleConversationSelect}
-                showAsList={true}
-                className="rounded-none border-0"
               />
             </CardContent>
           </Card>
