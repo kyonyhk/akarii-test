@@ -61,3 +61,18 @@ EOF
 - Team members can review incremental progress before merging
 - No work is lost between sessions
 - Easy rollback and cherry-pick capabilities
+
+## Package Manager
+
+**ALWAYS use bun instead of npm for all package management operations.**
+
+```bash
+# Use bun for installing packages
+bun add package-name
+bun add -d dev-package-name
+
+# Use bun for running scripts
+bun run dev
+bun run build
+bun run test
+```

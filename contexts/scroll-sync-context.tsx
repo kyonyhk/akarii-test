@@ -59,23 +59,20 @@ export function ScrollSyncProvider({ children }: ScrollSyncProviderProps) {
     setActiveMessageId(messageId)
   }, [])
 
-  const registerChatScroll = useCallback(
-    (ref: React.RefObject<HTMLElement>) => {
-      if (ref.current) {
-        chatScrollRef.current = ref.current
-      }
-    },
-    []
-  )
+  const registerChatScroll = useCallback((element: HTMLElement | null) => {
+    if (element && chatScrollRef.current !== element) {
+      ;(chatScrollRef as React.MutableRefObject<HTMLElement | null>).current =
+        element
+    }
+  }, [])
 
-  const registerAnalysisScroll = useCallback(
-    (ref: React.RefObject<HTMLElement>) => {
-      if (ref.current) {
-        analysisScrollRef.current = ref.current
-      }
-    },
-    []
-  )
+  const registerAnalysisScroll = useCallback((element: HTMLElement | null) => {
+    if (element && analysisScrollRef.current !== element) {
+      ;(
+        analysisScrollRef as React.MutableRefObject<HTMLElement | null>
+      ).current = element
+    }
+  }, [])
 
   const scrollToMessage = useCallback(
     (messageId: string, behavior: ScrollBehavior = 'smooth') => {
