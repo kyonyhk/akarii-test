@@ -335,7 +335,7 @@
             "description": "Connect panel to live analyses data using Convex queries with real-time updates",
             "dependencies": ["5.1"],
             "details": "Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
