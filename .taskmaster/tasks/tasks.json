@@ -599,7 +599,7 @@
             "description": "Create dashboard interface showing team token consumption and cost metrics",
             "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
