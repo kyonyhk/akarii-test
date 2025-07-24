@@ -4,8 +4,8 @@ import { v } from 'convex/values'
 export default defineSchema({
   messages: defineTable({
     content: v.string(),
-    userId: v.id('users'),
-    conversationId: v.id('conversations'),
+    userId: v.string(), // Keep as string for compatibility with existing functions
+    conversationId: v.string(), // Keep as string for compatibility with existing functions
     timestamp: v.number(),
     analysisId: v.optional(v.id('analyses')),
   })
@@ -36,7 +36,7 @@ export default defineSchema({
 
   conversations: defineTable({
     title: v.string(),
-    participants: v.array(v.id('users')),
+    participants: v.array(v.string()), // Keep as string for compatibility with existing functions
     createdAt: v.number(),
     updatedAt: v.number(),
     isActive: v.boolean(),
@@ -74,14 +74,41 @@ export default defineSchema({
     .index('by_active', ['isActive']),
 
   usageMetrics: defineTable({
-    teamId: v.id('teams'),
-    userId: v.id('users'),
-    tokensUsed: v.number(),
+    messageId: v.optional(v.id('messages')),
+    teamId: v.optional(v.id('teams')),
+    userId: v.string(), // Keep as string for compatibility with existing functions
+    model: v.string(),
+    inputTokens: v.number(),
+    outputTokens: v.number(),
+    totalTokens: v.number(),
     cost: v.number(),
-    requestCount: v.number(),
-    date: v.number(),
+    operationType: v.union(
+      v.literal('analysis'),
+      v.literal('bulk_analysis'),
+      v.literal('test')
+    ),
+    timestamp: v.number(),
   })
+    .index('by_message', ['messageId'])
     .index('by_team', ['teamId'])
     .index('by_user', ['userId'])
-    .index('by_date', ['date']),
+    .index('by_timestamp', ['timestamp'])
+    .index('by_operation', ['operationType']),
+
+  usage: defineTable({
+    messageId: v.id('messages'),
+    teamId: v.id('teams'),
+    tokensUsed: v.number(),
+    cost: v.number(),
+    timestamp: v.number(),
+    model: v.string(),
+    actionType: v.union(
+      v.literal('analysis'),
+      v.literal('bulk_analysis'),
+      v.literal('test')
+    ),
+  })
+    .index('by_team_timestamp', ['teamId', 'timestamp'])
+    .index('by_message', ['messageId'])
+    .index('by_timestamp', ['timestamp']),
 })
