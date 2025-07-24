@@ -62,6 +62,60 @@ export const getConversations = query({
   },
 })
 
+// Get conversations for a user with participant information
+export const getConversationsWithUsers = query({
+  args: {
+    userId: v.string(),
+    includeInactive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const includeInactive = args.includeInactive ?? false
+
+    // Get all conversations and filter client-side for now
+    const allConversations = await ctx.db
+      .query('conversations')
+      .order('desc')
+      .collect()
+
+    // Filter conversations where user is a participant
+    const userConversations = allConversations.filter(conversation => {
+      const hasAccess = conversation.participants.includes(args.userId)
+      const isActiveCheck = includeInactive || conversation.isActive
+      return hasAccess && isActiveCheck
+    })
+
+    // Enhance conversations with participant user information
+    const conversationsWithUsers = await Promise.all(
+      userConversations.map(async conversation => {
+        // Get user information for all participants
+        const participantUsers = await Promise.all(
+          conversation.participants.map(async participantId => {
+            const user = await ctx.db
+              .query('users')
+              .withIndex('by_clerk_id', q => q.eq('clerkId', participantId))
+              .first()
+
+            return {
+              id: participantId,
+              name: user?.name || user?.email || 'Unknown User',
+              email: user?.email,
+              avatar: user?.avatar,
+              role: user?.role,
+            }
+          })
+        )
+
+        return {
+          ...conversation,
+          participantUsers,
+        }
+      })
+    )
+
+    return conversationsWithUsers
+  },
+})
+
 // Get a single conversation by ID
 export const getConversation = query({
   args: {

@@ -81,6 +81,68 @@ export const getMessages = query({
   },
 })
 
+// Get messages with user information for a conversation
+export const getMessagesWithUsers = query({
+  args: {
+    conversationId: v.string(),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 50
+
+    // Get all messages and filter by conversation
+    const allMessages = await ctx.db.query('messages').order('desc').collect()
+    const conversationMessages = allMessages.filter(
+      message => message.conversationId === args.conversationId
+    )
+
+    // Apply cursor pagination if provided
+    let filteredMessages = conversationMessages
+    if (args.cursor) {
+      const cursorIndex = conversationMessages.findIndex(
+        message => message._id === args.cursor
+      )
+      if (cursorIndex !== -1) {
+        filteredMessages = conversationMessages.slice(cursorIndex + 1)
+      }
+    }
+
+    // Limit results
+    const paginatedMessages = filteredMessages.slice(0, limit)
+
+    // Get user information for each message
+    const messagesWithUsers = await Promise.all(
+      paginatedMessages.map(async message => {
+        // Try to find user by clerkId first (assuming userId is clerkId)
+        const user = await ctx.db
+          .query('users')
+          .withIndex('by_clerk_id', q => q.eq('clerkId', message.userId))
+          .first()
+
+        // If not found, try to find by internal user ID
+        let userInfo = null
+        if (user) {
+          userInfo = {
+            name: user.name || user.email || 'Unknown User',
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role,
+          }
+        }
+
+        return {
+          ...message,
+          user: userInfo,
+        }
+      })
+    )
+
+    // Return in chronological order (oldest first)
+    return messagesWithUsers.reverse()
+  },
+})
+
 // Get recent messages across all conversations for a user
 export const getRecentMessages = query({
   args: {
@@ -97,6 +159,58 @@ export const getRecentMessages = query({
       .slice(0, limit)
 
     return userMessages
+  },
+})
+
+// Get messages from conversations that a user participates in
+export const getMessagesFromUserConversations = query({
+  args: {
+    userId: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 50
+
+    // First, get all conversations the user participates in
+    const allConversations = await ctx.db.query('conversations').collect()
+    const userConversations = allConversations.filter(
+      conversation =>
+        conversation.participants.includes(args.userId) && conversation.isActive
+    )
+    const conversationIds = userConversations.map(c => c._id)
+
+    // Then get messages from those conversations
+    const allMessages = await ctx.db.query('messages').order('desc').collect()
+    const conversationMessages = allMessages
+      .filter(message => conversationIds.includes(message.conversationId))
+      .slice(0, limit)
+
+    // Get user information for each message
+    const messagesWithUsers = await Promise.all(
+      conversationMessages.map(async message => {
+        const user = await ctx.db
+          .query('users')
+          .withIndex('by_clerk_id', q => q.eq('clerkId', message.userId))
+          .first()
+
+        let userInfo = null
+        if (user) {
+          userInfo = {
+            name: user.name || user.email || 'Unknown User',
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role,
+          }
+        }
+
+        return {
+          ...message,
+          user: userInfo,
+        }
+      })
+    )
+
+    return messagesWithUsers
   },
 })
 
