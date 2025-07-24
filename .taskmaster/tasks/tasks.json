@@ -608,7 +608,7 @@
             "description": "Create Convex queries for aggregating token usage data by team and time periods",
             "dependencies": ["9.2"],
             "details": "Build queries for daily/weekly/monthly usage totals, team-level aggregations, cost calculations, and usage trends. Include filtering by date ranges and team members",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
