@@ -32,7 +32,7 @@ export function initializeVoteCounts() {
   return {
     thumbsUp: 0,
     thumbsDown: 0,
-    userVotes: {},
+    userVotes: [],
   }
 }
 

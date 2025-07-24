@@ -440,7 +440,7 @@
             "description": "Add thumbsUp, thumbsDown, and userVotes fields to analyses table schema",
             "dependencies": [],
             "details": "Extend the analyses table schema in convex/schema.ts to include vote tracking fields: thumbsUp (number), thumbsDown (number), and userVotes (array of objects with userId and voteType). Ensure proper indexing for vote queries and aggregation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -449,7 +449,7 @@
             "description": "Build Convex mutation for handling vote operations with validation logic",
             "dependencies": ["7.1"],
             "details": "Create thumbVote mutation in convex/mutations.ts that accepts analysisId, userId, and voteType parameters. Implement logic to toggle votes, prevent duplicate voting by same user, and update vote counts atomically. Include proper error handling and validation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -599,7 +599,7 @@
             "description": "Create dashboard interface showing team token consumption and cost metrics",
             "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
