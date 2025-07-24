@@ -83,7 +83,18 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       },
       thumbsUp: 2,
       thumbsDown: 0,
-      userVotes: { 'user-1': 'up', 'user-2': 'up' },
+      userVotes: [
+        {
+          userId: 'user-1',
+          voteType: 'up' as const,
+          timestamp: Date.now() - 1000,
+        },
+        {
+          userId: 'user-2',
+          voteType: 'up' as const,
+          timestamp: Date.now() - 2000,
+        },
+      ],
       createdAt: Date.now(),
     },
     {
@@ -116,7 +127,13 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       },
       thumbsUp: 0,
       thumbsDown: 1,
-      userVotes: { 'user-3': 'down' },
+      userVotes: [
+        {
+          userId: 'user-3',
+          voteType: 'down' as const,
+          timestamp: Date.now() - 3000,
+        },
+      ],
       createdAt: Date.now() - 30000,
     },
     {
@@ -132,7 +149,7 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       rawData: {},
       thumbsUp: 0,
       thumbsDown: 0,
-      userVotes: {},
+      userVotes: [],
       createdAt: Date.now() - 60000,
     },
   ]

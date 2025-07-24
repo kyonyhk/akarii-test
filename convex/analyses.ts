@@ -99,24 +99,28 @@ export const voteOnAnalysis = mutation({
       throw new Error('Analysis not found')
     }
 
-    // Get current user vote
-    const currentVote = (analysis.userVotes as Record<string, 'up' | 'down'>)[
-      args.userId
-    ]
+    // Get current user vote from array structure
+    const currentVoteIndex = analysis.userVotes.findIndex(
+      vote => vote.userId === args.userId
+    )
+    const currentVote =
+      currentVoteIndex >= 0
+        ? analysis.userVotes[currentVoteIndex].voteType
+        : null
 
     // Calculate new vote counts
     let newThumbsUp = analysis.thumbsUp
     let newThumbsDown = analysis.thumbsDown
-    const newUserVotes = { ...analysis.userVotes } as Record<
-      string,
-      'up' | 'down'
-    >
+    const newUserVotes = [...analysis.userVotes]
 
     // Remove previous vote if exists
     if (currentVote === 'up') {
       newThumbsUp--
     } else if (currentVote === 'down') {
       newThumbsDown--
+    }
+    if (currentVoteIndex >= 0) {
+      newUserVotes.splice(currentVoteIndex, 1)
     }
 
     // Add new vote if different from current
@@ -126,10 +130,11 @@ export const voteOnAnalysis = mutation({
       } else {
         newThumbsDown++
       }
-      newUserVotes[args.userId] = args.vote
-    } else {
-      // Remove vote if same as current (toggle off)
-      delete newUserVotes[args.userId]
+      newUserVotes.push({
+        userId: args.userId,
+        voteType: args.vote,
+        timestamp: getCurrentTimestamp(),
+      })
     }
 
     // Update the analysis
