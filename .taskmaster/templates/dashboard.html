@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Development Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #e2e8f0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px; background: #1e293b; border-radius: 10px; }
+        .header h1 { color: #60a5fa; font-size: 2.5rem; margin-bottom: 10px; }
+        .header .subtitle { color: #94a3b8; font-size: 1.1rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #1e293b; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #94a3b8; font-size: 0.9rem; }
+        .phases { margin-bottom: 30px; }
+        .phase { background: #1e293b; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+        .phase-header { display: flex; justify-content: between; align-items: center; margin-bottom: 15px; }
+        .phase-title { color: #60a5fa; font-size: 1.2rem; font-weight: bold; }
+        .phase-duration { color: #94a3b8; font-size: 0.9rem; }
+        .agents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .agent-card { background: #2d3748; border-radius: 10px; padding: 20px; position: relative; }
+        .agent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .agent-name { font-size: 1.1rem; font-weight: bold; color: #f1f5f9; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-ready { background: #16a34a; color: white; }
+        .status-in-progress { background: #2563eb; color: white; }
+        .status-waiting { background: #eab308; color: black; }
+        .status-completed { background: #059669; color: white; }
+        .status-blocked { background: #dc2626; color: white; }
+        .agent-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .detail-item { font-size: 0.9rem; }
+        .detail-label { color: #94a3b8; }
+        .detail-value { color: #e2e8f0; font-weight: 500; }
+        .process-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+        .process-running { background: #16a34a; }
+        .process-stopped { background: #dc2626; }
+        .logs { background: #0f172a; border-radius: 5px; padding: 10px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
+        .log-line { margin-bottom: 2px; color: #94a3b8; }
+        .handoffs { margin-top: 30px; }
+        .handoff-item { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .handoff-trigger { font-weight: bold; }
+        .handoff-status { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+        .handoff-complete { background: #16a34a; color: white; }
+        .handoff-pending { background: #64748b; color: white; }
+        .auto-refresh { position: fixed; top: 20px; right: 20px; background: #1e293b; padding: 10px; border-radius: 5px; font-size: 0.9rem; }
+        .loading { text-align: center; color: #94a3b8; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Multi-Agent Development Dashboard</h1>
+            <p class="subtitle">Real-time monitoring of Claude Code agents working on Akarii project</p>
+        </div>
+        
+        <div class="auto-refresh">
+            🔄 Auto-refresh: <span id="countdown">5</span>s
+        </div>
+        
+        <div id="dashboard-content">
+            <div class="loading">
+                <p>Loading dashboard data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdownTimer;
+        let refreshInterval = 5000; // 5 seconds
+        
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('dashboard-content').innerHTML = 
+                    '<div class="loading"><p>Error loading dashboard data</p></div>';
+            }
+        }
+        
+        function renderDashboard(data) {
+            const agents = data.agents || {};
+            const phases = data.phases || {};
+            const handoffs = data.handoffs || {};
+            
+            // Calculate stats
+            const totalAgents = Object.keys(agents).length;
+            const activeAgents = Object.values(agents).filter(a => a.status === 'in-progress').length;
+            const completedAgents = Object.values(agents).filter(a => a.status === 'completed').length;
+            const totalCommits = Object.values(agents).reduce((sum, a) => sum + (a.git?.commits || 0), 0);
+            
+            let html = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #60a5fa;">${totalAgents}</div>
+                        <div class="stat-label">Total Agents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #2563eb;">${activeAgents}</div>
+                        <div class="stat-label">Active Now</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #16a34a;">${completedAgents}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #f59e0b;">${totalCommits}</div>
+                        <div class="stat-label">Total Commits</div>
+                    </div>
+                </div>
+                
+                <div class="phases">
+                    <h2 style="color: #60a5fa; margin-bottom: 20px;">📋 Development Phases</h2>
+            `;
+            
+            // Render phases
+            Object.entries(phases).forEach(([phaseKey, phase]) => {
+                const statusStr = Object.entries(phase.status_counts)
+                    .map(([status, count]) => `${status}: ${count}`)
+                    .join(' | ');
+                
+                html += `
+                    <div class="phase">
+                        <div class="phase-header">
+                            <div class="phase-title">${phase.name}</div>
+                            <div class="phase-duration">${phase.duration}</div>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">${statusStr}</div>
+                    </div>
+                `;
+            });
+            
+            html += `</div><div class="agents-grid">`;
+            
+            // Render agents
+            Object.entries(agents).forEach(([agentId, agent]) => {
+                const statusClass = `status-${agent.status.replace('-', '')}`;
+                const processClass = agent.process?.running ? 'process-running' : 'process-stopped';
+                
+                html += `
+                    <div class="agent-card">
+                        <div class="agent-header">
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="status-badge ${statusClass}">${agent.status}</div>
+                        </div>
+                        
+                        <div class="agent-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Current Task:</span><br>
+                                <span class="detail-value">${agent.current_task}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">ETA:</span><br>
+                                <span class="detail-value">${agent.estimated_completion}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Process:</span><br>
+                                <span class="detail-value">
+                                    <span class="process-indicator ${processClass}"></span>
+                                    PID: ${agent.process?.pid || 'N/A'}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Commits:</span><br>
+                                <span class="detail-value">${agent.git?.commits || 0}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Branch:</span><br>
+                                <span class="detail-value">${agent.git?.branch || 'none'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Last Commit:</span><br>
+                                <span class="detail-value">${agent.git?.last_commit || 'never'}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">
+                            <strong>Specialization:</strong> ${agent.specialization}
+                        </div>
+                        
+                        <div class="logs">
+                            ${agent.recent_logs.map(log => `<div class="log-line">${log}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // Render handoffs
+            html += `
+                <div class="handoffs">
+                    <h2 style="color: #60a5fa; margin-bottom: 20px;">🔗 Critical Handoff Status</h2>
+            `;
+            
+            Object.entries(handoffs).forEach(([trigger, handoff]) => {
+                const statusClass = handoff.completed ? 'handoff-complete' : 'handoff-pending';
+                const statusText = handoff.completed ? 'COMPLETE' : 'PENDING';
+                
+                html += `
+                    <div class="handoff-item">
+                        <div>
+                            <div class="handoff-trigger">Task ${handoff.task_id}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">
+                                ${handoff.actions.join(', ')}
+                            </div>
+                        </div>
+                        <div class="handoff-status ${statusClass}">${statusText}</div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            document.getElementById('dashboard-content').innerHTML = html;
+        }
+        
+        function startCountdown() {
+            let count = 5;
+            countdownTimer = setInterval(() => {
+                count--;
+                document.getElementById('countdown').textContent = count;
+                if (count <= 0) {
+                    clearInterval(countdownTimer);
+                    loadDashboard();
+                    startCountdown();
+                }
+            }, 1000);
+        }
+        
+        // Initial load
+        loadDashboard();
+        startCountdown();
+    </script>
+</body>
+</html>

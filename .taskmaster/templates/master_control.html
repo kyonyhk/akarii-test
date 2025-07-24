@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎛️ Master Control - Multi-Agent System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a0a; color: #e2e8f0; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px; background: #1a1a2e; border-radius: 10px; border: 2px solid #ff6b6b; }
+        .header h1 { color: #ff6b6b; font-size: 2.5rem; margin-bottom: 10px; }
+        .header .subtitle { color: #94a3b8; font-size: 1.1rem; }
+        .control-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .control-section { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #374151; }
+        .control-section h3 { color: #60a5fa; margin-bottom: 15px; }
+        .message-area { width: 100%; height: 100px; background: #0f172a; border: 1px solid #374151; border-radius: 5px; padding: 10px; color: #e2e8f0; resize: vertical; }
+        .button-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-warning { background: #f59e0b; color: black; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .agent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .agent-card { background: #2d3748; border-radius: 10px; padding: 20px; border: 1px solid #4a5568; }
+        .agent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .agent-name { font-size: 1.2rem; font-weight: bold; }
+        .status-online { color: #10b981; }
+        .status-offline { color: #ef4444; }
+        .status-paused { color: #f59e0b; }
+        .logs { background: #0f172a; border-radius: 5px; padding: 10px; margin-top: 10px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto; }
+        .log-line { margin-bottom: 2px; color: #94a3b8; }
+        .system-status { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-running { background: #10b981; }
+        .status-paused { background: #f59e0b; }
+        .status-stopped { background: #ef4444; }
+        .auto-refresh { position: fixed; top: 20px; right: 20px; background: #1e293b; padding: 10px; border-radius: 5px; font-size: 0.9rem; }
+        select { background: #374151; color: #e2e8f0; border: 1px solid #4b5563; border-radius: 4px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎛️ Master Control Interface</h1>
+            <p class="subtitle">Real-time command and control for multi-agent system</p>
+        </div>
+        
+        <div class="auto-refresh">
+            🔄 Auto-refresh: <span id="countdown">10</span>s
+        </div>
+        
+        <div class="system-status">
+            <h3>System Status: <span id="system-state">Loading...</span></h3>
+            <div id="system-stats"></div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="control-section">
+                <h3>📢 Message Center</h3>
+                <textarea id="message-input" class="message-area" placeholder="Type your message to agents..."></textarea>
+                <div style="margin: 10px 0;">
+                    <label>Send to: </label>
+                    <select id="target-agent">
+                        <option value="all">🌐 All Agents</option>
+                        <option value="agent-prism">🎨 Agent Prism</option>
+                        <option value="agent-realtime">⚡ Agent Realtime</option>
+                        <option value="agent-auth">🔐 Agent Auth</option>
+                        <option value="agent-analytics">📊 Agent Analytics</option>
+                        <option value="agent-quality">✅ Agent Quality</option>
+                        <option value="agent-review">👀 Agent Review</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="sendMessage()">📤 Send Message</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🎮 System Control</h3>
+                <div class="button-group">
+                    <button class="btn btn-warning" onclick="pauseSystem()">⏸️ Pause All</button>
+                    <button class="btn btn-success" onclick="resumeSystem()">▶️ Resume All</button>
+                </div>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button class="btn btn-danger" onclick="emergencyStop()">🛑 Emergency Stop</button>
+                </div>
+                <div id="control-feedback" style="margin-top: 15px; color: #10b981; font-weight: bold;"></div>
+            </div>
+        </div>
+        
+        <div class="agent-grid" id="agent-grid">
+            <!-- Agents will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval = 10000; // 10 seconds
+        let countdownTimer;
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                renderStatus(data);
+            } catch (error) {
+                console.error('Error loading status:', error);
+            }
+        }
+
+        function renderStatus(data) {
+            // Update system state
+            const stateElement = document.getElementById('system-state');
+            const indicator = data.system_state === 'running' ? 'status-running' : 
+                            data.system_state === 'paused' ? 'status-paused' : 'status-stopped';
+            stateElement.innerHTML = `<span class="status-indicator ${indicator}"></span>${data.system_state.toUpperCase()}`;
+            
+            // Update system stats
+            const runningCount = Object.values(data.agents).filter(a => a.running).length;
+            const totalCount = Object.keys(data.agents).length;
+            document.getElementById('system-stats').innerHTML = `
+                Running: ${runningCount}/${totalCount} | Errors: ${data.error_count} | Last Update: ${new Date(data.timestamp).toLocaleTimeString()}
+            `;
+            
+            // Update agent grid
+            const agentGrid = document.getElementById('agent-grid');
+            agentGrid.innerHTML = '';
+            
+            Object.entries(data.agents).forEach(([agentId, agentData]) => {
+                const statusClass = agentData.running ? 'status-online' : 'status-offline';
+                const statusText = agentData.running ? '🟢 ONLINE' : '🔴 OFFLINE';
+                
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                agentCard.innerHTML = `
+                    <div class="agent-header">
+                        <div class="agent-name">${agentId}</div>
+                        <div class="${statusClass}">${statusText}</div>
+                    </div>
+                    <div>PID: ${agentData.pid || 'N/A'}</div>
+                    <div class="button-group" style="margin: 10px 0;">
+                        <button class="btn btn-primary" onclick="restartAgent('${agentId}')">🔄 Restart</button>
+                        <button class="btn btn-warning" onclick="viewLogs('${agentId}')">📋 Logs</button>
+                    </div>
+                    <div class="logs">
+                        ${agentData.logs.map(log => `<div class="log-line">${log}</div>`).join('')}
+                    </div>
+                `;
+                agentGrid.appendChild(agentCard);
+            });
+        }
+
+        async function sendMessage() {
+            const message = document.getElementById('message-input').value;
+            const target = document.getElementById('target-agent').value;
+            
+            if (!message.trim()) {
+                showFeedback('Please enter a message', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/send_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, agent_id: target })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showFeedback(`Message sent to ${target}`, 'success');
+                    document.getElementById('message-input').value = '';
+                } else {
+                    showFeedback('Failed to send message', 'error');
+                }
+            } catch (error) {
+                showFeedback('Error sending message', 'error');
+            }
+        }
+
+        async function pauseSystem() {
+            try {
+                const response = await fetch('/api/pause', { method: 'POST' });
+                const result = await response.json();
+                showFeedback('System paused', 'success');
+                loadStatus();
+            } catch (error) {
+                showFeedback('Error pausing system', 'error');
+            }
+        }
+
+        async function resumeSystem() {
+            try {
+                const response = await fetch('/api/resume', { method: 'POST' });
+                const result = await response.json();
+                showFeedback('System resumed', 'success');
+                loadStatus();
+            } catch (error) {
+                showFeedback('Error resuming system', 'error');
+            }
+        }
+
+        async function emergencyStop() {
+            if (!confirm('Are you sure you want to emergency stop all agents?')) return;
+            
+            try {
+                const response = await fetch('/api/emergency_stop', { method: 'POST' });
+                const result = await response.json();
+                showFeedback(`Emergency stop completed. Killed ${result.killed_processes.length} processes`, 'success');
+                loadStatus();
+            } catch (error) {
+                showFeedback('Error during emergency stop', 'error');
+            }
+        }
+
+        async function restartAgent(agentId) {
+            try {
+                const response = await fetch('/api/restart_agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_id: agentId })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showFeedback(`${agentId} restarted successfully`, 'success');
+                } else {
+                    showFeedback(`Failed to restart ${agentId}`, 'error');
+                }
+                loadStatus();
+            } catch (error) {
+                showFeedback(`Error restarting ${agentId}`, 'error');
+            }
+        }
+
+        async function viewLogs(agentId) {
+            try {
+                const response = await fetch(`/api/logs/${agentId}?lines=100`);
+                const result = await response.json();
+                
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                        <head><title>${agentId} Logs</title></head>
+                        <body style="background: #0f172a; color: #e2e8f0; font-family: monospace; padding: 20px;">
+                            <h2>${agentId} Logs</h2>
+                            <pre>${result.logs.join('\n')}</pre>
+                        </body>
+                    </html>
+                `);
+            } catch (error) {
+                showFeedback(`Error loading logs for ${agentId}`, 'error');
+            }
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('control-feedback');
+            feedback.textContent = message;
+            feedback.style.color = type === 'success' ? '#10b981' : '#ef4444';
+            setTimeout(() => feedback.textContent = '', 3000);
+        }
+
+        function startCountdown() {
+            let count = 10;
+            countdownTimer = setInterval(() => {
+                count--;
+                document.getElementById('countdown').textContent = count;
+                if (count <= 0) {
+                    clearInterval(countdownTimer);
+                    loadStatus();
+                    startCountdown();
+                }
+            }, 1000);
+        }
+
+        // Initialize
+        loadStatus();
+        startCountdown();
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

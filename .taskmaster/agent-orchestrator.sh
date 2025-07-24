@@ -6,7 +6,7 @@
 set -e
 
 PROJECT_ROOT="/Users/kuoloonchong/Desktop/akarii-test"
-MAIN_BRANCH="multi-agent-parallel-dev"
+MAIN_BRANCH="main"
 WORKTREE_DIR="${PROJECT_ROOT}/../akarii-worktrees"
 AGENT_ASSIGNMENTS="${PROJECT_ROOT}/.taskmaster/agent-assignments.json"
 ORCHESTRATOR_LOG="${PROJECT_ROOT}/.taskmaster/orchestrator.log"
@@ -69,10 +69,9 @@ create_agent_worktree() {
         git branch -D "$branch_name" 2>/dev/null || true
     fi
     
-    # Create new worktree and branch
-    git worktree add "$worktree_path" "$MAIN_BRANCH"
+    # Create new worktree with unique branch
+    git worktree add -b "$branch_name" "$worktree_path" "$MAIN_BRANCH"
     cd "$worktree_path"
-    git checkout -b "$branch_name"
     
     success "Created worktree for ${agent_id} on branch ${branch_name}"
 }
@@ -187,6 +186,11 @@ spawn_agent() {
     
     # Generate the prompt
     local prompt=$(generate_agent_prompt "$agent_id")
+    
+    # Create communication files for the agent
+    touch "${worktree_path}/user_message.txt"
+    touch "${worktree_path}/new_instruction.txt"
+    touch "${worktree_path}/agent_context.json"
     
     # Create a script to run the agent
     local agent_script="${worktree_path}/run_agent.sh"
@@ -327,12 +331,22 @@ run_orchestrator() {
         
         log "=== Monitoring cycle ==="
         
-        # Monitor active agents
+        # Monitor active agents with auto-recovery
         for agent in agent-prism agent-realtime agent-auth agent-analytics agent-quality agent-review; do
             local status=$(get_agent_status "$agent")
             if [ "$status" = "in-progress" ]; then
                 if ! monitor_agent "$agent"; then
-                    warn "Agent ${agent} needs attention"
+                    warn "Agent ${agent} needs attention - attempting auto-restart"
+                    
+                    # Attempt auto-restart if dependencies are met
+                    if check_agent_dependencies "$agent"; then
+                        log "Auto-restarting ${agent}"
+                        start_agent "$agent"
+                    else
+                        warn "Cannot auto-restart ${agent} - dependencies not met"
+                        # Mark as waiting for dependencies
+                        update_agent_status "$agent" "waiting"
+                    fi
                 fi
             fi
         done
@@ -387,6 +401,34 @@ case "${1:-}" in
             echo "${agent}: ${status}"
         done
         ;;
+    "restart")
+        # Restart a specific agent
+        if [ -z "$2" ]; then
+            error "Usage: $0 restart <agent-id>"
+            exit 1
+        fi
+        local agent_id="$2"
+        log "Restarting agent: ${agent_id}"
+        
+        # Kill existing process
+        local worktree_path="${WORKTREE_DIR}/${agent_id}"
+        local pid_file="${worktree_path}/agent.pid"
+        
+        if [ -f "$pid_file" ]; then
+            local pid=$(cat "$pid_file")
+            log "Killing existing ${agent_id} process (PID: ${pid})"
+            kill "$pid" 2>/dev/null || true
+            sleep 2
+        fi
+        
+        # Restart if dependencies are met
+        if check_agent_dependencies "$agent_id"; then
+            start_agent "$agent_id"
+            success "Restarted ${agent_id}"
+        else
+            warn "Cannot restart ${agent_id} - dependencies not met"
+        fi
+        ;;
     "cleanup")
         # Clean up worktrees and processes
         log "Cleaning up worktrees and processes"
@@ -406,13 +448,14 @@ case "${1:-}" in
     *)
         echo "Multi-Agent Claude Code Orchestrator"
         echo ""
-        echo "Usage: $0 {init|start|monitor|status|cleanup}"
+        echo "Usage: $0 {init|start|monitor|status|restart|cleanup}"
         echo ""
         echo "Commands:"
         echo "  init     - Initialize orchestrator (create worktrees, etc)"
         echo "  start    - Initialize and start all agents"
         echo "  monitor  - Monitor existing agents (no new spawns)"
         echo "  status   - Show status of all agents"
+        echo "  restart  - Restart a specific agent (e.g., restart agent-prism)"
         echo "  cleanup  - Clean up worktrees and kill processes"
         echo ""
         exit 1
