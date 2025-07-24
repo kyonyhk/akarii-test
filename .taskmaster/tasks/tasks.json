@@ -599,7 +599,7 @@
             "description": "Create dashboard interface showing team token consumption and cost metrics",
             "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -617,7 +617,7 @@
             "description": "Implement accurate cost calculation using current OpenAI token pricing models",
             "dependencies": ["9.1"],
             "details": "Create utility functions to calculate costs based on model type (GPT-4, GPT-3.5), token counts for input/output, and current OpenAI pricing. Handle different pricing tiers and model variations",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
