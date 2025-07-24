@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
 interface MessageBubbleProps {
+  messageId: string
   content: string
   authorId: string
   authorName?: string
@@ -11,9 +12,11 @@ interface MessageBubbleProps {
   timestamp: number
   isOwn?: boolean
   className?: string
+  isActive?: boolean
 }
 
 export function MessageBubble({
+  messageId,
   content,
   authorId,
   authorName,
@@ -21,6 +24,7 @@ export function MessageBubble({
   timestamp,
   isOwn = false,
   className,
+  isActive = false,
 }: MessageBubbleProps) {
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString([], {
@@ -42,9 +46,11 @@ export function MessageBubble({
 
   return (
     <div
+      data-message-id={messageId}
       className={cn(
         'group flex gap-3 p-3 transition-colors hover:bg-muted/30',
         isOwn && 'flex-row-reverse',
+        isActive && 'bg-accent/50 ring-2 ring-accent',
         className
       )}
     >

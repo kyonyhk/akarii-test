@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Analysis } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronRight, ChevronDown, Settings, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AnalysisRow } from './analysis-row'
+import { useScrollSync } from '@/contexts/scroll-sync-context'
 import { RawJSONDrawer } from './raw-json-drawer'
 
 interface PrismPanelProps {
@@ -23,12 +24,27 @@ interface PrismPanelProps {
 export function PrismPanel({ className, conversationId }: PrismPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const { registerAnalysisScroll, activeMessageId } = useScrollSync()
+
+  // Register scroll container with sync context
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      ) as HTMLElement
+      if (viewport) {
+        registerAnalysisScroll({ current: viewport })
+      }
+    }
+  }, [registerAnalysisScroll])
 
   // Mock data for development - will be replaced with real-time subscription
+  // Using realistic Convex ID format for testing
   const mockAnalyses: Analysis[] = [
     {
-      _id: '1' as any,
-      messageId: 'msg-1' as any,
+      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqy8' as any,
+      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy1' as any, // Mock message ID 1
       statementType: 'question' as const,
       beliefs: ['Users want better UX', 'Speed is critical'],
       tradeOffs: ['Performance vs Features', 'Complexity vs Simplicity'],
@@ -58,8 +74,8 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       createdAt: Date.now(),
     },
     {
-      _id: '2' as any,
-      messageId: 'msg-2' as any,
+      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqy9' as any,
+      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy2' as any, // Mock message ID 2
       statementType: 'opinion' as const,
       beliefs: ['AI should be transparent'],
       tradeOffs: ['Transparency vs Performance'],
@@ -89,6 +105,22 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       thumbsDown: 1,
       userVotes: { 'user-3': 'down' },
       createdAt: Date.now() - 30000,
+    },
+    {
+      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqya' as any,
+      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy3' as any, // Mock message ID 3
+      statementType: 'fact' as const,
+      beliefs: ['TypeScript provides type safety', 'Build tools are essential'],
+      tradeOffs: [
+        'Development speed vs Type safety',
+        'Bundle size vs Features',
+      ],
+      confidenceLevel: 92,
+      rawData: {},
+      thumbsUp: 0,
+      thumbsDown: 0,
+      userVotes: {},
+      createdAt: Date.now() - 60000,
     },
   ]
 
@@ -152,12 +184,13 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
                 </div>
               </div>
             ) : (
-              <ScrollArea className="flex-1">
+              <ScrollArea ref={scrollAreaRef} className="flex-1">
                 <div className="space-y-2 p-4">
                   {mockAnalyses.map(analysis => (
                     <AnalysisRow
                       key={analysis._id}
                       analysis={analysis}
+                      isActive={activeMessageId === analysis.messageId}
                       onViewRawJSON={analysis => (
                         <RawJSONDrawer analysis={analysis}>
                           <Button
