@@ -12,8 +12,8 @@ interface UseChatProps {
 export function useChat({ conversationId, userId }: UseChatProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  // Real-time messages subscription
-  const messages = useQuery(api.messages.getMessages, {
+  // Real-time messages subscription with user information
+  const messages = useQuery(api.messages.getMessagesWithUsers, {
     conversationId,
     limit: 100,
   })
