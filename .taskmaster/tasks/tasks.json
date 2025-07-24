@@ -24,9 +24,7 @@
             "id": 2,
             "title": "Install and configure Tailwind CSS",
             "description": "Set up Tailwind CSS for styling with proper configuration and PostCSS integration",
-            "dependencies": [
-              "1.1"
-            ],
+            "dependencies": ["1.1"],
             "details": "Install tailwindcss, postcss, and autoprefixer packages, generate tailwind.config.js with proper content paths, configure globals.css with Tailwind directives, verify CSS compilation works correctly",
             "status": "done",
             "testStrategy": ""
@@ -35,9 +33,7 @@
             "id": 3,
             "title": "Setup shadcn/ui component library",
             "description": "Initialize shadcn/ui and install essential components for the application",
-            "dependencies": [
-              "1.2"
-            ],
+            "dependencies": ["1.2"],
             "details": "Run 'npx shadcn-ui@latest init' to configure components.json, install core components (Button, Input, Card, Avatar), set up lib/utils.ts with cn utility function, verify component imports work correctly",
             "status": "done",
             "testStrategy": ""
@@ -46,9 +42,7 @@
             "id": 4,
             "title": "Configure development tooling (ESLint, Prettier, TypeScript)",
             "description": "Set up code quality tools and TypeScript configuration for development workflow",
-            "dependencies": [
-              "1.1"
-            ],
+            "dependencies": ["1.1"],
             "details": "Configure ESLint with Next.js rules, set up Prettier for code formatting, optimize tsconfig.json with strict mode and path mapping, add lint-staged and husky for pre-commit hooks, create .prettierrc and .eslintrc.json",
             "status": "done",
             "testStrategy": ""
@@ -57,9 +51,7 @@
             "id": 5,
             "title": "Create project folder structure",
             "description": "Establish organized directory structure for components, utilities, and application logic",
-            "dependencies": [
-              "1.3"
-            ],
+            "dependencies": ["1.3"],
             "details": "Create /components directory with subdirectories (ui, layout, forms), create /lib directory for utilities and configurations, set up /types directory for TypeScript definitions, organize /app directory structure with proper page routing",
             "status": "done",
             "testStrategy": ""
@@ -68,9 +60,7 @@
             "id": 6,
             "title": "Initialize git repository with proper configuration",
             "description": "Set up version control with appropriate .gitignore and initial commit",
-            "dependencies": [
-              "1.5"
-            ],
+            "dependencies": ["1.5"],
             "details": "Run 'git init' to initialize repository, configure .gitignore for Next.js, Node.js, and IDE files, add environment variable templates, create initial commit with project setup, configure git hooks for linting",
             "status": "done",
             "testStrategy": ""
@@ -84,9 +74,7 @@
         "details": "Install Convex CLI and SDK, run convex dev to initialize project, define schema in convex/schema.ts for messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), and create basic mutation/query stubs",
         "testStrategy": "Verify Convex dashboard shows correct schema, test basic CRUD operations via Convex dashboard, ensure real-time subscriptions work",
         "priority": "high",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "status": "done",
         "subtasks": [
           {
@@ -102,9 +90,7 @@
             "id": 2,
             "title": "Design and Implement Database Schema",
             "description": "Define complete database schema in convex/schema.ts for all required tables",
-            "dependencies": [
-              "2.1"
-            ],
+            "dependencies": ["2.1"],
             "details": "Create schema.ts with messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), define proper field types and relationships",
             "status": "done",
             "testStrategy": ""
@@ -113,9 +99,7 @@
             "id": 3,
             "title": "Implement Messages Table Operations",
             "description": "Create Convex mutations and queries for messages CRUD operations",
-            "dependencies": [
-              "2.2"
-            ],
+            "dependencies": ["2.2"],
             "details": "Create sendMessage mutation, getMessages query for conversation, implement real-time message subscription, add message validation and error handling",
             "status": "done",
             "testStrategy": ""
@@ -124,9 +108,7 @@
             "id": 4,
             "title": "Implement Analyses and Conversations Operations",
             "description": "Create Convex functions for analyses and conversations tables",
-            "dependencies": [
-              "2.2"
-            ],
+            "dependencies": ["2.2"],
             "details": "Create storeAnalysis mutation, getAnalyses query, createConversation mutation, getConversations query, implement proper data relationships and indexes",
             "status": "done",
             "testStrategy": ""
@@ -135,10 +117,7 @@
             "id": 5,
             "title": "Test and Validate Convex Setup",
             "description": "Verify Convex configuration and test all database operations",
-            "dependencies": [
-              "2.3",
-              "2.4"
-            ],
+            "dependencies": ["2.3", "2.4"],
             "details": "Test all mutations and queries via Convex dashboard, verify schema appears correctly, test real-time subscriptions, validate data persistence and relationships, ensure proper error handling",
             "status": "done",
             "testStrategy": ""
@@ -152,9 +131,7 @@
         "details": "Create chat components using shadcn/ui (Input, ScrollArea, Button), implement sendMessage Convex mutation, create useQuery hook for live message subscription, build message list component with auto-scroll, add typing indicators, implement split-pane layout with chat on left side, ensure messages display with timestamp and author",
         "testStrategy": "Test real-time messaging between multiple browser tabs, verify messages persist on page refresh, check auto-scroll behavior and responsive design",
         "priority": "high",
-        "dependencies": [
-          2
-        ],
+        "dependencies": [2],
         "status": "done",
         "subtasks": [
           {
@@ -179,9 +156,7 @@
             "id": 3,
             "title": "Set Up Real-time Message Subscription",
             "description": "Implement Convex live query hooks for real-time message updates and subscription management",
-            "dependencies": [
-              "3.2"
-            ],
+            "dependencies": ["3.2"],
             "details": "Create useQuery hook for live message subscription, implement proper query optimization for performance, add connection state handling, ensure messages update in real-time across all connected clients",
             "status": "done",
             "testStrategy": ""
@@ -190,10 +165,7 @@
             "id": 4,
             "title": "Build Message Display Logic and List Component",
             "description": "Create message list component with proper rendering, sorting, and state management for chat history",
-            "dependencies": [
-              "3.1",
-              "3.3"
-            ],
+            "dependencies": ["3.1", "3.3"],
             "details": "Build MessageList component using shadcn/ui ScrollArea, implement message sorting by timestamp, add proper key handling for React rendering, integrate with real-time subscription data, handle loading states",
             "status": "done",
             "testStrategy": ""
@@ -202,9 +174,7 @@
             "id": 5,
             "title": "Implement Auto-scroll Functionality",
             "description": "Add intelligent auto-scroll behavior that follows new messages while preserving user scroll position when reviewing history",
-            "dependencies": [
-              "3.4"
-            ],
+            "dependencies": ["3.4"],
             "details": "Implement auto-scroll to bottom for new messages, detect user manual scrolling to disable auto-scroll, add scroll-to-bottom button when not at bottom, ensure smooth scrolling animation, handle edge cases for rapid message sending",
             "status": "done",
             "testStrategy": ""
@@ -213,9 +183,7 @@
             "id": 6,
             "title": "Add Typing Indicators and Status Features",
             "description": "Implement typing indicators and online status to enhance real-time chat experience",
-            "dependencies": [
-              "3.3"
-            ],
+            "dependencies": ["3.3"],
             "details": "Create typing indicator component, implement typing state tracking in Convex, add real-time typing status updates, create online/offline user status indicators, ensure proper cleanup of typing states",
             "status": "done",
             "testStrategy": ""
@@ -224,10 +192,7 @@
             "id": 7,
             "title": "Implement Responsive Split-pane Layout",
             "description": "Create responsive layout with chat interface positioned on left side and proper mobile/desktop adaptations",
-            "dependencies": [
-              "3.4",
-              "3.5"
-            ],
+            "dependencies": ["3.4", "3.5"],
             "details": "Implement split-pane layout with chat on left side, add responsive breakpoints for mobile/tablet/desktop, ensure proper resizing behavior, implement collapsible sidebar for smaller screens, maintain chat functionality across all screen sizes",
             "status": "done",
             "testStrategy": ""
@@ -241,9 +206,7 @@
         "details": "Install OpenAI SDK, create server action in convex/actions.ts for analyzeMessage, design prompt template for extracting statement type, beliefs, trade-offs, and confidence levels, implement JSON response parsing with error handling, add retry logic for API failures, ensure analysis completes within 2-second target, store results in analyses table linked to messageId",
         "testStrategy": "Test analysis accuracy with sample messages, verify sub-2-second response times, test error handling for API failures, validate JSON parsing and database storage",
         "priority": "high",
-        "dependencies": [
-          2
-        ],
+        "dependencies": [2],
         "status": "done",
         "subtasks": [
           {
@@ -259,9 +222,7 @@
             "id": 2,
             "title": "Prompt Template Design for Message Analysis",
             "description": "Create structured prompt template for extracting statement type, beliefs, trade-offs, and confidence levels",
-            "dependencies": [
-              "4.1"
-            ],
+            "dependencies": ["4.1"],
             "details": "Design comprehensive prompt template that instructs the AI to analyze messages and return structured data including statement classification, belief extraction, trade-off identification, and confidence scoring",
             "status": "done",
             "testStrategy": ""
@@ -270,10 +231,7 @@
             "id": 3,
             "title": "Server Action Creation and API Integration",
             "description": "Implement analyzeMessage server action in convex/actions.ts with OpenAI API calls",
-            "dependencies": [
-              "4.1",
-              "4.2"
-            ],
+            "dependencies": ["4.1", "4.2"],
             "details": "Create server action that receives message content, makes OpenAI API calls using the designed prompt template, and handles the complete analysis workflow",
             "status": "done",
             "testStrategy": ""
@@ -282,9 +240,7 @@
             "id": 4,
             "title": "JSON Parsing Implementation",
             "description": "Implement robust JSON response parsing with validation and schema enforcement",
-            "dependencies": [
-              "4.3"
-            ],
+            "dependencies": ["4.3"],
             "details": "Create parsing logic to extract structured data from OpenAI responses, validate JSON format, enforce expected schema, and handle malformed responses gracefully",
             "status": "done",
             "testStrategy": ""
@@ -293,9 +249,7 @@
             "id": 5,
             "title": "Error Handling and Retry Logic",
             "description": "Implement comprehensive error handling with retry mechanisms for API failures",
-            "dependencies": [
-              "4.3"
-            ],
+            "dependencies": ["4.3"],
             "details": "Add exponential backoff retry logic for API failures, handle rate limiting, timeout errors, and invalid responses with appropriate fallback strategies",
             "status": "done",
             "testStrategy": ""
@@ -304,10 +258,7 @@
             "id": 6,
             "title": "Performance Optimization for 2-Second Target",
             "description": "Optimize analysis pipeline to meet sub-2-second response time requirement",
-            "dependencies": [
-              "4.4",
-              "4.5"
-            ],
+            "dependencies": ["4.4", "4.5"],
             "details": "Implement performance optimizations including request batching, response caching strategies, timeout configurations, and latency monitoring to ensure consistent sub-2-second analysis completion",
             "status": "done",
             "testStrategy": ""
@@ -316,9 +267,7 @@
             "id": 7,
             "title": "Database Storage Integration",
             "description": "Integrate analysis results storage with Convex analyses table linked to messageId",
-            "dependencies": [
-              "4.4"
-            ],
+            "dependencies": ["4.4"],
             "details": "Implement database storage logic to save analysis results to the analyses table with proper messageId linking, handle concurrent writes, and ensure data consistency",
             "status": "done",
             "testStrategy": ""
@@ -327,10 +276,7 @@
             "id": 8,
             "title": "Comprehensive Testing Implementation",
             "description": "Create comprehensive test suite for analysis accuracy, performance, and error handling",
-            "dependencies": [
-              "4.6",
-              "4.7"
-            ],
+            "dependencies": ["4.6", "4.7"],
             "details": "Develop test cases for analysis accuracy with sample messages, performance testing to verify sub-2-second response times, error handling validation for API failures, and database storage verification",
             "status": "done",
             "testStrategy": ""
@@ -344,10 +290,7 @@
         "details": "Build Prism Panel component using shadcn/ui (Card, Collapsible, Drawer), create analysis row components showing statement type, belief, trade-off, and confidence, implement click-to-expand drawer showing raw JSON analysis, add real-time subscription to analyses table, implement auto-scroll sync with chat, add latency indicator in corner, ensure mobile-responsive with panel hide option",
         "testStrategy": "Verify analysis appears within 2 seconds of message send, test collapsible functionality, validate raw JSON display, check mobile responsiveness and panel hide/show",
         "priority": "high",
-        "dependencies": [
-          3,
-          4
-        ],
+        "dependencies": [3, 4],
         "status": "in-progress",
         "subtasks": [
           {
@@ -363,9 +306,7 @@
             "id": 2,
             "title": "Build analysis row components",
             "description": "Create individual analysis display components for statement type, belief, trade-off, and confidence",
-            "dependencies": [
-              "5.1"
-            ],
+            "dependencies": ["5.1"],
             "details": "Create AnalysisRow.tsx component showing analysis fields, implement confidence-based styling (grey out <0.4), add proper spacing and typography using shadcn/ui components, ensure consistent display format",
             "status": "done",
             "testStrategy": ""
@@ -374,9 +315,7 @@
             "id": 3,
             "title": "Implement collapsible functionality",
             "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
-            "dependencies": [
-              "5.2"
-            ],
+            "dependencies": ["5.2"],
             "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
             "status": "done",
             "testStrategy": ""
@@ -385,9 +324,7 @@
             "id": 4,
             "title": "Create raw JSON drawer component",
             "description": "Build click-to-expand drawer showing complete raw JSON analysis data",
-            "dependencies": [
-              "5.2"
-            ],
+            "dependencies": ["5.2"],
             "details": "Implement drawer using shadcn/ui Drawer component, add JSON syntax highlighting, create toggle button to open/close drawer, format raw analysis data for readable display, add copy-to-clipboard functionality",
             "status": "pending",
             "testStrategy": ""
@@ -396,20 +333,16 @@
             "id": 5,
             "title": "Implement real-time data subscription",
             "description": "Connect panel to live analyses data using Convex queries with real-time updates",
-            "dependencies": [
-              "5.1"
-            ],
+            "dependencies": ["5.1"],
             "details": "Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Add auto-scroll synchronization with chat",
             "description": "Implement synchronized scrolling between chat messages and corresponding analysis results",
-            "dependencies": [
-              "5.5"
-            ],
+            "dependencies": ["5.5"],
             "details": "Create scroll synchronization logic between chat and panel, implement smooth scrolling to active analysis, add visual indicators for currently selected message/analysis pair, handle edge cases for rapid message sending",
             "status": "pending",
             "testStrategy": ""
@@ -418,9 +351,7 @@
             "id": 7,
             "title": "Implement mobile responsiveness and panel controls",
             "description": "Add mobile-responsive design with panel hide/show functionality and latency indicator",
-            "dependencies": [
-              "5.6"
-            ],
+            "dependencies": ["5.6"],
             "details": "Implement responsive breakpoints for mobile/tablet views, add panel hide/show toggle button, create latency indicator in corner showing analysis processing time, ensure touch-friendly interactions on mobile devices",
             "status": "pending",
             "testStrategy": ""
@@ -434,9 +365,7 @@
         "details": "Install Clerk SDK, configure Clerk dashboard for magic-link auth, create authentication components (SignIn, SignUp), integrate Clerk with Convex using ConvexProviderWithClerk, implement protected routes, add user context to messages and conversations, create invite link functionality for team collaboration, handle authentication state in UI",
         "testStrategy": "Test magic-link email delivery and authentication flow, verify protected routes work correctly, test user context in messages, validate invite link functionality",
         "priority": "medium",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "status": "pending",
         "subtasks": [
           {
@@ -452,9 +381,7 @@
             "id": 2,
             "title": "Create Authentication Components",
             "description": "Build SignIn and SignUp components using Clerk's pre-built components",
-            "dependencies": [
-              "6.1"
-            ],
+            "dependencies": ["6.1"],
             "details": "Create SignIn and SignUp page components using Clerk's <SignIn /> and <SignUp /> components, configure routing for authentication pages, implement authentication redirects and fallbacks, style components to match application design",
             "status": "pending",
             "testStrategy": ""
@@ -463,10 +390,7 @@
             "id": 3,
             "title": "Integrate Clerk with Convex Backend",
             "description": "Connect Clerk authentication to Convex using ConvexProviderWithClerk",
-            "dependencies": [
-              "6.1",
-              "6.2"
-            ],
+            "dependencies": ["6.1", "6.2"],
             "details": "Install @convex-dev/auth package, wrap app with ConvexProviderWithClerk, configure Convex authentication middleware, set up user synchronization between Clerk and Convex, implement authentication context throughout the app",
             "status": "pending",
             "testStrategy": ""
@@ -475,9 +399,7 @@
             "id": 4,
             "title": "Implement Protected Route System",
             "description": "Create route protection middleware and components for authenticated access",
-            "dependencies": [
-              "6.3"
-            ],
+            "dependencies": ["6.3"],
             "details": "Create ProtectedRoute component that checks authentication status, implement middleware for route protection, redirect unauthenticated users to sign-in page, handle loading states during authentication check",
             "status": "pending",
             "testStrategy": ""
@@ -486,9 +408,7 @@
             "id": 5,
             "title": "Add User Context to Messages and Conversations",
             "description": "Integrate authenticated user information with chat functionality",
-            "dependencies": [
-              "6.3"
-            ],
+            "dependencies": ["6.3"],
             "details": "Update Convex schema to include user ID in messages and conversations, modify sendMessage mutation to include authenticated user context, display user information in message components, implement user-specific conversation filtering",
             "status": "pending",
             "testStrategy": ""
@@ -497,10 +417,7 @@
             "id": 6,
             "title": "Create Invite Link Functionality",
             "description": "Build team collaboration system with shareable invite links",
-            "dependencies": [
-              "6.4",
-              "6.5"
-            ],
+            "dependencies": ["6.4", "6.5"],
             "details": "Create invite link generation system, implement invite acceptance flow, build team/workspace management components, handle invite link validation and expiration, create team member management interface with role-based permissions",
             "status": "pending",
             "testStrategy": ""
@@ -514,10 +431,7 @@
         "details": "Add vote fields to analyses schema (thumbsUp, thumbsDown, userVotes array), create thumbVote Convex mutation, build vote button components with visual feedback, implement user vote tracking to prevent duplicate votes, add vote count display in analysis rows, create aggregation queries for feedback metrics, ensure real-time vote updates across all connected clients",
         "testStrategy": "Test voting functionality prevents duplicate votes per user, verify real-time vote count updates, validate vote persistence and aggregation queries",
         "priority": "medium",
-        "dependencies": [
-          5,
-          6
-        ],
+        "dependencies": [5, 6],
         "status": "pending",
         "subtasks": [
           {
@@ -533,9 +447,7 @@
             "id": 2,
             "title": "Create thumbVote mutation implementation",
             "description": "Build Convex mutation for handling vote operations with validation logic",
-            "dependencies": [
-              "7.1"
-            ],
+            "dependencies": ["7.1"],
             "details": "Create thumbVote mutation in convex/mutations.ts that accepts analysisId, userId, and voteType parameters. Implement logic to toggle votes, prevent duplicate voting by same user, and update vote counts atomically. Include proper error handling and validation.",
             "status": "pending",
             "testStrategy": ""
@@ -544,9 +456,7 @@
             "id": 3,
             "title": "Build vote button UI components",
             "description": "Create reusable thumb vote button components with visual feedback",
-            "dependencies": [
-              "7.2"
-            ],
+            "dependencies": ["7.2"],
             "details": "Design and implement ThumbVoteButtons component using shadcn/ui Button with thumb up/down icons. Add visual states for unvoted, user-voted, and hover states. Include vote count display and smooth animations for state changes.",
             "status": "pending",
             "testStrategy": ""
@@ -555,9 +465,7 @@
             "id": 4,
             "title": "Implement duplicate vote prevention",
             "description": "Add client-side and server-side logic to prevent users from voting multiple times",
-            "dependencies": [
-              "7.3"
-            ],
+            "dependencies": ["7.3"],
             "details": "Implement user authentication tracking and vote state management in React components. Add optimistic updates with rollback on server rejection. Ensure UI reflects current user's vote status and prevents double-clicking issues.",
             "status": "pending",
             "testStrategy": ""
@@ -566,9 +474,7 @@
             "id": 5,
             "title": "Add real-time vote updates",
             "description": "Implement live subscription for vote count updates across all connected clients",
-            "dependencies": [
-              "7.4"
-            ],
+            "dependencies": ["7.4"],
             "details": "Create Convex live query subscription for vote counts that updates all connected clients in real-time. Integrate with existing Prism Panel analysis rows to show current vote totals. Ensure smooth UI updates without flickering.",
             "status": "pending",
             "testStrategy": ""
@@ -577,9 +483,7 @@
             "id": 6,
             "title": "Create vote aggregation queries",
             "description": "Build queries for vote metrics and feedback analytics",
-            "dependencies": [
-              "7.5"
-            ],
+            "dependencies": ["7.5"],
             "details": "Create Convex queries for vote aggregation including total votes per analysis, most/least popular analyses, and user voting patterns. Build helper functions for vote percentage calculations and sorting analyses by vote score.",
             "status": "pending",
             "testStrategy": ""
@@ -593,9 +497,7 @@
         "details": "Analyze thumb vote feedback data, iterate on prompt engineering for better analysis accuracy, implement confidence score thresholding (grey out <0.4 confidence), add prompt guardrails to prevent hallucination, create A/B testing framework for prompt variations, implement feedback-based prompt tuning, add analysis validation rules",
         "testStrategy": "Monitor thumb vote approval rates, test confidence score accuracy, validate prompt guardrails prevent nonsensical outputs, measure analysis quality improvements",
         "priority": "medium",
-        "dependencies": [
-          7
-        ],
+        "dependencies": [7],
         "status": "pending",
         "subtasks": [
           {
@@ -611,9 +513,7 @@
             "id": 2,
             "title": "Engineer and iterate on OpenAI prompt templates",
             "description": "Refine the OpenAI prompt template based on feedback analysis to improve accuracy and reduce hallucinations",
-            "dependencies": [
-              "8.1"
-            ],
+            "dependencies": ["8.1"],
             "details": "Review current prompt template structure, incorporate feedback patterns into prompt improvements, add explicit instructions for confidence scoring, implement chain-of-thought reasoning in prompts, create prompt variations for A/B testing, add context preservation instructions, implement structured output formatting guidelines",
             "status": "pending",
             "testStrategy": ""
@@ -622,9 +522,7 @@
             "id": 3,
             "title": "Implement confidence score thresholding system",
             "description": "Add confidence score validation and UI indicators to grey out low-confidence analyses",
-            "dependencies": [
-              "8.2"
-            ],
+            "dependencies": ["8.2"],
             "details": "Modify analysis pipeline to validate confidence scores, implement UI changes to grey out analyses with <0.4 confidence, add confidence indicator badges, create user education tooltips explaining confidence levels, add option to show/hide low-confidence results, implement confidence score calibration based on historical accuracy",
             "status": "pending",
             "testStrategy": ""
@@ -633,9 +531,7 @@
             "id": 4,
             "title": "Create prompt guardrails and validation rules",
             "description": "Implement guardrails to prevent hallucination and ensure analysis quality standards",
-            "dependencies": [
-              "8.2"
-            ],
+            "dependencies": ["8.2"],
             "details": "Add input validation for message content, implement output validation for analysis structure, create fact-checking prompts for controversial claims, add coherence validation between belief and trade-off fields, implement safety filters for inappropriate content, create fallback responses for edge cases, add consistency checks across similar message types",
             "status": "pending",
             "testStrategy": ""
@@ -644,10 +540,7 @@
             "id": 5,
             "title": "Build A/B testing framework for prompt variations",
             "description": "Create infrastructure to test different prompt versions and measure their effectiveness",
-            "dependencies": [
-              "8.2",
-              "8.3"
-            ],
+            "dependencies": ["8.2", "8.3"],
             "details": "Design A/B test infrastructure with user segmentation, create prompt version management system, implement metrics collection for each prompt variant, build statistical significance testing, create dashboard for experiment results, implement gradual rollout mechanism for winning prompts, add experiment configuration management",
             "status": "pending",
             "testStrategy": ""
@@ -656,10 +549,7 @@
             "id": 6,
             "title": "Implement feedback-based prompt tuning system",
             "description": "Create automated system to incorporate user feedback into prompt improvements",
-            "dependencies": [
-              "8.1",
-              "8.5"
-            ],
+            "dependencies": ["8.1", "8.5"],
             "details": "Build feedback collection pipeline from thumb votes, create prompt update triggers based on feedback thresholds, implement automated prompt refinement suggestions, add human-in-the-loop approval for prompt changes, create feedback-to-improvement mapping system, implement continuous learning pipeline for prompt optimization",
             "status": "pending",
             "testStrategy": ""
@@ -668,11 +558,7 @@
             "id": 7,
             "title": "Add comprehensive quality validation rules",
             "description": "Implement validation system to ensure analysis meets quality standards before display",
-            "dependencies": [
-              "8.3",
-              "8.4",
-              "8.6"
-            ],
+            "dependencies": ["8.3", "8.4", "8.6"],
             "details": "Create quality scoring rubric for analyses, implement pre-display validation checks, add human review triggers for borderline cases, create quality metrics dashboard, implement automatic retry for failed validations, add quality trend monitoring, create alerts for quality degradation, implement quality-based user experience adjustments",
             "status": "pending",
             "testStrategy": ""
@@ -686,10 +572,7 @@
         "details": "Add token usage tracking to analyzeMessage action, create usage analytics schema (teamId, tokensUsed, cost, timestamp), build simple dashboard showing team token consumption, implement usage aggregation queries, add cost calculation based on OpenAI pricing, create usage alerts for approaching limits, prepare foundation for future billing integration",
         "testStrategy": "Verify accurate token counting and cost calculation, test dashboard displays correct usage data, validate team-level usage aggregation",
         "priority": "low",
-        "dependencies": [
-          4,
-          6
-        ],
+        "dependencies": [4, 6],
         "status": "pending",
         "subtasks": [
           {
@@ -705,9 +588,7 @@
             "id": 2,
             "title": "Create usage analytics database schema",
             "description": "Define Convex schema for token usage tracking and cost analytics",
-            "dependencies": [
-              "9.1"
-            ],
+            "dependencies": ["9.1"],
             "details": "Create usage table schema with fields: id, messageId, teamId, tokensUsed, cost, timestamp, model, and actionType. Add indexes for efficient querying by teamId and timestamp ranges",
             "status": "pending",
             "testStrategy": ""
@@ -716,9 +597,7 @@
             "id": 3,
             "title": "Build cost dashboard UI components",
             "description": "Create dashboard interface showing team token consumption and cost metrics",
-            "dependencies": [
-              "9.2"
-            ],
+            "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
             "status": "pending",
             "testStrategy": ""
@@ -727,9 +606,7 @@
             "id": 4,
             "title": "Implement usage aggregation queries",
             "description": "Create Convex queries for aggregating token usage data by team and time periods",
-            "dependencies": [
-              "9.2"
-            ],
+            "dependencies": ["9.2"],
             "details": "Build queries for daily/weekly/monthly usage totals, team-level aggregations, cost calculations, and usage trends. Include filtering by date ranges and team members",
             "status": "pending",
             "testStrategy": ""
@@ -738,9 +615,7 @@
             "id": 5,
             "title": "Add cost calculation logic based on OpenAI pricing",
             "description": "Implement accurate cost calculation using current OpenAI token pricing models",
-            "dependencies": [
-              "9.1"
-            ],
+            "dependencies": ["9.1"],
             "details": "Create utility functions to calculate costs based on model type (GPT-4, GPT-3.5), token counts for input/output, and current OpenAI pricing. Handle different pricing tiers and model variations",
             "status": "pending",
             "testStrategy": ""
@@ -749,10 +624,7 @@
             "id": 6,
             "title": "Create usage alert system for team limits",
             "description": "Implement alerts and notifications when teams approach usage or cost limits",
-            "dependencies": [
-              "9.4",
-              "9.5"
-            ],
+            "dependencies": ["9.4", "9.5"],
             "details": "Build alert system with configurable thresholds, email notifications, dashboard warnings, and usage limit enforcement. Include both soft warnings and hard limits for token consumption",
             "status": "pending",
             "testStrategy": ""
@@ -766,9 +638,7 @@
         "details": "Create Review Mode component with scrollable message history, implement inline analysis display integrated with messages, add conversation search and filtering capabilities, build export functionality for decision documentation, create shareable conversation links, implement conversation archiving, add analysis summary views for key insights",
         "testStrategy": "Test Review Mode navigation and message history display, verify inline analysis integration, validate export functionality and shareable links",
         "priority": "low",
-        "dependencies": [
-          5
-        ],
+        "dependencies": [5],
         "status": "pending",
         "subtasks": [
           {
@@ -784,9 +654,7 @@
             "id": 2,
             "title": "Implement Message History with Scrollable Timeline",
             "description": "Build scrollable message history view with conversation timeline display",
-            "dependencies": [
-              "10.1"
-            ],
+            "dependencies": ["10.1"],
             "details": "Create MessageHistory component with virtualized scrolling for performance, implement conversation timeline with timestamps, add message grouping by time periods, ensure smooth scrolling with proper message pagination",
             "status": "pending",
             "testStrategy": ""
@@ -795,9 +663,7 @@
             "id": 3,
             "title": "Integrate Inline Analysis Display",
             "description": "Add inline analysis integration within message history for contextual insights",
-            "dependencies": [
-              "10.2"
-            ],
+            "dependencies": ["10.2"],
             "details": "Embed analysis results directly in message components, create expandable analysis cards, implement hover states for quick analysis preview, ensure analysis data loads efficiently with message history",
             "status": "pending",
             "testStrategy": ""
@@ -806,9 +672,7 @@
             "id": 4,
             "title": "Build Search and Filtering Functionality",
             "description": "Add comprehensive search and filtering capabilities for conversations and messages",
-            "dependencies": [
-              "10.2"
-            ],
+            "dependencies": ["10.2"],
             "details": "Implement full-text search across messages and analyses, add filters by date range, message type, analysis confidence levels, create advanced search with boolean operators, add search result highlighting",
             "status": "pending",
             "testStrategy": ""
@@ -817,10 +681,7 @@
             "id": 5,
             "title": "Create Export Functionality",
             "description": "Build export capabilities for decision documentation and analysis reports",
-            "dependencies": [
-              "10.3",
-              "10.4"
-            ],
+            "dependencies": ["10.3", "10.4"],
             "details": "Implement export to PDF, JSON, and Markdown formats, create customizable export templates, add selective export of filtered results, include analysis summaries and key insights in exports",
             "status": "pending",
             "testStrategy": ""
@@ -829,9 +690,7 @@
             "id": 6,
             "title": "Implement Shareable Link System",
             "description": "Create shareable conversation links with proper access controls and permissions",
-            "dependencies": [
-              "10.3"
-            ],
+            "dependencies": ["10.3"],
             "details": "Generate unique shareable URLs for conversations, implement access permissions and expiration dates, create public/private link options, add link management interface for users",
             "status": "pending",
             "testStrategy": ""
@@ -840,10 +699,7 @@
             "id": 7,
             "title": "Build Conversation Archiving System",
             "description": "Implement conversation archiving with analysis summary views and insights extraction",
-            "dependencies": [
-              "10.5",
-              "10.6"
-            ],
+            "dependencies": ["10.5", "10.6"],
             "details": "Create archiving workflow with metadata preservation, implement analysis summary generation for archived conversations, build insights dashboard showing key decision patterns, add archive search and restoration capabilities",
             "status": "pending",
             "testStrategy": ""
