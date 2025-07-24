@@ -4,8 +4,8 @@ import { v } from 'convex/values'
 export default defineSchema({
   messages: defineTable({
     content: v.string(),
-    userId: v.string(),
-    conversationId: v.string(),
+    userId: v.string(), // Keep as string for compatibility with existing functions
+    conversationId: v.string(), // Keep as string for compatibility with existing functions
     timestamp: v.number(),
     analysisId: v.optional(v.id('analyses')),
   })
@@ -36,7 +36,7 @@ export default defineSchema({
 
   conversations: defineTable({
     title: v.string(),
-    participants: v.array(v.string()),
+    participants: v.array(v.string()), // Keep as string for compatibility with existing functions
     createdAt: v.number(),
     updatedAt: v.number(),
     isActive: v.boolean(),
@@ -58,7 +58,7 @@ export default defineSchema({
 
   teams: defineTable({
     name: v.string(),
-    members: v.array(v.string()), // User IDs
+    members: v.array(v.id('users')), // User IDs
     createdAt: v.number(),
   }).index('by_created_at', ['createdAt']),
 
@@ -66,7 +66,7 @@ export default defineSchema({
     teamId: v.id('teams'),
     token: v.string(),
     expiresAt: v.number(),
-    createdBy: v.string(),
+    createdBy: v.id('users'),
     isActive: v.boolean(),
   })
     .index('by_team', ['teamId'])
@@ -76,6 +76,7 @@ export default defineSchema({
   usageMetrics: defineTable({
     messageId: v.optional(v.id('messages')),
     teamId: v.optional(v.id('teams')),
+    userId: v.string(), // Keep as string for compatibility with existing functions
     userId: v.string(),
     model: v.string(),
     inputTokens: v.number(),
