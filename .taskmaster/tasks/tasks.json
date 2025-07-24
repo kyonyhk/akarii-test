@@ -599,7 +599,7 @@
             "description": "Create dashboard interface showing team token consumption and cost metrics",
             "dependencies": ["9.2"],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -709,7 +709,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-24T20:21:03.726Z",
+      "updated": "2025-07-24T20:28:08.928Z",
       "description": "Tasks for master context"
     }
   }
