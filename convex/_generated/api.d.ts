@@ -15,7 +15,7 @@ import type {
 } from 'convex/server'
 import type * as actions from '../actions.js'
 import type * as analyses from '../analyses.js'
-import type * as analysis_utils from '../analysis-utils.js'
+import type * as analysis_utils from '../analysis_utils.js'
 import type * as conversations from '../conversations.js'
 import type * as messages from '../messages.js'
 import type * as openai from '../openai.js'
@@ -33,7 +33,7 @@ import type * as utils from '../utils.js'
 declare const fullApi: ApiFromModules<{
   actions: typeof actions
   analyses: typeof analyses
-  'analysis-utils': typeof analysis_utils
+  analysis_utils: typeof analysis_utils
   conversations: typeof conversations
   messages: typeof messages
   openai: typeof openai
