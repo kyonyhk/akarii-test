@@ -1,0 +1,55 @@
+# Task ID: 10
+# Title: Implement Review Mode for Async Analysis
+# Status: pending
+# Dependencies: 5
+# Priority: low
+# Description: Build alternative view for scrollable chat history with inline analyses for async reflection and decision documentation
+# Details:
+Create Review Mode component with scrollable message history, implement inline analysis display integrated with messages, add conversation search and filtering capabilities, build export functionality for decision documentation, create shareable conversation links, implement conversation archiving, add analysis summary views for key insights
+
+# Test Strategy:
+Test Review Mode navigation and message history display, verify inline analysis integration, validate export functionality and shareable links
+
+# Subtasks:
+## 1. Create Review Mode Component [pending]
+### Dependencies: None
+### Description: Build the main Review Mode component with navigation and layout structure
+### Details:
+Create ReviewMode component with header navigation, toggle between Review and Live modes, implement responsive layout with proper routing, add breadcrumb navigation for conversation selection
+
+## 2. Implement Message History with Scrollable Timeline [pending]
+### Dependencies: 10.1
+### Description: Build scrollable message history view with conversation timeline display
+### Details:
+Create MessageHistory component with virtualized scrolling for performance, implement conversation timeline with timestamps, add message grouping by time periods, ensure smooth scrolling with proper message pagination
+
+## 3. Integrate Inline Analysis Display [pending]
+### Dependencies: 10.2
+### Description: Add inline analysis integration within message history for contextual insights
+### Details:
+Embed analysis results directly in message components, create expandable analysis cards, implement hover states for quick analysis preview, ensure analysis data loads efficiently with message history
+
+## 4. Build Search and Filtering Functionality [pending]
+### Dependencies: 10.2
+### Description: Add comprehensive search and filtering capabilities for conversations and messages
+### Details:
+Implement full-text search across messages and analyses, add filters by date range, message type, analysis confidence levels, create advanced search with boolean operators, add search result highlighting
+
+## 5. Create Export Functionality [pending]
+### Dependencies: 10.3, 10.4
+### Description: Build export capabilities for decision documentation and analysis reports
+### Details:
+Implement export to PDF, JSON, and Markdown formats, create customizable export templates, add selective export of filtered results, include analysis summaries and key insights in exports
+
+## 6. Implement Shareable Link System [pending]
+### Dependencies: 10.3
+### Description: Create shareable conversation links with proper access controls and permissions
+### Details:
+Generate unique shareable URLs for conversations, implement access permissions and expiration dates, create public/private link options, add link management interface for users
+
+## 7. Build Conversation Archiving System [pending]
+### Dependencies: 10.5, 10.6
+### Description: Implement conversation archiving with analysis summary views and insights extraction
+### Details:
+Create archiving workflow with metadata preservation, implement analysis summary generation for archived conversations, build insights dashboard showing key decision patterns, add archive search and restoration capabilities
+

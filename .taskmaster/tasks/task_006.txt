@@ -1,0 +1,43 @@
+# Task ID: 6
+# Title: Implement Clerk Magic-Link Authentication
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: Integrate Clerk authentication with magic-link login and connect to Convex for session management
+# Details:
+Install Clerk SDK, configure Clerk dashboard for magic-link auth, create authentication components (SignIn, SignUp), integrate Clerk with Convex using ConvexProviderWithClerk, implement protected routes, add user context to messages and conversations, create invite link functionality for team collaboration, handle authentication state in UI
+
+# Test Strategy:
+Test magic-link email delivery and authentication flow, verify protected routes work correctly, test user context in messages, validate invite link functionality
+
+# Subtasks:
+## 1. Install and Configure Clerk SDK [pending]
+### Dependencies: None
+### Description: Install Clerk packages and set up environment variables for Clerk integration
+### Details:
+Install @clerk/nextjs and @clerk/themes packages, create Clerk application in dashboard, configure environment variables (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY), set up Clerk middleware for route protection, configure sign-in and sign-up URLs
+
+## 2. Configure Magic-Link Authentication in Clerk Dashboard [pending]
+### Dependencies: 6.1
+### Description: Set up magic-link authentication method and email provider configuration in Clerk
+### Details:
+Enable magic-link authentication in Clerk dashboard, configure email provider (built-in or custom SMTP), set up email templates for magic-link delivery, configure redirect URLs for authentication flow, disable password authentication if desired
+
+## 3. Create Authentication Components and UI [pending]
+### Dependencies: 6.2
+### Description: Build SignIn and SignUp components using Clerk's pre-built components
+### Details:
+Create sign-in page using Clerk's SignIn component, create sign-up page using SignUp component, implement authentication state handling, add sign-out functionality, create user profile component, style components to match application design using shadcn/ui themes
+
+## 4. Integrate Clerk with Convex using ConvexProviderWithClerk [pending]
+### Dependencies: 6.3
+### Description: Set up Clerk-Convex integration for session management and user context
+### Details:
+Install @convex-dev/auth package, configure ConvexProviderWithClerk in app root, set up Clerk webhook for user synchronization, create Convex auth configuration, implement user table in Convex schema, sync Clerk user data to Convex database
+
+## 5. Implement Protected Routes and User Context Integration [pending]
+### Dependencies: 6.4
+### Description: Add route protection and integrate user context into messages and conversations
+### Details:
+Implement protected route middleware, add user context to message creation and display, modify Convex mutations to include authenticated user data, create user avatar and name display in chat interface, implement user-based conversation filtering, add invite link functionality for team collaboration
+

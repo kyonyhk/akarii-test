@@ -1,0 +1,43 @@
+# Task ID: 7
+# Title: Add Thumb Vote Feedback System
+# Status: pending
+# Dependencies: 5, 6
+# Priority: medium
+# Description: Implement the 👍/👎 voting system for analysis quality feedback with real-time vote counts and user interaction tracking
+# Details:
+Add vote fields to analyses schema (thumbsUp, thumbsDown, userVotes array), create thumbVote Convex mutation, build vote button components with visual feedback, implement user vote tracking to prevent duplicate votes, add vote count display in analysis rows, create aggregation queries for feedback metrics, ensure real-time vote updates across all connected clients
+
+# Test Strategy:
+Test voting functionality prevents duplicate votes per user, verify real-time vote count updates, validate vote persistence and aggregation queries
+
+# Subtasks:
+## 1. Extend Analyses Schema with Vote Fields [pending]
+### Dependencies: None
+### Description: Add thumbsUp, thumbsDown count fields and userVotes array to track voting data in the analyses schema
+### Details:
+Modify convex/schema.ts to add thumbsUp (number), thumbsDown (number), and userVotes (array of objects with userId and voteType) fields to the analyses table. Create migration for existing analyses to initialize vote counts to 0 and empty userVotes arrays.
+
+## 2. Create Thumb Vote Convex Mutation [pending]
+### Dependencies: 7.1
+### Description: Implement the backend mutation to handle thumb voting with duplicate prevention and real-time updates
+### Details:
+Create thumbVote mutation in convex/analyses.ts that accepts analysisId, userId, and voteType (up/down). Implement logic to prevent duplicate votes by checking userVotes array, update or add user vote, recalculate thumbsUp/thumbsDown counts, and return updated analysis data for real-time UI updates.
+
+## 3. Build Vote Button Components [pending]
+### Dependencies: 7.2
+### Description: Create reusable thumb vote button components with visual feedback and loading states
+### Details:
+Create VoteButton component with thumbs up/down icons, vote count display, active/inactive states based on user's current vote, loading spinner during mutation, and hover effects. Implement optimistic updates for immediate UI feedback before server confirmation. Style with Tailwind using design system colors.
+
+## 4. Integrate Vote Buttons in Analysis Display [pending]
+### Dependencies: 7.3
+### Description: Add vote buttons to analysis components and implement user vote tracking in the UI
+### Details:
+Integrate VoteButton components into AnalysisCard and AnalysisRow components. Fetch current user's vote status from userVotes array to show active states. Handle vote button clicks by calling thumbVote mutation with proper error handling and success feedback. Ensure vote counts update in real-time across all analysis displays.
+
+## 5. Implement Vote Analytics and Aggregation [pending]
+### Dependencies: 7.4
+### Description: Create queries for vote metrics and analytics dashboard to track feedback quality
+### Details:
+Build aggregation queries to calculate total votes per analysis, vote ratios (thumbsUp/total), trending analyses by vote activity, and user engagement metrics. Create analytics dashboard component to display vote statistics, most/least liked analyses, and feedback trends over time. Add vote-based sorting options to analysis lists.
+

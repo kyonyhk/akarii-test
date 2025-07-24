@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Optimize Analysis Prompt and Quality Improvements
+# Status: pending
+# Dependencies: 7
+# Priority: medium
+# Description: Refine the OpenAI prompt template and implement quality controls to achieve ≥70% thumbs-up approval rate
+# Details:
+Analyze thumb vote feedback data, iterate on prompt engineering for better analysis accuracy, implement confidence score thresholding (grey out <0.4 confidence), add prompt guardrails to prevent hallucination, create A/B testing framework for prompt variations, implement feedback-based prompt tuning, add analysis validation rules
+
+# Test Strategy:
+Monitor thumb vote approval rates, test confidence score accuracy, validate prompt guardrails prevent nonsensical outputs, measure analysis quality improvements
+
+# Subtasks:
+## 1. Analyze thumb vote feedback data and patterns [pending]
+### Dependencies: None
+### Description: Collect and analyze existing thumb vote data to identify patterns in user approval/disapproval, categorize feedback types, and establish baseline metrics for current prompt performance
+### Details:
+Query Convex database for all thumb vote records, calculate current approval rate, categorize negative feedback by analysis type (statement classification, belief extraction, trade-off identification), identify common failure patterns, and create data visualization dashboard for ongoing monitoring
+
+## 2. Implement confidence score thresholding system [pending]
+### Dependencies: 8.1
+### Description: Add confidence score calculation to analysis results and implement UI changes to grey out low-confidence analyses below 0.4 threshold
+### Details:
+Modify OpenAI prompt to return confidence scores (0-1) for each analysis component, update Convex schema to store confidence values, implement UI logic to visually indicate low-confidence results with reduced opacity or greyed-out styling, add user tooltips explaining confidence levels
+
+## 3. Create A/B testing framework for prompt variations [pending]
+### Dependencies: 8.1
+### Description: Build system to test multiple prompt versions simultaneously and measure their performance against user feedback
+### Details:
+Create prompt versioning system in Convex, implement random assignment of users to prompt variants, track performance metrics per variant, build admin interface to manage active experiments, implement statistical significance testing for variant comparison
+
+## 4. Implement prompt guardrails and validation rules [pending]
+### Dependencies: 8.2
+### Description: Add safety mechanisms to prevent hallucination and ensure analysis output quality through validation rules and prompt engineering
+### Details:
+Implement response validation to check for required fields, add prompt instructions to prevent speculation beyond message content, create fallback responses for edge cases, implement content filtering to catch inappropriate or nonsensical outputs, add structured output validation using JSON schema
+
+## 5. Iterate prompt engineering based on feedback analysis [pending]
+### Dependencies: 8.1, 8.3, 8.4
+### Description: Refine and optimize the core OpenAI prompt template using insights from feedback analysis and A/B testing results
+### Details:
+Redesign prompt structure based on failure pattern analysis, implement iterative prompt improvements using A/B test winners, add specific examples and edge case handling to prompt, optimize token usage while maintaining quality, implement feedback-based automatic prompt tuning system
+
