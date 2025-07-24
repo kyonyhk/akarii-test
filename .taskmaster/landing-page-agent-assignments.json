@@ -1,0 +1,204 @@
+{
+  "project": "Anthropic Landing Page",
+  "description": "Multi-agent development system for building a modern Next.js landing page",
+  "agents": {
+    "agent-foundation": {
+      "name": "Foundation Agent",
+      "status": "waiting",
+      "role": "Setup and foundation",
+      "description": "Handles project setup, development environment, and design system foundation",
+      "tasks": [1, 2],
+      "blocked_by": [],
+      "file_ownership": [
+        "package.json",
+        "tsconfig.json",
+        "tailwind.config.js",
+        ".eslintrc.json",
+        ".prettierrc",
+        "src/styles/globals.css",
+        "src/lib/fonts.ts"
+      ],
+      "last_update": null,
+      "estimated_completion": "2-3 hours"
+    },
+    "agent-components": {
+      "name": "Components Agent",
+      "status": "waiting",
+      "role": "UI component development",
+      "description": "Builds reusable component library and navigation system",
+      "tasks": [3],
+      "blocked_by": [2],
+      "file_ownership": [
+        "src/components/ui/**",
+        "src/components/layout/**",
+        "src/types/components.ts",
+        "src/lib/utils.ts"
+      ],
+      "last_update": null,
+      "estimated_completion": "3-4 hours"
+    },
+    "agent-pages": {
+      "name": "Pages Agent",
+      "status": "waiting",
+      "role": "Page implementation",
+      "description": "Implements individual pages and routing structure",
+      "tasks": [4, 5, 6],
+      "blocked_by": [3],
+      "file_ownership": [
+        "app/**",
+        "src/components/sections/**",
+        "src/content/**"
+      ],
+      "last_update": null,
+      "estimated_completion": "4-5 hours"
+    },
+    "agent-features": {
+      "name": "Features Agent",
+      "status": "waiting",
+      "role": "Advanced features",
+      "description": "Handles forms, job listings, and interactive features",
+      "tasks": [7, 8, 9, 10],
+      "blocked_by": [6],
+      "file_ownership": [
+        "src/components/forms/**",
+        "src/components/interactive/**",
+        "src/lib/validation.ts",
+        "src/lib/api.ts"
+      ],
+      "last_update": null,
+      "estimated_completion": "5-6 hours"
+    },
+    "agent-optimization": {
+      "name": "Optimization Agent",
+      "status": "waiting",
+      "role": "Performance and SEO",
+      "description": "Handles SEO, performance optimization, and accessibility",
+      "tasks": [11, 12, 14],
+      "blocked_by": [10],
+      "file_ownership": [
+        "next.config.js",
+        "sitemap.ts",
+        "robots.txt",
+        "src/lib/seo.ts",
+        "src/lib/analytics.ts"
+      ],
+      "last_update": null,
+      "estimated_completion": "3-4 hours"
+    },
+    "agent-polish": {
+      "name": "Polish Agent",
+      "status": "waiting",
+      "role": "Animations and final polish",
+      "description": "Adds animations, micro-interactions, and final deployment",
+      "tasks": [13, 15],
+      "blocked_by": [12],
+      "file_ownership": [
+        "src/lib/animations.ts",
+        "src/components/animations/**",
+        ".env.example",
+        "vercel.json"
+      ],
+      "last_update": null,
+      "estimated_completion": "2-3 hours"
+    }
+  },
+  "coordination_rules": {
+    "communication": {
+      "status_updates": "Update agent-assignments.json every 30 minutes",
+      "task_completion": "Immediately update when completing critical handoff tasks",
+      "git_coordination": "Commit frequently with descriptive messages including task references"
+    },
+    "file_management": {
+      "ownership": "Agents only modify files they own",
+      "shared_files": "Coordinate changes via comments and pull requests",
+      "conflicts": "Use git worktrees to avoid merge conflicts"
+    },
+    "branch_strategy": {
+      "main_branch": "main",
+      "feature_branches": {
+        "agent-foundation": "feature/landing-foundation",
+        "agent-components": "feature/landing-components",
+        "agent-pages": "feature/landing-pages",
+        "agent-features": "feature/landing-features",
+        "agent-optimization": "feature/landing-optimization",
+        "agent-polish": "feature/landing-polish"
+      },
+      "merge_strategy": "Merge to main when phase complete and tested"
+    },
+    "testing_requirements": {
+      "before_handoff": "Run npm run build and npm run lint",
+      "component_testing": "Test components in isolation",
+      "integration_testing": "Verify pages work end-to-end",
+      "performance_testing": "Check Lighthouse scores before final handoff"
+    }
+  },
+  "phases": {
+    "phase_1_foundation": {
+      "agents": ["agent-foundation"],
+      "description": "Project setup and design system",
+      "completion_criteria": "Next.js project runs, Tailwind configured, components scaffold ready",
+      "estimated_duration": "2-3 hours"
+    },
+    "phase_2_components": {
+      "agents": ["agent-components"],
+      "description": "Core component library and navigation",
+      "completion_criteria": "Reusable components built, navigation working, responsive design",
+      "estimated_duration": "3-4 hours"
+    },
+    "phase_3_pages": {
+      "agents": ["agent-pages"],
+      "description": "Main page implementations",
+      "completion_criteria": "Home, About, Research pages complete with content and routing",
+      "estimated_duration": "4-5 hours"
+    },
+    "phase_4_features": {
+      "agents": ["agent-features"],
+      "description": "Advanced features and forms",
+      "completion_criteria": "Contact forms, careers page, safety page with interactive elements",
+      "estimated_duration": "5-6 hours"
+    },
+    "phase_5_optimization": {
+      "agents": ["agent-optimization"],
+      "description": "Performance and SEO optimization",
+      "completion_criteria": "95+ Lighthouse score, proper SEO, accessibility compliance",
+      "estimated_duration": "3-4 hours"
+    },
+    "phase_6_polish": {
+      "agents": ["agent-polish"],
+      "description": "Animations and deployment",
+      "completion_criteria": "Smooth animations, deployed to production, analytics configured",
+      "estimated_duration": "2-3 hours"
+    }
+  },
+  "success_criteria": {
+    "performance": {
+      "lighthouse_score": "95+",
+      "core_web_vitals": "All green",
+      "load_time": "< 2 seconds",
+      "mobile_score": "95+"
+    },
+    "functionality": {
+      "responsive_design": "Works on all screen sizes",
+      "accessibility": "WCAG 2.1 AA compliant",
+      "forms": "Contact and career forms functional",
+      "navigation": "Smooth navigation between all pages"
+    },
+    "content": {
+      "pages_complete": [
+        "Home",
+        "About",
+        "Research",
+        "Contact",
+        "Careers",
+        "Safety"
+      ],
+      "seo_optimized": "Meta tags, structured data, sitemap",
+      "content_accuracy": "Anthropic branding and messaging"
+    }
+  },
+  "emergency_contacts": {
+    "technical_lead": "User via Master Control Interface",
+    "escalation_threshold": "3 consecutive failures or 2+ hour blocks",
+    "communication_method": "Master Control at http://localhost:9000"
+  }
+}

@@ -295,66 +295,48 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Create Prism Panel component structure",
-            "description": "Build the main panel container with shadcn/ui Card component and responsive layout",
+            "title": "Create Prism Panel Component Structure",
+            "description": "Build the foundational PrismPanel component using shadcn/ui Card as the container with proper layout structure",
             "dependencies": [],
-            "details": "Create PrismPanel.tsx component using shadcn/ui Card, implement responsive width handling, add panel header with title and collapse toggle, set up proper positioning in split-pane layout on right side",
-            "status": "done",
-            "testStrategy": ""
+            "details": "Create PrismPanel.tsx component with shadcn/ui Card wrapper, implement responsive layout structure for right-side panel positioning, add basic header with title and mobile hide/show toggle button, set up proper CSS Grid or Flexbox layout for analysis rows, implement mobile-responsive design with collapsible panel functionality",
+            "status": "pending",
+            "testStrategy": "Verify panel renders correctly in desktop and mobile layouts, test panel hide/show functionality works on mobile devices, validate Card styling matches design system"
           },
           {
             "id": 2,
-            "title": "Build analysis row components",
-            "description": "Create individual analysis display components for statement type, belief, trade-off, and confidence",
+            "title": "Build Analysis Row Components",
+            "description": "Create individual analysis row components to display statement type, belief, trade-off, and confidence data",
             "dependencies": ["5.1"],
-            "details": "Create AnalysisRow.tsx component showing analysis fields, implement confidence-based styling (grey out <0.4), add proper spacing and typography using shadcn/ui components, ensure consistent display format",
+            "details": "Build AnalysisRow component using shadcn/ui Collapsible for expandable rows, create sub-components for displaying statement type classification, belief extraction, trade-off analysis, and confidence scores, implement proper typography and spacing for readability, add confidence-based styling (grey out rows with confidence <0.4), ensure rows are clickable and accessible",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test all analysis data types render correctly, verify collapsible functionality works smoothly, validate confidence-based styling applies correctly, check accessibility with keyboard navigation"
           },
           {
             "id": 3,
-            "title": "Implement collapsible functionality",
-            "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
+            "title": "Implement Raw JSON Drawer",
+            "description": "Build click-to-expand drawer component that displays the complete raw JSON analysis data",
             "dependencies": ["5.2"],
-            "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
+            "details": "Create JsonDrawer component using shadcn/ui Drawer, implement click handler on analysis rows to open drawer, format and syntax-highlight raw JSON data for readability, add copy-to-clipboard functionality for JSON data, ensure drawer is mobile-responsive and accessible, implement proper close functionality with escape key and backdrop click",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test drawer opens and closes correctly from analysis rows, verify JSON formatting and syntax highlighting works, validate copy functionality, check drawer behavior on mobile devices"
           },
           {
             "id": 4,
-            "title": "Create raw JSON drawer component",
-            "description": "Build click-to-expand drawer showing complete raw JSON analysis data",
-            "dependencies": ["5.2"],
-            "details": "Implement drawer using shadcn/ui Drawer component, add JSON syntax highlighting, create toggle button to open/close drawer, format raw analysis data for readable display, add copy-to-clipboard functionality",
+            "title": "Add Real-time Analysis Subscription",
+            "description": "Implement Convex live query subscription to display analyses in real-time as messages are analyzed",
+            "dependencies": ["5.3"],
+            "details": "Create useQuery hook to subscribe to analyses table filtered by current conversation, implement real-time updates to analysis rows as new data arrives, add loading states for pending analyses, handle connection states and error scenarios, ensure proper cleanup of subscriptions on component unmount",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test analyses appear in real-time as messages are sent, verify loading states display correctly, validate subscription cleanup prevents memory leaks, test error handling for connection issues"
           },
           {
             "id": 5,
-            "title": "Implement real-time data subscription",
-            "description": "Connect panel to live analyses data using Convex queries with real-time updates",
-            "dependencies": ["5.1"],
-            "details": "Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId",
+            "title": "Implement Auto-scroll Sync and Latency Indicator",
+            "description": "Add automatic scrolling synchronization with chat messages and display analysis latency in corner indicator",
+            "dependencies": ["5.4"],
+            "details": "Implement auto-scroll functionality to keep analysis panel synchronized with chat scroll position, create LatencyIndicator component showing analysis processing time in panel corner, add smooth scrolling animations and scroll position matching logic, implement scroll lock/unlock toggle for user control, ensure performance optimization for scroll event handling",
             "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 6,
-            "title": "Add auto-scroll synchronization with chat",
-            "description": "Implement synchronized scrolling between chat messages and corresponding analysis results",
-            "dependencies": ["5.5"],
-            "details": "Create scroll synchronization logic between chat and panel, implement smooth scrolling to active analysis, add visual indicators for currently selected message/analysis pair, handle edge cases for rapid message sending",
-            "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 7,
-            "title": "Implement mobile responsiveness and panel controls",
-            "description": "Add mobile-responsive design with panel hide/show functionality and latency indicator",
-            "dependencies": ["5.6"],
-            "details": "Implement responsive breakpoints for mobile/tablet views, add panel hide/show toggle button, create latency indicator in corner showing analysis processing time, ensure touch-friendly interactions on mobile devices",
-            "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test auto-scroll synchronization works correctly with chat, verify latency indicator shows accurate timing, validate scroll performance doesn't impact UI responsiveness, check user can override auto-scroll when needed"
           }
         ]
       },
@@ -371,56 +353,47 @@
           {
             "id": 1,
             "title": "Install and Configure Clerk SDK",
-            "description": "Set up Clerk authentication service with magic-link configuration",
+            "description": "Install Clerk packages and set up environment variables for Clerk integration",
             "dependencies": [],
-            "details": "Install @clerk/nextjs package, configure environment variables (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY), set up Clerk dashboard with magic-link authentication enabled, configure email templates and branding",
+            "details": "Install @clerk/nextjs and @clerk/themes packages, create Clerk application in dashboard, configure environment variables (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY), set up Clerk middleware for route protection, configure sign-in and sign-up URLs",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Verify Clerk dashboard connection, test environment variable loading, confirm middleware is protecting routes correctly"
           },
           {
             "id": 2,
-            "title": "Create Authentication Components",
-            "description": "Build SignIn and SignUp components using Clerk's pre-built components",
+            "title": "Configure Magic-Link Authentication in Clerk Dashboard",
+            "description": "Set up magic-link authentication method and email provider configuration in Clerk",
             "dependencies": ["6.1"],
-            "details": "Create SignIn and SignUp page components using Clerk's <SignIn /> and <SignUp /> components, configure routing for authentication pages, implement authentication redirects and fallbacks, style components to match application design",
+            "details": "Enable magic-link authentication in Clerk dashboard, configure email provider (built-in or custom SMTP), set up email templates for magic-link delivery, configure redirect URLs for authentication flow, disable password authentication if desired",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test magic-link email delivery, verify email templates render correctly, validate redirect URLs work as expected"
           },
           {
             "id": 3,
-            "title": "Integrate Clerk with Convex Backend",
-            "description": "Connect Clerk authentication to Convex using ConvexProviderWithClerk",
-            "dependencies": ["6.1", "6.2"],
-            "details": "Install @convex-dev/auth package, wrap app with ConvexProviderWithClerk, configure Convex authentication middleware, set up user synchronization between Clerk and Convex, implement authentication context throughout the app",
+            "title": "Create Authentication Components and UI",
+            "description": "Build SignIn and SignUp components using Clerk's pre-built components",
+            "dependencies": ["6.2"],
+            "details": "Create sign-in page using Clerk's SignIn component, create sign-up page using SignUp component, implement authentication state handling, add sign-out functionality, create user profile component, style components to match application design using shadcn/ui themes",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test sign-in and sign-up flows with magic-link, verify authentication state updates correctly, test sign-out functionality"
           },
           {
             "id": 4,
-            "title": "Implement Protected Route System",
-            "description": "Create route protection middleware and components for authenticated access",
+            "title": "Integrate Clerk with Convex using ConvexProviderWithClerk",
+            "description": "Set up Clerk-Convex integration for session management and user context",
             "dependencies": ["6.3"],
-            "details": "Create ProtectedRoute component that checks authentication status, implement middleware for route protection, redirect unauthenticated users to sign-in page, handle loading states during authentication check",
+            "details": "Install @convex-dev/auth package, configure ConvexProviderWithClerk in app root, set up Clerk webhook for user synchronization, create Convex auth configuration, implement user table in Convex schema, sync Clerk user data to Convex database",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Verify user authentication state syncs between Clerk and Convex, test user data persistence in Convex, validate webhook functionality"
           },
           {
             "id": 5,
-            "title": "Add User Context to Messages and Conversations",
-            "description": "Integrate authenticated user information with chat functionality",
-            "dependencies": ["6.3"],
-            "details": "Update Convex schema to include user ID in messages and conversations, modify sendMessage mutation to include authenticated user context, display user information in message components, implement user-specific conversation filtering",
+            "title": "Implement Protected Routes and User Context Integration",
+            "description": "Add route protection and integrate user context into messages and conversations",
+            "dependencies": ["6.4"],
+            "details": "Implement protected route middleware, add user context to message creation and display, modify Convex mutations to include authenticated user data, create user avatar and name display in chat interface, implement user-based conversation filtering, add invite link functionality for team collaboration",
             "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 6,
-            "title": "Create Invite Link Functionality",
-            "description": "Build team collaboration system with shareable invite links",
-            "dependencies": ["6.4", "6.5"],
-            "details": "Create invite link generation system, implement invite acceptance flow, build team/workspace management components, handle invite link validation and expiration, create team member management interface with role-based permissions",
-            "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test protected route access control, verify user context appears in messages, validate conversation filtering by user, test invite link generation and redemption"
           }
         ]
       },
@@ -436,57 +409,48 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Update database schema for voting system",
-            "description": "Add thumbsUp, thumbsDown, and userVotes fields to analyses table schema",
+            "title": "Extend Analyses Schema with Vote Fields",
+            "description": "Add thumbsUp, thumbsDown count fields and userVotes array to track voting data in the analyses schema",
             "dependencies": [],
-            "details": "Extend the analyses table schema in convex/schema.ts to include vote tracking fields: thumbsUp (number), thumbsDown (number), and userVotes (array of objects with userId and voteType). Ensure proper indexing for vote queries and aggregation.",
+            "details": "Modify convex/schema.ts to add thumbsUp (number), thumbsDown (number), and userVotes (array of objects with userId and voteType) fields to the analyses table. Create migration for existing analyses to initialize vote counts to 0 and empty userVotes arrays.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Verify schema changes apply correctly, test that new analyses initialize with proper vote fields, validate userVotes array structure stores userId and vote type correctly"
           },
           {
             "id": 2,
-            "title": "Create thumbVote mutation implementation",
-            "description": "Build Convex mutation for handling vote operations with validation logic",
+            "title": "Create Thumb Vote Convex Mutation",
+            "description": "Implement the backend mutation to handle thumb voting with duplicate prevention and real-time updates",
             "dependencies": ["7.1"],
-            "details": "Create thumbVote mutation in convex/mutations.ts that accepts analysisId, userId, and voteType parameters. Implement logic to toggle votes, prevent duplicate voting by same user, and update vote counts atomically. Include proper error handling and validation.",
+            "details": "Create thumbVote mutation in convex/analyses.ts that accepts analysisId, userId, and voteType (up/down). Implement logic to prevent duplicate votes by checking userVotes array, update or add user vote, recalculate thumbsUp/thumbsDown counts, and return updated analysis data for real-time UI updates.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test duplicate vote prevention works correctly, verify vote counts update accurately when users change votes, validate real-time updates propagate to all connected clients"
           },
           {
             "id": 3,
-            "title": "Build vote button UI components",
-            "description": "Create reusable thumb vote button components with visual feedback",
+            "title": "Build Vote Button Components",
+            "description": "Create reusable thumb vote button components with visual feedback and loading states",
             "dependencies": ["7.2"],
-            "details": "Design and implement ThumbVoteButtons component using shadcn/ui Button with thumb up/down icons. Add visual states for unvoted, user-voted, and hover states. Include vote count display and smooth animations for state changes.",
+            "details": "Create VoteButton component with thumbs up/down icons, vote count display, active/inactive states based on user's current vote, loading spinner during mutation, and hover effects. Implement optimistic updates for immediate UI feedback before server confirmation. Style with Tailwind using design system colors.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test visual feedback shows correct active states, verify loading states display during mutations, validate optimistic updates revert on error, test accessibility with keyboard navigation"
           },
           {
             "id": 4,
-            "title": "Implement duplicate vote prevention",
-            "description": "Add client-side and server-side logic to prevent users from voting multiple times",
+            "title": "Integrate Vote Buttons in Analysis Display",
+            "description": "Add vote buttons to analysis components and implement user vote tracking in the UI",
             "dependencies": ["7.3"],
-            "details": "Implement user authentication tracking and vote state management in React components. Add optimistic updates with rollback on server rejection. Ensure UI reflects current user's vote status and prevents double-clicking issues.",
+            "details": "Integrate VoteButton components into AnalysisCard and AnalysisRow components. Fetch current user's vote status from userVotes array to show active states. Handle vote button clicks by calling thumbVote mutation with proper error handling and success feedback. Ensure vote counts update in real-time across all analysis displays.",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test vote buttons appear correctly in all analysis views, verify user's previous votes are highlighted properly, validate vote count updates reflect immediately in UI"
           },
           {
             "id": 5,
-            "title": "Add real-time vote updates",
-            "description": "Implement live subscription for vote count updates across all connected clients",
+            "title": "Implement Vote Analytics and Aggregation",
+            "description": "Create queries for vote metrics and analytics dashboard to track feedback quality",
             "dependencies": ["7.4"],
-            "details": "Create Convex live query subscription for vote counts that updates all connected clients in real-time. Integrate with existing Prism Panel analysis rows to show current vote totals. Ensure smooth UI updates without flickering.",
+            "details": "Build aggregation queries to calculate total votes per analysis, vote ratios (thumbsUp/total), trending analyses by vote activity, and user engagement metrics. Create analytics dashboard component to display vote statistics, most/least liked analyses, and feedback trends over time. Add vote-based sorting options to analysis lists.",
             "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 6,
-            "title": "Create vote aggregation queries",
-            "description": "Build queries for vote metrics and feedback analytics",
-            "dependencies": ["7.5"],
-            "details": "Create Convex queries for vote aggregation including total votes per analysis, most/least popular analyses, and user voting patterns. Build helper functions for vote percentage calculations and sorting analyses by vote score.",
-            "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test aggregation queries return accurate vote statistics, verify analytics dashboard displays correct metrics, validate vote-based sorting works properly, test performance with large datasets"
           }
         ]
       },
@@ -502,66 +466,48 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Analyze feedback data and identify improvement patterns",
-            "description": "Extract and analyze thumb vote feedback data to identify common failure patterns, approval rate trends, and specific areas where analysis quality is lacking",
+            "title": "Analyze thumb vote feedback data and patterns",
+            "description": "Collect and analyze existing thumb vote data to identify patterns in user approval/disapproval, categorize feedback types, and establish baseline metrics for current prompt performance",
             "dependencies": [],
-            "details": "Query thumb vote data from database, calculate current approval rates by analysis type, identify most common failure patterns (hallucinations, incorrect confidence scores, missing context), create data visualization dashboard for feedback trends, document improvement opportunities based on user feedback patterns",
+            "details": "Query Convex database for all thumb vote records, calculate current approval rate, categorize negative feedback by analysis type (statement classification, belief extraction, trade-off identification), identify common failure patterns, and create data visualization dashboard for ongoing monitoring",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Verify data collection captures all thumb votes, validate categorization accuracy, confirm baseline metrics calculation is correct"
           },
           {
             "id": 2,
-            "title": "Engineer and iterate on OpenAI prompt templates",
-            "description": "Refine the OpenAI prompt template based on feedback analysis to improve accuracy and reduce hallucinations",
+            "title": "Implement confidence score thresholding system",
+            "description": "Add confidence score calculation to analysis results and implement UI changes to grey out low-confidence analyses below 0.4 threshold",
             "dependencies": ["8.1"],
-            "details": "Review current prompt template structure, incorporate feedback patterns into prompt improvements, add explicit instructions for confidence scoring, implement chain-of-thought reasoning in prompts, create prompt variations for A/B testing, add context preservation instructions, implement structured output formatting guidelines",
+            "details": "Modify OpenAI prompt to return confidence scores (0-1) for each analysis component, update Convex schema to store confidence values, implement UI logic to visually indicate low-confidence results with reduced opacity or greyed-out styling, add user tooltips explaining confidence levels",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test confidence score accuracy correlates with user feedback, verify UI correctly greys out low-confidence results, validate threshold can be adjusted dynamically"
           },
           {
             "id": 3,
-            "title": "Implement confidence score thresholding system",
-            "description": "Add confidence score validation and UI indicators to grey out low-confidence analyses",
-            "dependencies": ["8.2"],
-            "details": "Modify analysis pipeline to validate confidence scores, implement UI changes to grey out analyses with <0.4 confidence, add confidence indicator badges, create user education tooltips explaining confidence levels, add option to show/hide low-confidence results, implement confidence score calibration based on historical accuracy",
+            "title": "Create A/B testing framework for prompt variations",
+            "description": "Build system to test multiple prompt versions simultaneously and measure their performance against user feedback",
+            "dependencies": ["8.1"],
+            "details": "Create prompt versioning system in Convex, implement random assignment of users to prompt variants, track performance metrics per variant, build admin interface to manage active experiments, implement statistical significance testing for variant comparison",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Verify random assignment works correctly, confirm metrics tracking captures all relevant data, test admin interface allows proper experiment management"
           },
           {
             "id": 4,
-            "title": "Create prompt guardrails and validation rules",
-            "description": "Implement guardrails to prevent hallucination and ensure analysis quality standards",
+            "title": "Implement prompt guardrails and validation rules",
+            "description": "Add safety mechanisms to prevent hallucination and ensure analysis output quality through validation rules and prompt engineering",
             "dependencies": ["8.2"],
-            "details": "Add input validation for message content, implement output validation for analysis structure, create fact-checking prompts for controversial claims, add coherence validation between belief and trade-off fields, implement safety filters for inappropriate content, create fallback responses for edge cases, add consistency checks across similar message types",
+            "details": "Implement response validation to check for required fields, add prompt instructions to prevent speculation beyond message content, create fallback responses for edge cases, implement content filtering to catch inappropriate or nonsensical outputs, add structured output validation using JSON schema",
             "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Test guardrails catch and handle edge cases appropriately, verify validation rules prevent malformed responses, confirm fallback mechanisms work correctly"
           },
           {
             "id": 5,
-            "title": "Build A/B testing framework for prompt variations",
-            "description": "Create infrastructure to test different prompt versions and measure their effectiveness",
-            "dependencies": ["8.2", "8.3"],
-            "details": "Design A/B test infrastructure with user segmentation, create prompt version management system, implement metrics collection for each prompt variant, build statistical significance testing, create dashboard for experiment results, implement gradual rollout mechanism for winning prompts, add experiment configuration management",
+            "title": "Iterate prompt engineering based on feedback analysis",
+            "description": "Refine and optimize the core OpenAI prompt template using insights from feedback analysis and A/B testing results",
+            "dependencies": ["8.1", "8.3", "8.4"],
+            "details": "Redesign prompt structure based on failure pattern analysis, implement iterative prompt improvements using A/B test winners, add specific examples and edge case handling to prompt, optimize token usage while maintaining quality, implement feedback-based automatic prompt tuning system",
             "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 6,
-            "title": "Implement feedback-based prompt tuning system",
-            "description": "Create automated system to incorporate user feedback into prompt improvements",
-            "dependencies": ["8.1", "8.5"],
-            "details": "Build feedback collection pipeline from thumb votes, create prompt update triggers based on feedback thresholds, implement automated prompt refinement suggestions, add human-in-the-loop approval for prompt changes, create feedback-to-improvement mapping system, implement continuous learning pipeline for prompt optimization",
-            "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 7,
-            "title": "Add comprehensive quality validation rules",
-            "description": "Implement validation system to ensure analysis meets quality standards before display",
-            "dependencies": ["8.3", "8.4", "8.6"],
-            "details": "Create quality scoring rubric for analyses, implement pre-display validation checks, add human review triggers for borderline cases, create quality metrics dashboard, implement automatic retry for failed validations, add quality trend monitoring, create alerts for quality degradation, implement quality-based user experience adjustments",
-            "status": "pending",
-            "testStrategy": ""
+            "testStrategy": "Monitor thumb vote approval rate improvements toward ≥70% target, validate prompt changes maintain consistency across message types, test optimized prompts reduce token usage without quality loss"
           }
         ]
       },
@@ -709,8 +655,182 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-23T22:04:28.368Z",
+      "updated": "2025-07-24T02:21:31.544Z",
       "description": "Tasks for master context"
+    }
+  },
+  "landing-page": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Project Setup and Development Environment",
+        "description": "Initialize Next.js 14 project with TypeScript, configure development environment, and set up project structure",
+        "details": "Create new Next.js 14 project using `npx create-next-app@latest anthropic-landing --typescript --tailwind --eslint --app`. Configure package.json with required dependencies: @headlessui/react@^1.7.17, framer-motion@^10.16.4, react-hook-form@^7.47.0, @hookform/resolvers@^3.3.2, zod@^3.22.4. Set up project structure with src/ directory containing components/, pages/, styles/, lib/, content/, and public/ folders. Configure TypeScript with strict mode, path mapping for clean imports, and proper type definitions. Set up ESLint and Prettier for code formatting consistency.",
+        "testStrategy": "Verify project builds successfully with `npm run build`, TypeScript compilation passes without errors, and development server runs on localhost:3000",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Design System and Component Library Foundation",
+        "description": "Create comprehensive design system with Tailwind CSS configuration, typography, color palette, and base component architecture",
+        "details": "Configure Tailwind CSS with custom theme extending default configuration. Define brand colors: primary blues (#1E3A8A, #3B82F6), accent orange (#F97316), grays for text hierarchy. Set up typography scale using Inter font family with proper font weights (400, 500, 600, 700). Create base components: Button, Card, Container, Typography, and Layout components using TypeScript interfaces for props. Implement responsive breakpoints matching design requirements (sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px). Set up design tokens for spacing, shadows, and border radius for consistency.",
+        "testStrategy": "Create Storybook stories for each base component, test responsive behavior across breakpoints, validate color contrast ratios meet WCAG AA standards",
+        "priority": "high",
+        "dependencies": [1],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Navigation and Layout Architecture",
+        "description": "Implement responsive navigation system with mobile menu, footer, and reusable layout components",
+        "details": "Create Header component with Anthropic logo, main navigation menu (Home, About, Research, Careers, Contact, Safety), and mobile hamburger menu using Headless UI's Disclosure component. Implement responsive navigation with smooth transitions and proper focus management for accessibility. Build Footer component with company links, social media icons, legal links, and newsletter signup. Create Layout component wrapping pages with consistent header/footer structure. Use Next.js 14 App Router with layout.tsx for shared layouts. Implement scroll-based header behavior (transparent to solid background transition).",
+        "testStrategy": "Test keyboard navigation, screen reader compatibility, mobile menu functionality across devices, and ensure proper semantic HTML structure",
+        "priority": "high",
+        "dependencies": [2],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Home Page Hero Section Implementation",
+        "description": "Create compelling hero section with animated backgrounds, Claude introduction, and primary call-to-action",
+        "details": "Build hero section using Framer Motion for animations with gradient background transitions and subtle particle effects. Implement responsive typography hierarchy with compelling headline about Claude and Anthropic's mission. Create interactive elements showcasing Claude capabilities with animated conversation bubbles or typing effects. Add primary CTA button linking to Claude demo or signup. Use next/image for optimized image loading and proper alt text. Implement lazy loading and intersection observer for performance. Include trust indicators like 'Built by Anthropic' or safety certifications.",
+        "testStrategy": "Test animation performance on low-powered devices, validate CTA click tracking, ensure hero loads within 1.5s LCP target, test across screen sizes",
+        "priority": "high",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Interactive Claude Demo Component",
+        "description": "Develop interactive conversation preview showcasing Claude's capabilities with realistic dialogue examples",
+        "details": "Create ConversationDemo component with predefined conversation examples highlighting Claude's helpfulness, harmlessness, and honesty. Implement typing animation effects using Framer Motion with realistic timing delays. Design conversation UI with user and assistant message bubbles, proper spacing, and readability. Include multiple conversation scenarios users can cycle through (coding help, creative writing, analysis, safety responses). Add subtle hover effects and smooth transitions between conversation examples. Ensure component is accessible with proper ARIA labels and keyboard navigation.",
+        "testStrategy": "Test conversation flow transitions, validate text readability across themes, ensure animations don't cause motion sickness, verify keyboard accessibility",
+        "priority": "medium",
+        "dependencies": [4],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "About Page with Team and Mission Content",
+        "description": "Build comprehensive About page featuring company mission, leadership team, timeline, and values",
+        "details": "Create mission statement section with compelling copy about AI safety and responsible development. Implement team grid component with leadership photos, bios, and roles using next/image for optimization. Build interactive company timeline using CSS Grid and Framer Motion for scroll-triggered animations. Design values section with iconography and detailed descriptions of company principles. Create office locations component with embedded maps using Google Maps API or Mapbox. Implement proper semantic HTML structure with h1-h6 hierarchy for SEO.",
+        "testStrategy": "Validate team photo loading performance, test timeline animations across devices, ensure content is crawlable by search engines, verify accessibility of interactive elements",
+        "priority": "medium",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Research Publications Showcase System",
+        "description": "Develop filterable research paper grid with categories, search, and detailed publication information",
+        "details": "Create research paper data structure with TypeScript interfaces for title, authors, abstract, publication date, categories, and PDF links. Implement search and filter functionality using React state management and useMemo for performance. Build ResearchCard component with paper previews, author information, and download/citation options. Add category filtering (Constitutional AI, Safety Research, Technical Papers) with tag-based system. Implement pagination or infinite scroll for large paper collections. Include structured data markup for academic search engines and proper OpenGraph meta tags.",
+        "testStrategy": "Test search functionality with various queries, validate PDF download links, ensure filter performance with large datasets, verify structured data markup",
+        "priority": "medium",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Contact Forms and Inquiry Management",
+        "description": "Implement contact page with inquiry-type forms, validation, and submission handling",
+        "details": "Build contact form using React Hook Form with Zod schema validation for type safety. Create inquiry type selection (General, Media, Partnership, Research) with conditional form fields. Implement form validation with real-time feedback and accessibility-compliant error messages. Set up form submission handling with email service integration (Resend or EmailJS) and anti-spam protection using Turnstile or reCAPTCHA. Create success/error states with proper user feedback. Include office location maps using Google Maps API with custom styling matching brand aesthetic.",
+        "testStrategy": "Test form validation edge cases, verify email delivery functionality, validate spam protection effectiveness, ensure form accessibility with screen readers",
+        "priority": "medium",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Careers Page with Job Listing Integration",
+        "description": "Create careers page with job search, filtering, and application process information",
+        "details": "Design job listing component with TypeScript interfaces for position data (title, department, location, type, description). Implement search and filter functionality by department, location, and job type. Create detailed job description modal or dedicated pages with application instructions. Build employee testimonials section with photos and quotes about company culture. Add benefits and perks showcase with icons and detailed descriptions. Include diversity and inclusion statement with commitment details. Integrate with ATS (Applicant Tracking System) or external job board APIs if available.",
+        "testStrategy": "Test job search across different criteria, validate modal accessibility, ensure responsive design on mobile devices, verify external application links",
+        "priority": "medium",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "AI Safety Page with Interactive Elements",
+        "description": "Develop comprehensive AI safety page explaining Constitutional AI and safety research with interactive diagrams",
+        "details": "Create safety methodology section explaining Constitutional AI with interactive flowchart diagrams using React and SVG. Implement research principles showcase with expandable sections and detailed explanations. Build risk mitigation strategies component with case studies and examples. Add safety metrics visualization using charts (Chart.js or Recharts) showing progress and benchmarks. Include transparency measures section with links to technical documentation and research papers. Design interactive safety framework diagram allowing users to explore different aspects of AI safety.",
+        "testStrategy": "Test interactive diagram functionality, validate chart accessibility with screen readers, ensure technical content accuracy, verify external research links",
+        "priority": "medium",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "SEO Optimization and Meta Tags Implementation",
+        "description": "Implement comprehensive SEO strategy with meta tags, structured data, and search engine optimization",
+        "details": "Configure Next.js metadata API for dynamic meta tags, titles, and descriptions for each page. Implement structured data markup using JSON-LD for organization, research papers, and job postings. Create XML sitemap generation with next-sitemap package. Add OpenGraph and Twitter Card meta tags for social media sharing. Implement canonical URLs and proper URL structure. Configure robots.txt and handle 404 pages gracefully. Add schema markup for LocalBusiness, Organization, and Article types. Optimize images with next/image automatic optimization and proper alt text.",
+        "testStrategy": "Validate structured data using Google's Rich Results Test, check meta tags with social media debuggers, test sitemap accessibility, verify search console setup",
+        "priority": "medium",
+        "dependencies": [6, 7, 8, 9, 10],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Performance Optimization and Core Web Vitals",
+        "description": "Optimize website performance to meet Core Web Vitals targets and achieve 95+ Lighthouse score",
+        "details": "Implement image optimization using next/image with proper sizing, formats (WebP/AVIF), and lazy loading. Configure font optimization with next/font for Inter typeface with display: swap. Minimize JavaScript bundles using dynamic imports and code splitting for non-critical components. Implement service worker for caching strategies using next-pwa or Workbox. Optimize Largest Contentful Paint (LCP) by preloading critical resources and optimizing hero section. Minimize Cumulative Layout Shift (CLS) with proper image dimensions and skeleton loading states. Implement resource hints (preconnect, dns-prefetch) for external resources.",
+        "testStrategy": "Run Lighthouse audits across pages, test Core Web Vitals with PageSpeed Insights, validate performance on 3G networks, monitor bundle sizes with webpack-bundle-analyzer",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Animation System and Micro-interactions",
+        "description": "Implement smooth animations and micro-interactions using Framer Motion for enhanced user experience",
+        "details": "Create animation library using Framer Motion with reusable animation variants for consistent behavior. Implement scroll-triggered animations for section reveals using intersection observer API. Add hover effects and micro-interactions for buttons, cards, and interactive elements. Create page transition animations for smooth navigation between routes. Implement loading animations and skeleton screens for better perceived performance. Add parallax effects and subtle motion design that respects prefers-reduced-motion settings. Create stagger animations for lists and grids to enhance visual hierarchy.",
+        "testStrategy": "Test animations across devices and browsers, validate motion accessibility preferences, ensure animations don't impact performance metrics, verify smooth 60fps performance",
+        "priority": "low",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Accessibility Compliance and Testing",
+        "description": "Ensure WCAG 2.1 AA compliance with comprehensive accessibility testing and improvements",
+        "details": "Implement proper semantic HTML structure with correct heading hierarchy and landmark regions. Add comprehensive ARIA labels, descriptions, and live regions for dynamic content. Ensure keyboard navigation works for all interactive elements with visible focus indicators. Test color contrast ratios to meet AA standards (4.5:1 for normal text, 3:1 for large text). Implement skip navigation links and proper tab order. Add alt text for all images and captions for media content. Test with screen readers (NVDA, JAWS, VoiceOver) and validate against axe-core accessibility rules.",
+        "testStrategy": "Run automated accessibility testing with axe-DevTools, manual testing with screen readers, keyboard-only navigation testing, color blindness simulation testing",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Analytics Integration and Deployment Setup",
+        "description": "Configure analytics tracking, monitoring, and deploy to production with CI/CD pipeline",
+        "details": "Implement Google Analytics 4 with next/script for optimal loading and privacy compliance. Set up conversion tracking for contact forms, newsletter signups, and career applications. Configure error monitoring with Sentry for runtime error tracking and performance monitoring. Set up Vercel deployment with automatic deployments from Git repository. Configure custom domain with SSL certificate and proper DNS settings. Implement environment-specific configurations for staging and production. Set up monitoring alerts for Core Web Vitals degradation and error rates. Configure CDN settings for optimal global performance.",
+        "testStrategy": "Verify analytics data collection in GA4, test error reporting functionality, validate deployment pipeline with staging environment, monitor production performance metrics",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-24T02:29:20.713Z",
+      "updated": "2025-07-24T02:31:09.719Z",
+      "description": "Tasks for landing-page context"
     }
   }
 }

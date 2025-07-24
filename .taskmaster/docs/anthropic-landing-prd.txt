@@ -1,0 +1,272 @@
+# Anthropic Landing Page - Product Requirements Document
+
+## 1. Project Overview
+
+### 1.1 Project Vision
+Create a modern, responsive landing page for Anthropic that showcases their AI capabilities, company mission, and product offerings. The website should reflect Anthropic's commitment to AI safety and responsible development.
+
+### 1.2 Target Audience
+- AI researchers and developers
+- Enterprise decision makers
+- General public interested in AI
+- Potential employees and investors
+- Media and press
+
+### 1.3 Success Metrics
+- Page load time < 2 seconds
+- Mobile-first responsive design
+- 95+ Lighthouse performance score
+- Accessibility compliance (WCAG 2.1 AA)
+- SEO optimized with meta tags and structured data
+
+## 2. Technical Architecture
+
+### 2.1 Technology Stack
+- **Framework**: Next.js 14 with TypeScript
+- **Styling**: Tailwind CSS with custom design system
+- **UI Components**: Headless UI and custom components
+- **Animations**: Framer Motion for smooth interactions
+- **Forms**: React Hook Form with validation
+- **Analytics**: Google Analytics 4
+- **Deployment**: Vercel with automatic deployments
+
+### 2.2 Project Structure
+```
+src/
+├── components/        # Reusable UI components
+├── pages/            # Next.js pages
+├── styles/           # Global styles and Tailwind config
+├── lib/              # Utilities and helpers
+├── content/          # Static content and copy
+└── public/           # Static assets
+```
+
+## 3. Page Structure and Content
+
+### 3.1 Home Page (/)
+**Purpose**: Primary landing experience showcasing Anthropic's mission and Claude
+
+**Sections**:
+- Hero section with compelling headline and Claude introduction
+- Key benefits of Claude (safety, helpfulness, harmlessness)
+- Interactive demo or example conversations
+- Trust indicators (research papers, safety measures)
+- Call-to-action for trying Claude
+
+**Key Features**:
+- Animated hero with gradient backgrounds
+- Interactive Claude conversation preview
+- Smooth scroll navigation
+- Video/animation showcasing Claude capabilities
+
+### 3.2 About Page (/about)
+**Purpose**: Detailed information about Anthropic's mission, team, and values
+
+**Sections**:
+- Company mission and AI safety focus
+- Leadership team with photos and bios
+- Company timeline and milestones
+- Research philosophy and approach
+- Office locations and company culture
+
+**Key Features**:
+- Team member cards with hover effects
+- Interactive timeline of company history
+- Mission statement with visual emphasis
+- Culture and values showcase
+
+### 3.3 Research Page (/research)
+**Purpose**: Showcase Anthropic's research contributions and publications
+
+**Sections**:
+- Featured research papers and findings
+- Constitutional AI and safety research
+- Technical blog posts and insights
+- Research methodology and principles
+- Academic partnerships and collaborations
+
+**Key Features**:
+- Filterable research paper grid
+- PDF download links and external references
+- Research categories and tags
+- Citation tools and sharing options
+
+### 3.4 Careers Page (/careers)
+**Purpose**: Attract top talent to join Anthropic's mission
+
+**Sections**:
+- Why work at Anthropic (mission-driven culture)
+- Open positions with detailed descriptions
+- Employee benefits and perks
+- Application process and requirements
+- Diversity and inclusion commitment
+
+**Key Features**:
+- Job search and filtering system
+- Department-based job categories
+- Application form integration
+- Employee testimonials and stories
+
+### 3.5 Contact Page (/contact)
+**Purpose**: Provide multiple ways to reach Anthropic for different inquiries
+
+**Sections**:
+- General contact information
+- Media and press inquiries
+- Partnership opportunities
+- Research collaboration requests
+- Office locations with maps
+
+**Key Features**:
+- Contact form with inquiry type selection
+- Interactive office location maps
+- Response time expectations
+- Social media links and presence
+
+### 3.6 Safety Page (/safety)
+**Purpose**: Detailed explanation of Anthropic's AI safety approach
+
+**Sections**:
+- Constitutional AI methodology
+- Safety research and principles
+- Responsible deployment practices
+- Transparency and accountability measures
+- Risk mitigation strategies
+
+**Key Features**:
+- Interactive safety framework diagrams
+- Case studies and examples
+- Technical documentation links
+- Safety metrics and measurements
+
+## 4. Design Requirements
+
+### 4.1 Brand Identity
+- **Colors**: Deep blues, clean whites, accent oranges
+- **Typography**: Modern sans-serif (Inter or similar)
+- **Logo**: Anthropic brand mark with proper spacing
+- **Voice**: Professional, trustworthy, approachable, technical
+
+### 4.2 Visual Design
+- Clean, minimalist aesthetic
+- Generous white space and clear hierarchy
+- Subtle animations and micro-interactions
+- High-quality imagery and illustrations
+- Consistent component library
+
+### 4.3 Responsive Design
+- Mobile-first approach (320px and up)
+- Tablet optimization (768px and up)
+- Desktop experience (1024px and up)
+- Large screen support (1440px and up)
+
+## 5. Development Phases
+
+### Phase 1: Foundation and Home Page
+- Project setup with Next.js and TypeScript
+- Design system and component library
+- Home page implementation with hero and key sections
+- Basic responsive layout and navigation
+
+### Phase 2: Core Pages
+- About page with team and mission content
+- Research page with publication showcase
+- Contact page with forms and location info
+- Cross-page navigation and routing
+
+### Phase 3: Advanced Features
+- Careers page with job listing functionality
+- Safety page with interactive elements
+- Advanced animations and micro-interactions
+- Performance optimization and SEO
+
+### Phase 4: Polish and Launch
+- Content review and copywriting refinement
+- Accessibility testing and improvements
+- Performance optimization and monitoring
+- Analytics integration and tracking
+- Final testing and deployment
+
+## 6. Content Requirements
+
+### 6.1 Copywriting
+- Clear, compelling headlines for each section
+- Technical accuracy in AI and safety descriptions
+- Consistent brand voice across all pages
+- SEO-optimized page titles and descriptions
+
+### 6.2 Visual Assets
+- High-resolution Anthropic logos and brand assets
+- Professional team photos and headshots
+- Product screenshots and interface mockups
+- Custom illustrations for complex concepts
+
+### 6.3 Interactive Elements
+- Claude conversation examples and demos
+- Research paper previews and abstracts
+- Contact forms with validation and submission
+- Newsletter signup and subscription management
+
+## 7. Performance and Quality Standards
+
+### 7.1 Performance Targets
+- First Contentful Paint < 1.5s
+- Largest Contentful Paint < 2.5s
+- Cumulative Layout Shift < 0.1
+- First Input Delay < 100ms
+
+### 7.2 Quality Assurance
+- Cross-browser testing (Chrome, Firefox, Safari, Edge)
+- Device testing (iOS, Android, desktop)
+- Accessibility testing with screen readers
+- SEO validation and structured data markup
+
+### 7.3 Security and Privacy
+- HTTPS encryption for all connections
+- Privacy policy and cookie consent
+- Form validation and spam protection
+- Secure contact form submissions
+
+## 8. Launch and Maintenance
+
+### 8.1 Deployment Strategy
+- Staging environment for testing and review
+- Production deployment with Vercel
+- Custom domain configuration
+- CDN setup for global performance
+
+### 8.2 Monitoring and Analytics
+- Google Analytics 4 implementation
+- Core Web Vitals monitoring
+- Error tracking and alerting
+- User behavior analysis and insights
+
+### 8.3 Future Enhancements
+- Blog integration for company updates
+- Event and webinar management system
+- Advanced search functionality
+- Multilingual support for global reach
+
+## 9. Timeline and Milestones
+
+### Week 1: Foundation
+- Project setup and initial development environment
+- Design system and component library creation
+- Home page hero and navigation implementation
+
+### Week 2: Core Development
+- Complete home page with all sections
+- About page with team and mission content
+- Basic responsive design and cross-browser testing
+
+### Week 3: Feature Development
+- Research page with publication showcase
+- Contact page with forms and functionality
+- Careers page with job listing integration
+
+### Week 4: Polish and Launch
+- Safety page with interactive elements
+- Performance optimization and SEO implementation
+- Final testing, accessibility review, and deployment
+
+This comprehensive landing page will serve as Anthropic's primary web presence, effectively communicating their mission, showcasing their research, and attracting both users and talent to their AI safety initiatives.
