@@ -5,10 +5,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { AlertTriangle, Plus, Settings, Trash2, Edit2, Save, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  Plus,
+  Settings,
+  Trash2,
+  Edit2,
+  Save,
+  X,
+} from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AlertConfig {
@@ -48,7 +62,11 @@ interface AlertManagementProps {
   onTeamSelect: (teamId: string) => void
 }
 
-export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertManagementProps) {
+export function AlertManagement({
+  teams,
+  selectedTeamId,
+  onTeamSelect,
+}: AlertManagementProps) {
   const [alertConfigs, setAlertConfigs] = useState<AlertConfig[]>([])
   const [usageLimits, setUsageLimits] = useState<UsageLimit[]>([])
   const [isCreatingAlert, setIsCreatingAlert] = useState(false)
@@ -62,12 +80,12 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
       _id: '1',
       teamId: selectedTeamId || 'team1',
       alertType: 'cost_limit',
-      thresholdValue: 10.00,
+      thresholdValue: 10.0,
       thresholdUnit: 'dollars',
       timeWindow: 'monthly',
       isActive: true,
       notificationMethods: ['email', 'dashboard'],
-      warningThreshold: 8.00,
+      warningThreshold: 8.0,
       createdAt: Date.now() - 86400000,
       updatedAt: Date.now() - 86400000,
     },
@@ -91,7 +109,7 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
       _id: '1',
       teamId: selectedTeamId || 'team1',
       limitType: 'hard_cost_limit',
-      limitValue: 15.00,
+      limitValue: 15.0,
       timeWindow: 'monthly',
       isActive: true,
       enforcementAction: 'block_requests',
@@ -106,29 +124,42 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
 
   const getAlertTypeLabel = (type: string) => {
     switch (type) {
-      case 'token_limit': return 'Token Limit'
-      case 'cost_limit': return 'Cost Limit'
-      case 'daily_usage': return 'Daily Usage'
-      case 'monthly_usage': return 'Monthly Usage'
-      default: return type
+      case 'token_limit':
+        return 'Token Limit'
+      case 'cost_limit':
+        return 'Cost Limit'
+      case 'daily_usage':
+        return 'Daily Usage'
+      case 'monthly_usage':
+        return 'Monthly Usage'
+      default:
+        return type
     }
   }
 
   const getLimitTypeLabel = (type: string) => {
     switch (type) {
-      case 'hard_token_limit': return 'Hard Token Limit'
-      case 'hard_cost_limit': return 'Hard Cost Limit'
-      case 'rate_limit': return 'Rate Limit'
-      default: return type
+      case 'hard_token_limit':
+        return 'Hard Token Limit'
+      case 'hard_cost_limit':
+        return 'Hard Cost Limit'
+      case 'rate_limit':
+        return 'Rate Limit'
+      default:
+        return type
     }
   }
 
   const formatThreshold = (value: number, unit: string) => {
     switch (unit) {
-      case 'tokens': return `${value.toLocaleString()} tokens`
-      case 'dollars': return `$${value.toFixed(2)}`
-      case 'percentage': return `${value}%`
-      default: return value.toString()
+      case 'tokens':
+        return `${value.toLocaleString()} tokens`
+      case 'dollars':
+        return `$${value.toFixed(2)}`
+      case 'percentage':
+        return `${value}%`
+      default:
+        return value.toString()
     }
   }
 
@@ -150,7 +181,7 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
                 <SelectValue placeholder="Choose a team..." />
               </SelectTrigger>
               <SelectContent>
-                {teams.map((team) => (
+                {teams.map(team => (
                   <SelectItem key={team._id} value={team._id}>
                     {team.name}
                   </SelectItem>
@@ -165,7 +196,8 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Please select a team to manage alert configurations and usage limits.
+            Please select a team to manage alert configurations and usage
+            limits.
           </AlertDescription>
         </Alert>
       )}
@@ -188,12 +220,13 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
             <CardContent>
               <div className="space-y-4">
                 {currentConfigs.length === 0 && !isCreatingAlert && (
-                  <p className="text-sm text-gray-500 text-center py-8">
-                    No alert configurations found. Click "Add Alert" to create your first one.
+                  <p className="py-8 text-center text-sm text-gray-500">
+                    No alert configurations found. Click "Add Alert" to create
+                    your first one.
                   </p>
                 )}
 
-                {currentConfigs.map((config) => (
+                {currentConfigs.map(config => (
                   <AlertConfigCard
                     key={config._id}
                     config={config}
@@ -235,12 +268,13 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
             <CardContent>
               <div className="space-y-4">
                 {currentLimits.length === 0 && !isCreatingLimit && (
-                  <p className="text-sm text-gray-500 text-center py-8">
-                    No usage limits configured. Click "Add Limit" to create enforcement rules.
+                  <p className="py-8 text-center text-sm text-gray-500">
+                    No usage limits configured. Click "Add Limit" to create
+                    enforcement rules.
                   </p>
                 )}
 
-                {currentLimits.map((limit) => (
+                {currentLimits.map(limit => (
                   <UsageLimitCard
                     key={limit._id}
                     limit={limit}
@@ -270,13 +304,13 @@ export function AlertManagement({ teams, selectedTeamId, onTeamSelect }: AlertMa
   )
 }
 
-function AlertConfigCard({ 
-  config, 
-  isEditing, 
-  onEdit, 
-  onSave, 
-  onCancel, 
-  onDelete 
+function AlertConfigCard({
+  config,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+  onDelete,
 }: {
   config: AlertConfig
   isEditing: boolean
@@ -286,27 +320,37 @@ function AlertConfigCard({
   onDelete: () => void
 }) {
   return (
-    <Card className={`border-l-4 ${config.isActive ? 'border-l-green-500' : 'border-l-gray-300'}`}>
+    <Card
+      className={`border-l-4 ${config.isActive ? 'border-l-green-500' : 'border-l-gray-300'}`}
+    >
       <CardContent className="pt-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium">{getAlertTypeLabel(config.alertType)}</h4>
+              <h4 className="font-medium">
+                {getAlertTypeLabel(config.alertType)}
+              </h4>
               <Badge variant={config.isActive ? 'default' : 'secondary'}>
                 {config.isActive ? 'Active' : 'Inactive'}
               </Badge>
             </div>
             <p className="text-sm text-gray-600">
-              Threshold: {formatThreshold(config.thresholdValue, config.thresholdUnit)}
+              Threshold:{' '}
+              {formatThreshold(config.thresholdValue, config.thresholdUnit)}
               {config.warningThreshold && (
                 <span className="ml-2 text-yellow-600">
-                  (Warning at {formatThreshold(config.warningThreshold, config.thresholdUnit)})
+                  (Warning at{' '}
+                  {formatThreshold(
+                    config.warningThreshold,
+                    config.thresholdUnit
+                  )}
+                  )
                 </span>
               )}
             </p>
             <p className="text-sm text-gray-500">
-              Time Window: {config.timeWindow} • 
-              Notifications: {config.notificationMethods.join(', ')}
+              Time Window: {config.timeWindow} • Notifications:{' '}
+              {config.notificationMethods.join(', ')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -323,13 +367,13 @@ function AlertConfigCard({
   )
 }
 
-function UsageLimitCard({ 
-  limit, 
-  isEditing, 
-  onEdit, 
-  onSave, 
-  onCancel, 
-  onDelete 
+function UsageLimitCard({
+  limit,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+  onDelete,
 }: {
   limit: UsageLimit
   isEditing: boolean
@@ -340,20 +384,28 @@ function UsageLimitCard({
 }) {
   const getBadgeColor = (action: string) => {
     switch (action) {
-      case 'block_requests': return 'destructive'
-      case 'require_approval': return 'secondary'
-      case 'notify_only': return 'outline'
-      default: return 'default'
+      case 'block_requests':
+        return 'destructive'
+      case 'require_approval':
+        return 'secondary'
+      case 'notify_only':
+        return 'outline'
+      default:
+        return 'default'
     }
   }
 
   return (
-    <Card className={`border-l-4 ${limit.isActive ? 'border-l-red-500' : 'border-l-gray-300'}`}>
+    <Card
+      className={`border-l-4 ${limit.isActive ? 'border-l-red-500' : 'border-l-gray-300'}`}
+    >
       <CardContent className="pt-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium">{getLimitTypeLabel(limit.limitType)}</h4>
+              <h4 className="font-medium">
+                {getLimitTypeLabel(limit.limitType)}
+              </h4>
               <Badge variant={limit.isActive ? 'default' : 'secondary'}>
                 {limit.isActive ? 'Active' : 'Inactive'}
               </Badge>
@@ -362,9 +414,12 @@ function UsageLimitCard({
               </Badge>
             </div>
             <p className="text-sm text-gray-600">
-              Limit: {limit.limitValue.toLocaleString()} 
-              {limit.limitType.includes('token') ? ' tokens' : 
-               limit.limitType.includes('cost') ? ' dollars' : ' requests'}
+              Limit: {limit.limitValue.toLocaleString()}
+              {limit.limitType.includes('token')
+                ? ' tokens'
+                : limit.limitType.includes('cost')
+                  ? ' dollars'
+                  : ' requests'}
             </p>
             <p className="text-sm text-gray-500">
               Time Window: {limit.timeWindow}
@@ -384,10 +439,10 @@ function UsageLimitCard({
   )
 }
 
-function NewAlertConfigForm({ 
-  teamId, 
-  onSave, 
-  onCancel 
+function NewAlertConfigForm({
+  teamId,
+  onSave,
+  onCancel,
 }: {
   teamId: string
   onSave: () => void
@@ -409,8 +464,12 @@ function NewAlertConfigForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Alert Type</Label>
-              <Select value={formData.alertType} onValueChange={(value: any) => 
-                setFormData(prev => ({ ...prev, alertType: value }))}>
+              <Select
+                value={formData.alertType}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({ ...prev, alertType: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -424,8 +483,12 @@ function NewAlertConfigForm({
             </div>
             <div>
               <Label>Time Window</Label>
-              <Select value={formData.timeWindow} onValueChange={(value: any) => 
-                setFormData(prev => ({ ...prev, timeWindow: value }))}>
+              <Select
+                value={formData.timeWindow}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({ ...prev, timeWindow: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -445,10 +508,12 @@ function NewAlertConfigForm({
               <Input
                 type="number"
                 value={formData.thresholdValue}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  thresholdValue: parseFloat(e.target.value) || 0 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    thresholdValue: parseFloat(e.target.value) || 0,
+                  }))
+                }
               />
             </div>
             <div>
@@ -456,21 +521,23 @@ function NewAlertConfigForm({
               <Input
                 type="number"
                 value={formData.warningThreshold}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  warningThreshold: parseFloat(e.target.value) || 0 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    warningThreshold: parseFloat(e.target.value) || 0,
+                  }))
+                }
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onCancel}>
-              <X className="h-4 w-4 mr-2" />
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
             <Button onClick={onSave}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
               Save Alert
             </Button>
           </div>
@@ -480,10 +547,10 @@ function NewAlertConfigForm({
   )
 }
 
-function NewUsageLimitForm({ 
-  teamId, 
-  onSave, 
-  onCancel 
+function NewUsageLimitForm({
+  teamId,
+  onSave,
+  onCancel,
 }: {
   teamId: string
   onSave: () => void
@@ -503,28 +570,42 @@ function NewUsageLimitForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Limit Type</Label>
-              <Select value={formData.limitType} onValueChange={(value: any) => 
-                setFormData(prev => ({ ...prev, limitType: value }))}>
+              <Select
+                value={formData.limitType}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({ ...prev, limitType: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hard_token_limit">Hard Token Limit</SelectItem>
-                  <SelectItem value="hard_cost_limit">Hard Cost Limit</SelectItem>
+                  <SelectItem value="hard_token_limit">
+                    Hard Token Limit
+                  </SelectItem>
+                  <SelectItem value="hard_cost_limit">
+                    Hard Cost Limit
+                  </SelectItem>
                   <SelectItem value="rate_limit">Rate Limit</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Enforcement Action</Label>
-              <Select value={formData.enforcementAction} onValueChange={(value: any) => 
-                setFormData(prev => ({ ...prev, enforcementAction: value }))}>
+              <Select
+                value={formData.enforcementAction}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({ ...prev, enforcementAction: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="block_requests">Block Requests</SelectItem>
-                  <SelectItem value="require_approval">Require Approval</SelectItem>
+                  <SelectItem value="require_approval">
+                    Require Approval
+                  </SelectItem>
                   <SelectItem value="notify_only">Notify Only</SelectItem>
                 </SelectContent>
               </Select>
@@ -537,16 +618,22 @@ function NewUsageLimitForm({
               <Input
                 type="number"
                 value={formData.limitValue}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  limitValue: parseFloat(e.target.value) || 0 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    limitValue: parseFloat(e.target.value) || 0,
+                  }))
+                }
               />
             </div>
             <div>
               <Label>Time Window</Label>
-              <Select value={formData.timeWindow} onValueChange={(value: any) => 
-                setFormData(prev => ({ ...prev, timeWindow: value }))}>
+              <Select
+                value={formData.timeWindow}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({ ...prev, timeWindow: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -562,11 +649,11 @@ function NewUsageLimitForm({
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onCancel}>
-              <X className="h-4 w-4 mr-2" />
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
             <Button onClick={onSave}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
               Save Limit
             </Button>
           </div>
@@ -578,28 +665,41 @@ function NewUsageLimitForm({
 
 function getAlertTypeLabel(type: string) {
   switch (type) {
-    case 'token_limit': return 'Token Limit'
-    case 'cost_limit': return 'Cost Limit'
-    case 'daily_usage': return 'Daily Usage'
-    case 'monthly_usage': return 'Monthly Usage'
-    default: return type
+    case 'token_limit':
+      return 'Token Limit'
+    case 'cost_limit':
+      return 'Cost Limit'
+    case 'daily_usage':
+      return 'Daily Usage'
+    case 'monthly_usage':
+      return 'Monthly Usage'
+    default:
+      return type
   }
 }
 
 function getLimitTypeLabel(type: string) {
   switch (type) {
-    case 'hard_token_limit': return 'Hard Token Limit'
-    case 'hard_cost_limit': return 'Hard Cost Limit'
-    case 'rate_limit': return 'Rate Limit'
-    default: return type
+    case 'hard_token_limit':
+      return 'Hard Token Limit'
+    case 'hard_cost_limit':
+      return 'Hard Cost Limit'
+    case 'rate_limit':
+      return 'Rate Limit'
+    default:
+      return type
   }
 }
 
 function formatThreshold(value: number, unit: string) {
   switch (unit) {
-    case 'tokens': return `${value.toLocaleString()} tokens`
-    case 'dollars': return `$${value.toFixed(2)}`
-    case 'percentage': return `${value}%`
-    default: return value.toString()
+    case 'tokens':
+      return `${value.toLocaleString()} tokens`
+    case 'dollars':
+      return `$${value.toFixed(2)}`
+    case 'percentage':
+      return `${value}%`
+    default:
+      return value.toString()
   }
 }

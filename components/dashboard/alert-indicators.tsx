@@ -25,14 +25,20 @@ interface AlertIndicatorsProps {
   className?: string
 }
 
-export function AlertIndicators({ alerts, onResolveAlert, className }: AlertIndicatorsProps) {
+export function AlertIndicators({
+  alerts,
+  onResolveAlert,
+  className,
+}: AlertIndicatorsProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
 
-  const activeAlerts = alerts.filter(alert => 
-    alert.isActive && !dismissedAlerts.has(alert.id)
+  const activeAlerts = alerts.filter(
+    alert => alert.isActive && !dismissedAlerts.has(alert.id)
   )
 
-  const criticalAlerts = activeAlerts.filter(alert => alert.level === 'critical')
+  const criticalAlerts = activeAlerts.filter(
+    alert => alert.level === 'critical'
+  )
   const warningAlerts = activeAlerts.filter(alert => alert.level === 'warning')
 
   const handleDismissAlert = (alertId: string) => {
@@ -90,8 +96,9 @@ export function AlertIndicators({ alerts, onResolveAlert, className }: AlertIndi
         <Alert className="mb-4 border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-500" />
           <AlertDescription className="text-red-800">
-            <strong>Critical Alert:</strong> {criticalAlerts.length} usage limit(s) exceeded. 
-            Immediate action required to prevent service interruption.
+            <strong>Critical Alert:</strong> {criticalAlerts.length} usage
+            limit(s) exceeded. Immediate action required to prevent service
+            interruption.
           </AlertDescription>
         </Alert>
       )}
@@ -100,23 +107,32 @@ export function AlertIndicators({ alerts, onResolveAlert, className }: AlertIndi
         <Alert className="mb-4 border-yellow-200 bg-yellow-50">
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            <strong>Warning:</strong> {warningAlerts.length} usage threshold(s) approaching. 
-            Consider reviewing your team's usage patterns.
+            <strong>Warning:</strong> {warningAlerts.length} usage threshold(s)
+            approaching. Consider reviewing your team's usage patterns.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Detailed Alert Cards */}
       <div className="space-y-3">
-        {activeAlerts.map((alert) => (
-          <Card key={alert.id} className="border-l-4 border-l-red-500 data-[level=warning]:border-l-yellow-500" data-level={alert.level}>
+        {activeAlerts.map(alert => (
+          <Card
+            key={alert.id}
+            className="border-l-4 border-l-red-500 data-[level=warning]:border-l-yellow-500"
+            data-level={alert.level}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
                 {getAlertIcon(alert.level)}
                 <CardTitle className="text-sm font-medium">
                   {getAlertTypeLabel(alert.type)}
                 </CardTitle>
-                <Badge variant={alert.level === 'critical' ? 'destructive' : 'secondary'} className="text-xs">
+                <Badge
+                  variant={
+                    alert.level === 'critical' ? 'destructive' : 'secondary'
+                  }
+                  className="text-xs"
+                >
                   {alert.level.toUpperCase()}
                 </Badge>
               </div>
@@ -134,10 +150,16 @@ export function AlertIndicators({ alerts, onResolveAlert, className }: AlertIndi
                 <p className="text-sm text-gray-700">{alert.message}</p>
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>
-                    Current: <strong>{formatValue(alert.currentValue, alert.unit)}</strong>
+                    Current:{' '}
+                    <strong>
+                      {formatValue(alert.currentValue, alert.unit)}
+                    </strong>
                   </span>
                   <span>
-                    Threshold: <strong>{formatValue(alert.thresholdValue, alert.unit)}</strong>
+                    Threshold:{' '}
+                    <strong>
+                      {formatValue(alert.thresholdValue, alert.unit)}
+                    </strong>
                   </span>
                 </div>
                 <div className="text-xs text-gray-400">
@@ -158,11 +180,15 @@ interface AlertStatusBadgeProps {
   className?: string
 }
 
-export function AlertStatusBadge({ alertCount, criticalCount, className }: AlertStatusBadgeProps) {
+export function AlertStatusBadge({
+  alertCount,
+  criticalCount,
+  className,
+}: AlertStatusBadgeProps) {
   if (alertCount === 0) {
     return (
       <Badge variant="success" className={className}>
-        <CheckCircle className="h-3 w-3 mr-1" />
+        <CheckCircle className="mr-1 h-3 w-3" />
         All Clear
       </Badge>
     )
@@ -171,7 +197,7 @@ export function AlertStatusBadge({ alertCount, criticalCount, className }: Alert
   if (criticalCount > 0) {
     return (
       <Badge variant="destructive" className={className}>
-        <AlertTriangle className="h-3 w-3 mr-1" />
+        <AlertTriangle className="mr-1 h-3 w-3" />
         {criticalCount} Critical
       </Badge>
     )
@@ -179,7 +205,7 @@ export function AlertStatusBadge({ alertCount, criticalCount, className }: Alert
 
   return (
     <Badge variant="secondary" className={className}>
-      <Bell className="h-3 w-3 mr-1" />
+      <Bell className="mr-1 h-3 w-3" />
       {alertCount} Warning{alertCount > 1 ? 's' : ''}
     </Badge>
   )
@@ -191,10 +217,10 @@ interface AlertHeaderNotificationProps {
   onViewAlerts?: () => void
 }
 
-export function AlertHeaderNotification({ 
-  alertCount, 
-  criticalCount, 
-  onViewAlerts 
+export function AlertHeaderNotification({
+  alertCount,
+  criticalCount,
+  onViewAlerts,
 }: AlertHeaderNotificationProps) {
   if (alertCount === 0) {
     return (
@@ -205,17 +231,19 @@ export function AlertHeaderNotification({
   }
 
   return (
-    <Button 
-      variant="ghost" 
-      size="sm" 
-      className="relative" 
+    <Button
+      variant="ghost"
+      size="sm"
+      className="relative"
       onClick={onViewAlerts}
     >
-      <Bell className={`h-4 w-4 ${criticalCount > 0 ? 'text-red-500' : 'text-yellow-500'}`} />
+      <Bell
+        className={`h-4 w-4 ${criticalCount > 0 ? 'text-red-500' : 'text-yellow-500'}`}
+      />
       {alertCount > 0 && (
-        <Badge 
+        <Badge
           variant={criticalCount > 0 ? 'destructive' : 'secondary'}
-          className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
+          className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
         >
           {alertCount > 99 ? '99+' : alertCount}
         </Badge>
@@ -233,8 +261,8 @@ export function useAlertData(teamId?: string) {
       type: 'cost_limit',
       level: 'warning',
       message: 'Monthly cost usage approaching limit',
-      currentValue: 8.50,
-      thresholdValue: 10.00,
+      currentValue: 8.5,
+      thresholdValue: 10.0,
       unit: 'dollars',
       timestamp: Date.now() - 300000, // 5 minutes ago
       isActive: true,
