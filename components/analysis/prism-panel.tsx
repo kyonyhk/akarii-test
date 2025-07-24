@@ -24,8 +24,21 @@ interface PrismPanelProps {
 export function PrismPanel({ className, conversationId }: PrismPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+  const [lastAnalysisTime, setLastAnalysisTime] = useState(1200)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const { registerAnalysisScroll, activeMessageId } = useScrollSync()
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Register scroll container with sync context
   useEffect(() => {
@@ -126,14 +139,22 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
 
   if (!isVisible) {
     return (
-      <div className="fixed right-4 top-4 z-50">
+      <div
+        className={cn(
+          'fixed z-50 transition-all duration-200',
+          isMobile ? 'bottom-4 right-4' : 'right-4 top-4'
+        )}
+      >
         <Button
           variant="outline"
-          size="sm"
+          size={isMobile ? 'default' : 'sm'}
           onClick={() => setIsVisible(true)}
-          className="bg-background/80 backdrop-blur-sm"
+          className={cn(
+            'bg-background/80 shadow-lg backdrop-blur-sm',
+            isMobile && 'h-12 w-12 rounded-full p-0'
+          )}
         >
-          <Eye className="h-4 w-4" />
+          <Eye className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
           <span className="sr-only">Show analysis panel</span>
         </Button>
       </div>
@@ -141,20 +162,35 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
   }
 
   return (
-    <Card className={cn('flex h-full flex-col', className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-3 py-2 pb-2">
-        <CardTitle className="text-sm font-medium">Analysis Prism</CardTitle>
+    <Card
+      className={cn(
+        'flex h-full min-h-0 flex-col transition-all duration-200',
+        isMobile && 'rounded-b-none rounded-t-lg',
+        className
+      )}
+    >
+      <CardHeader
+        className={cn(
+          'flex flex-row items-center justify-between space-y-0 pb-2',
+          isMobile ? 'px-4 py-3' : 'px-3 py-2'
+        )}
+      >
+        <CardTitle
+          className={cn('font-medium', isMobile ? 'text-base' : 'text-sm')}
+        >
+          Analysis Prism
+        </CardTitle>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="h-6 w-6 p-0"
+            className={cn('p-0', isMobile ? 'h-8 w-8' : 'h-6 w-6')}
           >
             {isCollapsed ? (
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className={cn(isMobile ? 'h-4 w-4' : 'h-3 w-3')} />
             ) : (
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className={cn(isMobile ? 'h-4 w-4' : 'h-3 w-3')} />
             )}
             <span className="sr-only">
               {isCollapsed ? 'Expand' : 'Collapse'} panel
@@ -164,17 +200,17 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
             variant="ghost"
             size="sm"
             onClick={() => setIsVisible(false)}
-            className="h-6 w-6 p-0"
+            className={cn('p-0', isMobile ? 'h-8 w-8' : 'h-6 w-6')}
           >
-            <EyeOff className="h-4 w-4" />
+            <EyeOff className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
             <span className="sr-only">Hide panel</span>
           </Button>
         </div>
       </CardHeader>
 
       <Collapsible open={!isCollapsed} onOpenChange={setIsCollapsed}>
-        <CollapsibleContent className="flex-1">
-          <CardContent className="flex h-full flex-col p-0">
+        <CollapsibleContent className="min-h-0 flex-1">
+          <CardContent className="flex h-full min-h-0 flex-col p-0">
             {mockAnalyses.length === 0 ? (
               <div className="flex flex-1 items-center justify-center p-4">
                 <div className="text-center text-sm text-muted-foreground">
@@ -184,8 +220,13 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
                 </div>
               </div>
             ) : (
-              <ScrollArea ref={scrollAreaRef} className="flex-1">
-                <div className="space-y-2 p-4">
+              <ScrollArea
+                ref={scrollAreaRef}
+                className="flex-1 overflow-hidden"
+              >
+                <div
+                  className={cn('min-h-0 space-y-2', isMobile ? 'p-3' : 'p-4')}
+                >
                   {mockAnalyses.map(analysis => (
                     <AnalysisRow
                       key={analysis._id}
@@ -195,8 +236,11 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
                         <RawJSONDrawer analysis={analysis}>
                           <Button
                             variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                            size={isMobile ? 'default' : 'sm'}
+                            className={cn(
+                              'text-muted-foreground hover:text-foreground',
+                              isMobile ? 'h-8 px-3 text-sm' : 'h-7 px-2 text-xs'
+                            )}
                           >
                             View Raw JSON
                           </Button>
@@ -208,13 +252,55 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
               </ScrollArea>
             )}
 
-            {/* Latency indicator */}
-            <div className="border-t p-2">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Last analysis: 1.2s</span>
+            {/* Enhanced latency indicator */}
+            <div
+              className={cn(
+                'border-t transition-all duration-200',
+                isMobile ? 'p-3' : 'p-2'
+              )}
+            >
+              <div
+                className={cn(
+                  'flex items-center justify-between text-muted-foreground',
+                  isMobile ? 'text-sm' : 'text-xs'
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span>
+                    Last analysis: {(lastAnalysisTime / 1000).toFixed(1)}s
+                  </span>
+                  {lastAnalysisTime > 2000 && (
+                    <span className="text-xs text-yellow-500">Slow</span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1">
-                  <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                  <span>Live</span>
+                  <div
+                    className={cn(
+                      'rounded-full transition-colors duration-200',
+                      lastAnalysisTime <= 2000
+                        ? 'bg-green-500'
+                        : lastAnalysisTime <= 5000
+                          ? 'bg-yellow-500'
+                          : 'bg-red-500',
+                      isMobile ? 'h-2 w-2' : 'h-1.5 w-1.5'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'font-medium',
+                      lastAnalysisTime <= 2000
+                        ? 'text-green-600 dark:text-green-400'
+                        : lastAnalysisTime <= 5000
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-red-600 dark:text-red-400'
+                    )}
+                  >
+                    {lastAnalysisTime <= 2000
+                      ? 'Fast'
+                      : lastAnalysisTime <= 5000
+                        ? 'OK'
+                        : 'Slow'}
+                  </span>
                 </div>
               </div>
             </div>
