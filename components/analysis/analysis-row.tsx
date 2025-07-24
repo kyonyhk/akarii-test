@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,
@@ -24,8 +24,20 @@ export function AnalysisRow({
   isActive = false,
 }: AnalysisRowProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const isLowConfidence = analysis.confidenceLevel < 40
   const { syncToMessage, activeMessageId } = useScrollSync()
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Determine if this analysis is currently active
   const isCurrentlyActive = isActive || activeMessageId === analysis.messageId
@@ -62,33 +74,46 @@ export function AnalysisRow({
         data-analysis-message-id={analysis.messageId}
         onClick={handleRowClick}
         className={cn(
-          'cursor-pointer rounded-lg border bg-card p-3 transition-all hover:shadow-sm',
+          'cursor-pointer touch-manipulation rounded-lg border bg-card transition-all hover:shadow-sm',
           isLowConfidence && 'opacity-40',
           isExpanded && 'shadow-sm ring-1 ring-primary/20',
-          isCurrentlyActive && 'bg-accent/10 ring-2 ring-accent'
+          isCurrentlyActive && 'bg-accent/10 ring-2 ring-accent',
+          isMobile ? 'p-4 active:scale-[0.98]' : 'p-3'
         )}
       >
         <CollapsibleTrigger asChild>
-          <button className="flex w-full items-start justify-between text-left">
-            <div className="flex-1 space-y-2">
+          <button
+            className={cn(
+              'flex w-full touch-manipulation items-start justify-between text-left',
+              isMobile && 'min-h-[44px]'
+            )}
+          >
+            <div className={cn('flex-1', isMobile ? 'space-y-3' : 'space-y-2')}>
               {/* Header row with statement type and confidence */}
-              <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  'flex items-center',
+                  isMobile ? 'gap-3' : 'gap-2'
+                )}
+              >
                 <span
                   className={cn(
-                    'inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium',
-                    statementTypeColors[analysis.statementType]
+                    'inline-flex rounded-full border font-medium',
+                    statementTypeColors[analysis.statementType],
+                    isMobile ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs'
                   )}
                 >
                   {analysis.statementType}
                 </span>
                 <span
                   className={cn(
-                    'text-xs font-medium',
+                    'font-medium',
                     isLowConfidence
                       ? 'text-red-500 dark:text-red-400'
                       : analysis.confidenceLevel >= 70
                         ? 'text-green-600 dark:text-green-400'
-                        : 'text-yellow-600 dark:text-yellow-400'
+                        : 'text-yellow-600 dark:text-yellow-400',
+                    isMobile ? 'text-sm' : 'text-xs'
                   )}
                 >
                   {analysis.confidenceLevel}% confidence
@@ -96,7 +121,12 @@ export function AnalysisRow({
               </div>
 
               {/* Summary row */}
-              <div className="text-xs text-muted-foreground">
+              <div
+                className={cn(
+                  'text-muted-foreground',
+                  isMobile ? 'text-sm' : 'text-xs'
+                )}
+              >
                 <span className="font-medium">{analysis.beliefs.length}</span>{' '}
                 beliefs
                 {analysis.beliefs.length > 0 &&
@@ -115,14 +145,20 @@ export function AnalysisRow({
 
             <ChevronRight
               className={cn(
-                'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
-                isExpanded && 'rotate-90'
+                'shrink-0 text-muted-foreground transition-transform',
+                isExpanded && 'rotate-90',
+                isMobile ? 'h-5 w-5' : 'h-4 w-4'
               )}
             />
           </button>
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="mt-3 space-y-3">
+        <CollapsibleContent
+          className={cn(
+            'space-y-3 overflow-hidden',
+            isMobile ? 'mt-4' : 'mt-3'
+          )}
+        >
           {/* Beliefs section */}
           {analysis.beliefs.length > 0 && (
             <div className="space-y-2">
