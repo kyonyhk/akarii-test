@@ -366,7 +366,7 @@
         "testStrategy": "Test magic-link email delivery and authentication flow, verify protected routes work correctly, test user context in messages, validate invite link functionality",
         "priority": "medium",
         "dependencies": [1],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -626,7 +626,7 @@
             "description": "Implement alerts and notifications when teams approach usage or cost limits",
             "dependencies": ["9.4", "9.5"],
             "details": "Build alert system with configurable thresholds, email notifications, dashboard warnings, and usage limit enforcement. Include both soft warnings and hard limits for token consumption",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           }
         ]
@@ -665,7 +665,7 @@
             "description": "Add inline analysis integration within message history for contextual insights",
             "dependencies": ["10.2"],
             "details": "Embed analysis results directly in message components, create expandable analysis cards, implement hover states for quick analysis preview, ensure analysis data loads efficiently with message history",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -674,7 +674,7 @@
             "description": "Add comprehensive search and filtering capabilities for conversations and messages",
             "dependencies": ["10.2"],
             "details": "Implement full-text search across messages and analyses, add filters by date range, message type, analysis confidence levels, create advanced search with boolean operators, add search result highlighting",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -709,7 +709,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-24T21:05:59.155Z",
+      "updated": "2025-07-24T21:35:42.191Z",
       "description": "Tasks for master context"
     }
   }
