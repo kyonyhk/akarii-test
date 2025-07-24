@@ -23,7 +23,7 @@ import {
   setCachedAnalysis,
   recordAnalysisMetrics,
   getPerformanceMetrics,
-} from './analysis-utils'
+} from './analysis_utils'
 import { api } from './_generated/api'
 
 // Action to analyze a message using OpenAI

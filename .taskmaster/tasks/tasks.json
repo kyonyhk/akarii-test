@@ -317,7 +317,7 @@
             "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
             "dependencies": ["5.2"],
             "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -335,7 +335,7 @@
             "description": "Connect panel to live analyses data using Convex queries with real-time updates",
             "dependencies": ["5.1"],
             "details": "Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {

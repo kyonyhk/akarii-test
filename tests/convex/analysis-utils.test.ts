@@ -9,7 +9,7 @@ import {
   getCacheStats,
   recordAnalysisMetrics,
   getPerformanceMetrics,
-} from '../../convex/analysis-utils'
+} from '../../convex/analysis_utils'
 import { MOCK_ANALYSIS_RESPONSE, TEST_MESSAGES } from '../setup'
 
 describe('Analysis Utils', () => {
