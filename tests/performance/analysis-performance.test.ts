@@ -3,7 +3,7 @@ import {
   createPerformanceTracker,
   recordAnalysisMetrics,
   getPerformanceMetrics,
-} from '../../convex/analysis-utils'
+} from '../../convex/analysis_utils'
 import { TEST_MESSAGES } from '../setup'
 
 describe('Analysis Performance Tests', () => {
