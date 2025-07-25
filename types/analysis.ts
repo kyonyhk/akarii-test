@@ -42,6 +42,8 @@ export interface AnalysisResponse extends MessageAnalysis {
   error?: string
   errorCode?: string
   requiresApproval?: boolean
+  displayMode?: 'normal' | 'warning' | 'hidden' | 'review_pending'
+  qualityWarnings?: string[]
 }
 
 // OpenAI API response structure

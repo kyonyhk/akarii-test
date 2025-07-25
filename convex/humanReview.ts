@@ -1,0 +1,580 @@
+/**
+ * Human Review System for Borderline Analysis Cases
+ * Handles queue management, assignment, and review workflow
+ */
+
+import { mutation, query } from './_generated/server'
+import { v } from 'convex/values'
+import { api } from './_generated/api'
+import { Id } from './_generated/dataModel'
+
+// SLA times in minutes by priority
+const SLA_TIMES = {
+  urgent: 30, // 30 minutes
+  high: 120, // 2 hours
+  medium: 480, // 8 hours
+  low: 1440, // 24 hours
+} as const
+
+/**
+ * Submit an analysis for human review
+ */
+export const submitForReview = mutation({
+  args: {
+    messageId: v.id('messages'),
+    originalContent: v.string(),
+    proposedAnalysis: v.object({
+      statementType: v.union(
+        v.literal('question'),
+        v.literal('opinion'),
+        v.literal('fact'),
+        v.literal('request'),
+        v.literal('other')
+      ),
+      beliefs: v.array(v.string()),
+      tradeOffs: v.array(v.string()),
+      confidenceLevel: v.number(),
+      reasoning: v.string(),
+    }),
+    qualityMetrics: v.object({
+      overallScore: v.number(),
+      qualityGrade: v.union(
+        v.literal('A'),
+        v.literal('B'),
+        v.literal('C'),
+        v.literal('D'),
+        v.literal('F')
+      ),
+      dimensionScores: v.any(),
+      flagCount: v.number(),
+      blockingReasons: v.array(v.string()),
+    }),
+    reviewTriggers: v.array(v.string()),
+    userContext: v.object({
+      userId: v.string(),
+      teamId: v.optional(v.string()),
+      conversationId: v.string(),
+      userTier: v.union(
+        v.literal('free'),
+        v.literal('pro'),
+        v.literal('enterprise')
+      ),
+    }),
+    automatedFlags: v.array(
+      v.object({
+        type: v.string(),
+        severity: v.union(
+          v.literal('low'),
+          v.literal('medium'),
+          v.literal('high')
+        ),
+        description: v.string(),
+        suggestion: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    // Determine priority based on quality metrics and triggers
+    let priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
+
+    // High priority triggers
+    if (
+      args.reviewTriggers.some(trigger =>
+        [
+          'content_safety',
+          'high_stakes_context',
+          'multiple_critical_flags',
+        ].includes(trigger)
+      )
+    ) {
+      priority = 'high'
+    }
+
+    // Urgent priority triggers
+    if (
+      args.reviewTriggers.includes('safety_concern') ||
+      (args.userContext.userTier === 'enterprise' &&
+        args.qualityMetrics.overallScore < 40)
+    ) {
+      priority = 'urgent'
+    }
+
+    // Low priority for minor issues
+    if (
+      args.qualityMetrics.overallScore > 65 &&
+      args.automatedFlags.every(flag => flag.severity === 'low')
+    ) {
+      priority = 'low'
+    }
+
+    // Calculate SLA deadline
+    const slaDeadline = Date.now() + SLA_TIMES[priority] * 60 * 1000
+
+    // Check if there's already a pending review for this message
+    const existingReview = await ctx.db
+      .query('humanReviewQueue')
+      .withIndex('by_message', q => q.eq('messageId', args.messageId))
+      .filter(q => q.neq(q.field('status'), 'approved'))
+      .filter(q => q.neq(q.field('status'), 'rejected'))
+      .first()
+
+    if (existingReview) {
+      // Update existing review with new information
+      await ctx.db.patch(existingReview._id, {
+        proposedAnalysis: args.proposedAnalysis,
+        qualityMetrics: args.qualityMetrics,
+        reviewTriggers: args.reviewTriggers,
+        automatedFlags: args.automatedFlags,
+        priority,
+        slaDeadline,
+        updatedAt: Date.now(),
+      })
+
+      return existingReview._id
+    }
+
+    // Create new review request
+    const reviewId = await ctx.db.insert('humanReviewQueue', {
+      messageId: args.messageId,
+      originalContent: args.originalContent,
+      proposedAnalysis: args.proposedAnalysis,
+      qualityMetrics: args.qualityMetrics,
+      reviewTriggers: args.reviewTriggers,
+      priority,
+      status: 'pending',
+      userContext: args.userContext,
+      automatedFlags: args.automatedFlags,
+      slaDeadline,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    })
+
+    // Auto-assign if there are available reviewers (simplified logic)
+    await tryAutoAssign(ctx, reviewId, priority)
+
+    console.log(
+      `Submitted analysis for human review: ${reviewId} (priority: ${priority})`
+    )
+    return reviewId
+  },
+})
+
+/**
+ * Get pending reviews for assignment
+ */
+export const getPendingReviews = query({
+  args: {
+    priority: v.optional(
+      v.union(
+        v.literal('urgent'),
+        v.literal('high'),
+        v.literal('medium'),
+        v.literal('low')
+      )
+    ),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query('humanReviewQueue')
+      .withIndex('by_status', q => q.eq('status', 'pending'))
+
+    if (args.priority) {
+      query = query.filter(q => q.eq(q.field('priority'), args.priority))
+    }
+
+    const reviews = await query.order('desc').take(args.limit || 50)
+
+    // Sort by priority and SLA deadline
+    return reviews.sort((a, b) => {
+      const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 }
+      const aPriority = priorityOrder[a.priority]
+      const bPriority = priorityOrder[b.priority]
+
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority // Higher priority first
+      }
+
+      return a.slaDeadline - b.slaDeadline // Earlier deadline first
+    })
+  },
+})
+
+/**
+ * Assign a review to a reviewer
+ */
+export const assignReview = mutation({
+  args: {
+    reviewId: v.id('humanReviewQueue'),
+    reviewerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.reviewId)
+    if (!review) {
+      throw new Error('Review not found')
+    }
+
+    if (review.status !== 'pending') {
+      throw new Error('Review is not available for assignment')
+    }
+
+    await ctx.db.patch(args.reviewId, {
+      status: 'in_review',
+      assignedReviewer: args.reviewerId,
+      reviewStartedAt: Date.now(),
+      updatedAt: Date.now(),
+    })
+
+    console.log(`Assigned review ${args.reviewId} to ${args.reviewerId}`)
+    return true
+  },
+})
+
+/**
+ * Submit a review decision
+ */
+export const submitReviewDecision = mutation({
+  args: {
+    reviewId: v.id('humanReviewQueue'),
+    reviewerId: v.string(),
+    decision: v.object({
+      action: v.union(
+        v.literal('approve'),
+        v.literal('reject'),
+        v.literal('revise'),
+        v.literal('escalate')
+      ),
+      revisedAnalysis: v.optional(
+        v.object({
+          statementType: v.union(
+            v.literal('question'),
+            v.literal('opinion'),
+            v.literal('fact'),
+            v.literal('request'),
+            v.literal('other')
+          ),
+          beliefs: v.array(v.string()),
+          tradeOffs: v.array(v.string()),
+          confidenceLevel: v.number(),
+          reasoning: v.string(),
+        })
+      ),
+      reviewerNotes: v.string(),
+      improvementSuggestions: v.optional(v.array(v.string())),
+    }),
+    escalationReason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.reviewId)
+    if (!review) {
+      throw new Error('Review not found')
+    }
+
+    if (review.assignedReviewer !== args.reviewerId) {
+      throw new Error('Unauthorized: Review not assigned to this reviewer')
+    }
+
+    if (review.status !== 'in_review') {
+      throw new Error('Review is not in progress')
+    }
+
+    const completedAt = Date.now()
+    const reviewTime = review.reviewStartedAt
+      ? (completedAt - review.reviewStartedAt) / (1000 * 60)
+      : 0 // in minutes
+
+    // Determine final status based on decision
+    let finalStatus: 'approved' | 'rejected' | 'needs_revision' | 'escalated'
+    switch (args.decision.action) {
+      case 'approve':
+        finalStatus = 'approved'
+        break
+      case 'reject':
+        finalStatus = 'rejected'
+        break
+      case 'revise':
+        finalStatus = 'needs_revision'
+        break
+      case 'escalate':
+        finalStatus = 'escalated'
+        break
+    }
+
+    // Update review record
+    await ctx.db.patch(args.reviewId, {
+      status: finalStatus,
+      reviewCompletedAt: completedAt,
+      reviewDecision: args.decision,
+      escalationReason: args.escalationReason,
+      updatedAt: completedAt,
+    })
+
+    // If approved, create the analysis record
+    if (finalStatus === 'approved') {
+      const analysisToUse =
+        args.decision.revisedAnalysis || review.proposedAnalysis
+
+      const analysisId = await ctx.db.insert('analyses', {
+        messageId: review.messageId,
+        statementType: analysisToUse.statementType,
+        beliefs: analysisToUse.beliefs,
+        tradeOffs: analysisToUse.tradeOffs,
+        confidenceLevel: analysisToUse.confidenceLevel,
+        rawData: {
+          originalMessage: review.originalContent,
+          analysisTimestamp: Date.now(),
+          modelUsed: 'human-reviewed',
+          humanReviewed: true,
+          reviewId: args.reviewId,
+          reviewTime: reviewTime,
+          qualityMetrics: review.qualityMetrics,
+          automatedFlags: review.automatedFlags,
+          reviewerNotes: args.decision.reviewerNotes,
+        },
+        createdAt: Date.now(),
+        thumbsUp: 0,
+        thumbsDown: 0,
+        userVotes: [],
+      })
+
+      // Link the analysis back to the review
+      await ctx.db.patch(args.reviewId, {
+        analysisId,
+      })
+
+      console.log(
+        `Approved analysis ${analysisId} from review ${args.reviewId}`
+      )
+    }
+
+    // Record reviewer performance metrics
+    await recordReviewMetrics(
+      ctx,
+      args.reviewerId,
+      review,
+      reviewTime,
+      args.decision.action
+    )
+
+    console.log(
+      `Review ${args.reviewId} completed with decision: ${args.decision.action}`
+    )
+    return { success: true, analysisCreated: finalStatus === 'approved' }
+  },
+})
+
+/**
+ * Get reviews assigned to a specific reviewer
+ */
+export const getAssignedReviews = query({
+  args: {
+    reviewerId: v.string(),
+    status: v.optional(
+      v.union(
+        v.literal('pending'),
+        v.literal('in_review'),
+        v.literal('approved'),
+        v.literal('rejected'),
+        v.literal('needs_revision'),
+        v.literal('escalated')
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query('humanReviewQueue')
+      .withIndex('by_reviewer', q => q.eq('assignedReviewer', args.reviewerId))
+
+    if (args.status) {
+      query = query.filter(q => q.eq(q.field('status'), args.status))
+    }
+
+    return await query.order('desc').take(100)
+  },
+})
+
+/**
+ * Get review queue statistics
+ */
+export const getQueueStats = query({
+  args: {},
+  handler: async ctx => {
+    const allReviews = await ctx.db.query('humanReviewQueue').collect()
+
+    const stats = {
+      total: allReviews.length,
+      pending: 0,
+      inReview: 0,
+      approved: 0,
+      rejected: 0,
+      needsRevision: 0,
+      escalated: 0,
+      byPriority: {
+        urgent: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+      },
+      slaBreaches: 0,
+      avgReviewTime: 0,
+    }
+
+    let totalReviewTime = 0
+    let completedReviews = 0
+    const now = Date.now()
+
+    allReviews.forEach(review => {
+      stats.byPriority[review.priority]++
+
+      switch (review.status) {
+        case 'pending':
+          stats.pending++
+          if (now > review.slaDeadline) stats.slaBreaches++
+          break
+        case 'in_review':
+          stats.inReview++
+          if (now > review.slaDeadline) stats.slaBreaches++
+          break
+        case 'approved':
+          stats.approved++
+          break
+        case 'rejected':
+          stats.rejected++
+          break
+        case 'needs_revision':
+          stats.needsRevision++
+          break
+        case 'escalated':
+          stats.escalated++
+          break
+      }
+
+      if (review.reviewStartedAt && review.reviewCompletedAt) {
+        totalReviewTime += review.reviewCompletedAt - review.reviewStartedAt
+        completedReviews++
+      }
+    })
+
+    if (completedReviews > 0) {
+      stats.avgReviewTime = Math.round(
+        totalReviewTime / completedReviews / (1000 * 60)
+      ) // minutes
+    }
+
+    return stats
+  },
+})
+
+/**
+ * Get review details by ID
+ */
+export const getReviewDetails = query({
+  args: {
+    reviewId: v.id('humanReviewQueue'),
+  },
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.reviewId)
+    if (!review) {
+      throw new Error('Review not found')
+    }
+
+    // Get the original message for context
+    const message = await ctx.db.get(review.messageId)
+
+    return {
+      ...review,
+      originalMessage: message,
+      isOverdue: Date.now() > review.slaDeadline,
+      timeRemaining: Math.max(0, review.slaDeadline - Date.now()),
+    }
+  },
+})
+
+/**
+ * Auto-assignment logic (simplified)
+ */
+async function tryAutoAssign(
+  ctx: any,
+  reviewId: Id<'humanReviewQueue'>,
+  priority: string
+) {
+  // In a real implementation, this would:
+  // 1. Check reviewer availability and workload
+  // 2. Consider reviewer expertise/specialization
+  // 3. Balance workload across reviewers
+  // 4. Respect reviewer working hours/time zones
+
+  // For now, just log that auto-assignment would happen
+  console.log(
+    `Auto-assignment would be attempted for review ${reviewId} with priority ${priority}`
+  )
+}
+
+/**
+ * Record reviewer performance metrics
+ */
+async function recordReviewMetrics(
+  ctx: any,
+  reviewerId: string,
+  review: any,
+  reviewTime: number,
+  decision: string
+) {
+  const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+
+  // Get or create today's metrics for this reviewer
+  const existingMetrics = await ctx.db
+    .query('reviewMetrics')
+    .withIndex('by_reviewer', q => q.eq('reviewerId', reviewerId))
+    .filter(q => q.eq(q.field('period'), today))
+    .first()
+
+  const isApproval = decision === 'approve'
+  const isRevision = decision === 'revise'
+  const isEscalation = decision === 'escalate'
+  const slaComplied = Date.now() <= review.slaDeadline
+
+  if (existingMetrics) {
+    // Update existing metrics
+    const newReviewsCompleted = existingMetrics.reviewsCompleted + 1
+    const newTotalTime =
+      existingMetrics.averageReviewTime * existingMetrics.reviewsCompleted +
+      reviewTime
+    const newAverageTime = newTotalTime / newReviewsCompleted
+
+    await ctx.db.patch(existingMetrics._id, {
+      reviewsCompleted: newReviewsCompleted,
+      averageReviewTime: newAverageTime,
+      approvalRate:
+        (existingMetrics.approvalRate * existingMetrics.reviewsCompleted +
+          (isApproval ? 1 : 0)) /
+        newReviewsCompleted,
+      revisionRate:
+        (existingMetrics.revisionRate * existingMetrics.reviewsCompleted +
+          (isRevision ? 1 : 0)) /
+        newReviewsCompleted,
+      escalationRate:
+        (existingMetrics.escalationRate * existingMetrics.reviewsCompleted +
+          (isEscalation ? 1 : 0)) /
+        newReviewsCompleted,
+      slaCompliance:
+        (existingMetrics.slaCompliance * existingMetrics.reviewsCompleted +
+          (slaComplied ? 1 : 0)) /
+        newReviewsCompleted,
+    })
+  } else {
+    // Create new metrics record
+    await ctx.db.insert('reviewMetrics', {
+      reviewerId,
+      period: today,
+      reviewsCompleted: 1,
+      averageReviewTime: reviewTime,
+      approvalRate: isApproval ? 1 : 0,
+      revisionRate: isRevision ? 1 : 0,
+      escalationRate: isEscalation ? 1 : 0,
+      qualityImprovement: 0, // Would be calculated based on before/after quality scores
+      slaCompliance: slaComplied ? 1 : 0,
+      createdAt: Date.now(),
+    })
+  }
+}
