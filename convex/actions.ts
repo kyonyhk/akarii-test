@@ -56,6 +56,10 @@ import {
   extractTokenUsageFromResponse,
 } from './token_utils'
 import { api } from './_generated/api'
+import {
+  getExperimentPromptForUser,
+  logExperimentEvent,
+} from './experimentPrompts'
 
 // Enhanced action to analyze a message using OpenAI with improved prompts
 export const analyzeMessage = action({
@@ -627,6 +631,341 @@ export const getAnalysisPerformanceMetrics = action({
   args: {},
   handler: async (): Promise<any> => {
     return getPerformanceMetrics()
+  },
+})
+
+// Experiment-aware analysis action with automatic A/B testing
+export const analyzeMessageWithExperiments = action({
+  args: {
+    messageId: v.id('messages'),
+    content: v.string(),
+    userId: v.string(),
+    conversationId: v.string(),
+    teamId: v.optional(v.id('teams')),
+    useContext: v.optional(v.boolean()),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Promise<AnalysisResponse & { experimentData?: any }> => {
+    const tracker = createPerformanceTracker()
+
+    try {
+      // Get experimental prompt configuration for this user
+      const experimentPromptData = await ctx.runMutation(
+        api.experimentPrompts.getExperimentPromptForUser,
+        {
+          userId: args.userId,
+          messageContent: args.content,
+          defaultConfig: {
+            variant: 'standard',
+            mode: 'production',
+          },
+        }
+      )
+
+      const { promptConfig, systemPrompt, userPrompt, experimentData } =
+        experimentPromptData
+
+      // Log experiment exposure event if in an experiment
+      if (experimentData && experimentData.experimentId !== 'control') {
+        await ctx.runMutation(api.experiments.logExperimentEvent, {
+          experimentId: experimentData.experimentId,
+          variantId: experimentData.variantId,
+          userId: args.userId,
+          eventType: 'exposure',
+          eventName: 'message_analysis_start',
+          properties: {
+            messageLength: args.content.length,
+            conversationId: args.conversationId,
+            variant: experimentData.variantName,
+          },
+          messageId: args.messageId,
+        })
+      }
+
+      // Input validation
+      const inputValidation = validateAnalysisInput(args)
+      if (!inputValidation.isValid) {
+        // Log error event if in experiment
+        if (experimentData && experimentData.experimentId !== 'control') {
+          await ctx.runMutation(api.experiments.logExperimentEvent, {
+            experimentId: experimentData.experimentId,
+            variantId: experimentData.variantId,
+            userId: args.userId,
+            eventType: 'error',
+            eventName: 'input_validation_failed',
+            properties: {
+              errors: inputValidation.errors,
+              riskLevel: inputValidation.riskLevel,
+            },
+            messageId: args.messageId,
+          })
+        }
+
+        return {
+          messageId: args.messageId,
+          success: false,
+          error: `Input validation failed: ${inputValidation.errors.join(', ')}`,
+          rawData: {
+            originalMessage: args.content,
+            analysisTimestamp: Date.now(),
+            modelUsed: ANALYSIS_MODEL,
+            processingTimeMs: tracker.getElapsedMs(),
+            experimentId: experimentData?.experimentId,
+            variantId: experimentData?.variantId,
+            validationErrors: inputValidation.errors,
+          },
+          experimentData,
+        }
+      }
+
+      const sanitizedArgs = inputValidation.sanitizedArgs || args
+
+      // Validate OpenAI configuration
+      if (!validateOpenAIConfig()) {
+        throw new Error('OpenAI API is not properly configured')
+      }
+
+      // Extract conversation context if needed
+      let conversationContext
+      let contextQuality: 'high' | 'medium' | 'low' = 'low'
+
+      if (
+        sanitizedArgs.useContext ||
+        promptConfig.variant === 'context_aware'
+      ) {
+        try {
+          const messages = await ctx.runQuery(
+            api.messages.getMessagesInConversation,
+            {
+              conversationId: sanitizedArgs.conversationId,
+              limit: 10,
+            }
+          )
+
+          conversationContext = extractConversationContext(
+            messages,
+            sanitizedArgs.messageId
+          )
+          contextQuality = assessContextQuality(
+            sanitizedArgs.content,
+            conversationContext
+          )
+        } catch (contextError) {
+          console.warn('Failed to extract conversation context:', contextError)
+        }
+      }
+
+      // Enhanced cache key including experiment variant
+      const cacheKey = `${sanitizedArgs.content}_${promptConfig.variant}_${promptConfig.experimentId}_${contextQuality}`
+      const cachedResult = getCachedAnalysis(cacheKey)
+
+      if (cachedResult) {
+        console.log(
+          `Cache hit for experimental analysis ${sanitizedArgs.messageId}`
+        )
+
+        // Log cache hit event
+        if (experimentData && experimentData.experimentId !== 'control') {
+          await ctx.runMutation(api.experiments.logExperimentEvent, {
+            experimentId: experimentData.experimentId,
+            variantId: experimentData.variantId,
+            userId: args.userId,
+            eventType: 'interaction',
+            eventName: 'cache_hit',
+            properties: {
+              processingTimeMs: tracker.getElapsedMs(),
+              contextQuality,
+            },
+            messageId: args.messageId,
+          })
+        }
+
+        recordAnalysisMetrics(tracker.getElapsedMs(), true, true)
+
+        return {
+          messageId: sanitizedArgs.messageId,
+          success: true,
+          statementType: cachedResult.statement_type,
+          beliefs: cachedResult.beliefs,
+          tradeOffs: cachedResult.trade_offs,
+          confidenceLevel: cachedResult.confidence_level,
+          rawData: {
+            originalMessage: sanitizedArgs.content,
+            analysisTimestamp: Date.now(),
+            modelUsed: ANALYSIS_MODEL,
+            processingTimeMs: tracker.getElapsedMs(),
+            cached: true,
+            promptVariant: promptConfig.variant,
+            experimentId: promptConfig.experimentId,
+            variantId: experimentData?.variantId,
+            contextQuality,
+          },
+          experimentData,
+        }
+      }
+
+      // Count tokens for cost tracking
+      const systemTokens = countTokens(systemPrompt)
+      const userTokens = countTokens(userPrompt)
+      const inputTokens = systemTokens + userTokens
+
+      // Make OpenAI API call with experimental prompt
+      const startTime = Date.now()
+
+      const completion = await withRetry(
+        async () =>
+          await openai.chat.completions.create({
+            model: ANALYSIS_MODEL,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            max_tokens: MAX_TOKENS,
+            temperature: TEMPERATURE,
+            response_format: { type: 'json_object' },
+          }),
+        3,
+        error => isRetryableError(error)
+      )
+
+      const processingTime = Date.now() - startTime
+      const outputTokens = completion.usage?.completion_tokens || 0
+      const totalTokens =
+        completion.usage?.total_tokens || inputTokens + outputTokens
+
+      // Parse and validate the response
+      const rawOutput = parseAnalysisResponse(
+        completion.choices[0]?.message?.content
+      )
+
+      const formatted = formatAnalysisOutput(
+        rawOutput,
+        promptConfig,
+        processingTime,
+        contextQuality,
+        sanitizedArgs.content
+      )
+
+      // Apply context-based confidence adjustment if applicable
+      let finalOutput = formatted.output
+      if (conversationContext && contextQuality !== 'low') {
+        finalOutput = adjustConfidenceForContext(
+          finalOutput,
+          conversationContext,
+          contextQuality
+        )
+      }
+
+      // Cache the result
+      setCachedAnalysis(cacheKey, finalOutput)
+
+      // Record performance metrics
+      recordAnalysisMetrics(processingTime, true, false)
+
+      // Log successful analysis event
+      if (experimentData && experimentData.experimentId !== 'control') {
+        await ctx.runMutation(api.experiments.logExperimentEvent, {
+          experimentId: experimentData.experimentId,
+          variantId: experimentData.variantId,
+          userId: args.userId,
+          eventType: 'conversion',
+          eventName: 'analysis_completed',
+          properties: {
+            processingTimeMs: processingTime,
+            confidenceLevel: finalOutput.confidence_level,
+            statementType: finalOutput.statement_type,
+            beliefCount: finalOutput.beliefs.length,
+            tradeOffCount: finalOutput.trade_offs.length,
+            qualityScore: formatted.quality.score,
+            contextQuality,
+            inputTokens,
+            outputTokens,
+            totalTokens,
+          },
+          messageId: args.messageId,
+        })
+      }
+
+      const analysis: AnalysisResponse & { experimentData?: any } = {
+        messageId: sanitizedArgs.messageId,
+        success: true,
+        statementType: finalOutput.statement_type,
+        beliefs: finalOutput.beliefs,
+        tradeOffs: finalOutput.trade_offs,
+        confidenceLevel: finalOutput.confidence_level,
+        rawData: {
+          originalMessage: sanitizedArgs.content,
+          analysisTimestamp: Date.now(),
+          modelUsed: ANALYSIS_MODEL,
+          processingTimeMs: processingTime,
+          cached: false,
+          promptVariant: promptConfig.variant,
+          experimentId: promptConfig.experimentId,
+          variantId: experimentData?.variantId,
+          contextQuality,
+          tokenUsage: {
+            inputTokens,
+            outputTokens,
+            totalTokens,
+          },
+          qualityMetrics: formatted.quality,
+          validationResults: formatted.validation,
+        },
+        experimentData,
+      }
+
+      return analysis
+    } catch (error) {
+      console.error('Experimental analysis failed:', error)
+
+      // Log error event if in experiment
+      if (experimentData && experimentData.experimentId !== 'control') {
+        await ctx.runMutation(api.experiments.logExperimentEvent, {
+          experimentId: experimentData.experimentId,
+          variantId: experimentData.variantId,
+          userId: args.userId,
+          eventType: 'error',
+          eventName: 'analysis_failed',
+          properties: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            processingTimeMs: tracker.getElapsedMs(),
+          },
+          messageId: args.messageId,
+        })
+      }
+
+      // Record error metrics
+      recordAnalysisMetrics(tracker.getElapsedMs(), false, false)
+
+      // Create fallback analysis
+      const fallbackResponse = await withFallback(
+        args.content,
+        classifyErrorForFallback(error)
+      )
+
+      return {
+        messageId: args.messageId,
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+        statementType: fallbackResponse.statement_type,
+        beliefs: fallbackResponse.beliefs,
+        tradeOffs: fallbackResponse.trade_offs,
+        confidenceLevel: fallbackResponse.confidence_level,
+        rawData: {
+          originalMessage: args.content,
+          analysisTimestamp: Date.now(),
+          modelUsed: ANALYSIS_MODEL,
+          processingTimeMs: tracker.getElapsedMs(),
+          cached: false,
+          fallbackUsed: true,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        experimentData,
+      }
+    }
   },
 })
 

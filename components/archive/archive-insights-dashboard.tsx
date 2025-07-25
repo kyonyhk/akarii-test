@@ -84,7 +84,7 @@ export function ArchiveInsightsDashboard({
   }
 
   const insightsByType = insights.reduce(
-    (acc, insight) => {
+    (acc: Record<string, typeof insights>, insight: any) => {
       if (!acc[insight.insightType]) {
         acc[insight.insightType] = []
       }
@@ -95,21 +95,21 @@ export function ArchiveInsightsDashboard({
   )
 
   const insightTypeData = Object.entries(insightsByType).map(
-    ([type, typeInsights]) => ({
+    ([type, typeInsights]: [string, any]) => ({
       type: type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
       count: typeInsights.length,
       avgConfidence:
-        typeInsights.reduce((sum, i) => sum + i.confidence, 0) /
+        typeInsights.reduce((sum: number, i: any) => sum + i.confidence, 0) /
         typeInsights.length,
       highImpact: typeInsights.filter(
-        i => i.impact === 'high' || i.impact === 'critical'
+        (i: any) => i.impact === 'high' || i.impact === 'critical'
       ).length,
       color: INSIGHT_COLORS[type as keyof typeof INSIGHT_COLORS],
     })
   )
 
   const impactDistribution = insights.reduce(
-    (acc, insight) => {
+    (acc: Record<string, number>, insight: any) => {
       acc[insight.impact] = (acc[insight.impact] || 0) + 1
       return acc
     },
@@ -124,13 +124,15 @@ export function ArchiveInsightsDashboard({
     })
   )
 
-  const confidenceData = insights.map(insight => ({
+  const confidenceData = insights.map((insight: any) => ({
     type: insight.insightType.replace('_', ' '),
     confidence: Math.round(insight.confidence * 100),
     impact: insight.impact,
   }))
 
-  const overviewSummary = summaries.find(s => s.summaryType === 'overview')
+  const overviewSummary = summaries.find(
+    (s: any) => s.summaryType === 'overview'
+  )
 
   return (
     <div className="space-y-6">
