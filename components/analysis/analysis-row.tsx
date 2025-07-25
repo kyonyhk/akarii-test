@@ -75,18 +75,21 @@ export function AnalysisRow({
     syncToMessage(analysis.messageId, 'analysis')
   }
 
-  const handleVote = async (voteType: 'up' | 'down') => {
+  const handleVote = async (voteType: 'up' | 'down', requestId?: string) => {
     if (!clerkUser?.id) return
 
     setIsVoting(true)
     try {
-      await thumbVote({
+      const result = await thumbVote({
         analysisId: analysis._id,
         userId: clerkUser.id,
         voteType,
+        requestId,
       })
+      return result
     } catch (error) {
       console.error('Error voting:', error)
+      throw error
     } finally {
       setIsVoting(false)
     }
