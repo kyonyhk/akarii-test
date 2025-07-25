@@ -18,6 +18,8 @@ export interface MessageAnalysis {
     modelUsed: string
     processingTimeMs?: number
     cached?: boolean
+    blocked?: boolean
+    blockReason?: string
     tokenUsage?: {
       inputTokens: number
       outputTokens: number
@@ -38,6 +40,8 @@ export interface AnalysisResponse extends MessageAnalysis {
   messageId: string
   success: boolean
   error?: string
+  errorCode?: string
+  requiresApproval?: boolean
 }
 
 // OpenAI API response structure

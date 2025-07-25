@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { AlertStatusBadge, useAlertData } from './alert-indicators'
+import { AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react'
 
 const currentBillingPeriod = {
   startDate: '2024-01-01',
@@ -29,6 +31,8 @@ const summaryData = {
 }
 
 export function BillingPeriodSummary() {
+  const { alerts, criticalCount, warningCount } = useAlertData()
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -37,27 +41,80 @@ export function BillingPeriodSummary() {
   }
 
   const getBudgetStatus = () => {
+    // Check if there are any cost-related alerts
+    const hasCostAlert = alerts.some(alert => 
+      alert.type === 'cost_limit' && alert.isActive
+    )
+    
+    if (hasCostAlert) {
+      const criticalCostAlert = alerts.some(alert => 
+        alert.type === 'cost_limit' && alert.level === 'critical' && alert.isActive
+      )
+      return criticalCostAlert ? 'destructive' : 'warning'
+    }
+    
     if (summaryData.budgetUsed < 50) return 'success'
     if (summaryData.budgetUsed < 80) return 'warning'
     return 'destructive'
   }
 
   const getTokenStatus = () => {
+    // Check if there are any token-related alerts
+    const hasTokenAlert = alerts.some(alert => 
+      alert.type === 'token_limit' && alert.isActive
+    )
+    
+    if (hasTokenAlert) {
+      const criticalTokenAlert = alerts.some(alert => 
+        alert.type === 'token_limit' && alert.level === 'critical' && alert.isActive
+      )
+      return criticalTokenAlert ? 'destructive' : 'warning'
+    }
+    
     if (summaryData.tokensUsedPercentage < 50) return 'success'
     if (summaryData.tokensUsedPercentage < 80) return 'warning'
     return 'destructive'
   }
 
+  const hasAlerts = alerts.length > 0
+
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Current Period</CardTitle>
-          <Badge variant="outline">
-            {formatDate(currentBillingPeriod.startDate)} -{' '}
-            {formatDate(currentBillingPeriod.endDate)}
-          </Badge>
-        </CardHeader>
+    <div className="space-y-6">
+      {/* Alert Status Summary */}
+      {hasAlerts && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <CardTitle className="text-sm font-medium text-orange-800">
+                Usage Alerts Active
+              </CardTitle>
+            </div>
+            <AlertStatusBadge 
+              alertCount={alerts.length} 
+              criticalCount={criticalCount}
+            />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-orange-700">
+              {criticalCount > 0 
+                ? `${criticalCount} critical alert${criticalCount > 1 ? 's' : ''} require immediate attention`
+                : `${warningCount} warning${warningCount > 1 ? 's' : ''} - usage approaching limits`
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Period</CardTitle>
+            <Badge variant="outline">
+              {formatDate(currentBillingPeriod.startDate)} -{' '}
+              {formatDate(currentBillingPeriod.endDate)}
+            </Badge>
+          </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div>
@@ -82,9 +139,14 @@ export function BillingPeriodSummary() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={alerts.some(a => a.type === 'cost_limit' && a.isActive) ? 'border-l-4 border-l-red-500' : ''}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Budget Usage</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium">Budget Usage</CardTitle>
+            {alerts.some(a => a.type === 'cost_limit' && a.level === 'critical' && a.isActive) && (
+              <AlertTriangle className="h-3 w-3 text-red-500" />
+            )}
+          </div>
           <Badge variant={getBudgetStatus()}>{summaryData.budgetUsed}%</Badge>
         </CardHeader>
         <CardContent>
@@ -102,13 +164,23 @@ export function BillingPeriodSummary() {
               ${(summaryData.budget - summaryData.totalSpent).toFixed(2)}{' '}
               remaining
             </p>
+            {alerts.some(a => a.type === 'cost_limit' && a.isActive) && (
+              <p className="text-xs text-red-600 font-medium">
+                ⚠ Cost alert active
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={alerts.some(a => a.type === 'token_limit' && a.isActive) ? 'border-l-4 border-l-red-500' : ''}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Token Usage</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium">Token Usage</CardTitle>
+            {alerts.some(a => a.type === 'token_limit' && a.level === 'critical' && a.isActive) && (
+              <AlertTriangle className="h-3 w-3 text-red-500" />
+            )}
+          </div>
           <Badge variant={getTokenStatus()}>
             {summaryData.tokensUsedPercentage}%
           </Badge>
@@ -133,6 +205,11 @@ export function BillingPeriodSummary() {
               ).toLocaleString()}{' '}
               remaining
             </p>
+            {alerts.some(a => a.type === 'token_limit' && a.isActive) && (
+              <p className="text-xs text-red-600 font-medium">
+                ⚠ Token alert active
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -180,6 +257,7 @@ export function BillingPeriodSummary() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
