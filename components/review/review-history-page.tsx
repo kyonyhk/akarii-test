@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ExportDropdown } from '@/components/export/export-dropdown'
 // import { useQuery } from 'convex/react'
 // import { api } from '@/convex/_generated/api'
 
@@ -55,7 +56,12 @@ export function ReviewHistoryPage({
   //     limit: 50,
   //   } : 'skip'
   // )
-  const searchResults = { results: [], totalCount: 0, hasMore: false } // Temporary placeholder
+  const searchResults = {
+    results: [],
+    totalCount: 0,
+    hasMore: false,
+    query: undefined,
+  } // Temporary placeholder
 
   const handleConversationSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId)
@@ -84,10 +90,7 @@ export function ReviewHistoryPage({
     setShowSearchResults(true)
   }
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Exporting conversation history...')
-  }
+  // Export functionality is now handled by ExportDropdown component
 
   return (
     <div className="mx-auto flex h-full max-w-6xl flex-col space-y-4 p-4">
@@ -108,10 +111,11 @@ export function ReviewHistoryPage({
             <Filter className="mr-2 h-4 w-4" />
             Filters
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <ExportDropdown
+            data={showSearchResults ? searchResults.results || [] : []}
+            filters={searchFilters}
+            disabled={!showSearchResults || !searchResults.results?.length}
+          />
         </div>
       </div>
 
