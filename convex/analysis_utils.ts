@@ -436,3 +436,213 @@ export function createPerformanceTracker() {
     },
   }
 }
+
+// Fallback response generation for edge cases
+export interface FallbackScenario {
+  type:
+    | 'timeout'
+    | 'rate_limit'
+    | 'service_error'
+    | 'validation_failure'
+    | 'content_filter'
+    | 'unknown_error'
+  severity: 'low' | 'medium' | 'high'
+  userMessage?: string
+  technicalDetails?: string
+}
+
+/**
+ * Creates appropriate fallback responses for different error scenarios
+ */
+export function createFallbackAnalysis(
+  messageId: string,
+  originalContent: string,
+  scenario: FallbackScenario,
+  processingTimeMs?: number
+): OpenAIAnalysisResponse {
+  const timestamp = Date.now()
+
+  // Determine statement type based on simple heuristics
+  let statementType: StatementType = 'other'
+  if (
+    originalContent.includes('?') ||
+    originalContent.toLowerCase().includes('how') ||
+    originalContent.toLowerCase().includes('what') ||
+    originalContent.toLowerCase().includes('why')
+  ) {
+    statementType = 'question'
+  } else if (
+    originalContent.toLowerCase().includes('please') ||
+    originalContent.toLowerCase().includes('can you') ||
+    originalContent.toLowerCase().includes('could you')
+  ) {
+    statementType = 'request'
+  } else if (
+    originalContent.toLowerCase().includes('think') ||
+    originalContent.toLowerCase().includes('believe') ||
+    originalContent.toLowerCase().includes('feel')
+  ) {
+    statementType = 'opinion'
+  }
+
+  const fallbackResponse: OpenAIAnalysisResponse = {
+    statement_type: statementType,
+    beliefs: [],
+    trade_offs: [],
+    confidence_level: 0,
+    reasoning: generateFallbackReasoning(scenario, originalContent),
+  }
+
+  return fallbackResponse
+}
+
+/**
+ * Generates appropriate reasoning text for fallback scenarios
+ */
+function generateFallbackReasoning(
+  scenario: FallbackScenario,
+  originalContent: string
+): string {
+  const baseMessage = `Analysis could not be completed due to ${scenario.type}.`
+
+  switch (scenario.type) {
+    case 'timeout':
+      return `${baseMessage} The message analysis request exceeded the allowed processing time. This may be due to complex content or temporary service delays. The message appears to be ${originalContent.length > 100 ? 'lengthy' : 'standard length'} and may require manual review.`
+
+    case 'rate_limit':
+      return `${baseMessage} The service is currently experiencing high demand. Please try again in a few moments. No analysis could be performed on this message.`
+
+    case 'service_error':
+      return `${baseMessage} The analysis service encountered a technical issue. This is likely temporary and the message should be reanalyzed when service is restored.`
+
+    case 'validation_failure':
+      return `${baseMessage} The message content or analysis output failed quality validation checks. This may indicate complex or ambiguous content that requires human review.`
+
+    case 'content_filter':
+      return `${baseMessage} The message content was flagged by safety filters and cannot be processed through automated analysis. Manual review may be required.`
+
+    case 'unknown_error':
+    default:
+      return `${baseMessage} An unexpected error occurred during analysis. The message content appears to be ${originalContent.length} characters long. Manual analysis may be required.`
+  }
+}
+
+/**
+ * Determines the appropriate fallback scenario based on error details
+ */
+export function classifyErrorForFallback(error: any): FallbackScenario {
+  const errorMessage = error?.message?.toLowerCase() || ''
+  const errorStatus = error?.status || 0
+
+  if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+    return {
+      type: 'timeout',
+      severity: 'medium',
+      userMessage: 'Analysis took too long and was cancelled',
+      technicalDetails: errorMessage,
+    }
+  }
+
+  if (errorStatus === 429 || errorMessage.includes('rate limit')) {
+    return {
+      type: 'rate_limit',
+      severity: 'low',
+      userMessage: 'Service is busy, please try again shortly',
+      technicalDetails: `Rate limit: ${errorMessage}`,
+    }
+  }
+
+  if (
+    errorStatus >= 500 ||
+    errorMessage.includes('service') ||
+    errorMessage.includes('server')
+  ) {
+    return {
+      type: 'service_error',
+      severity: 'high',
+      userMessage: 'Analysis service temporarily unavailable',
+      technicalDetails: `Server error: ${errorMessage}`,
+    }
+  }
+
+  if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {
+    return {
+      type: 'validation_failure',
+      severity: 'medium',
+      userMessage: 'Message could not be analyzed due to content complexity',
+      technicalDetails: `Validation error: ${errorMessage}`,
+    }
+  }
+
+  if (
+    errorMessage.includes('content') ||
+    errorMessage.includes('filter') ||
+    errorMessage.includes('inappropriate')
+  ) {
+    return {
+      type: 'content_filter',
+      severity: 'high',
+      userMessage: 'Message content requires manual review',
+      technicalDetails: `Content filter: ${errorMessage}`,
+    }
+  }
+
+  return {
+    type: 'unknown_error',
+    severity: 'high',
+    userMessage: 'Analysis failed due to unexpected error',
+    technicalDetails: errorMessage,
+  }
+}
+
+/**
+ * Enhanced retry logic with fallback handling
+ */
+export async function withFallback<T>(
+  operation: () => Promise<T>,
+  messageId: string,
+  originalContent: string,
+  maxRetries: number = 3,
+  baseDelay: number = 750
+): Promise<T | OpenAIAnalysisResponse> {
+  let lastError: any
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error
+
+      // Check if error is retryable
+      if (!isRetryableError(error)) {
+        console.log(
+          `Non-retryable error on attempt ${attempt + 1}, falling back:`,
+          error
+        )
+        break
+      }
+
+      // If this is the last attempt, fall back
+      if (attempt === maxRetries - 1) {
+        console.log(`All retry attempts exhausted, falling back:`, error)
+        break
+      }
+
+      // Calculate delay for next attempt
+      const delay = calculateRetryDelay(error, attempt, baseDelay)
+      if (delay > 0) {
+        console.log(
+          `Attempt ${attempt + 1} failed, retrying in ${delay}ms:`,
+          error.message
+        )
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+  }
+
+  // Create fallback response
+  const scenario = classifyErrorForFallback(lastError)
+  console.log(`Creating fallback response for scenario: ${scenario.type}`)
+
+  return createFallbackAnalysis(messageId, originalContent, scenario)
+}
