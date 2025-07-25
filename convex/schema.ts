@@ -433,4 +433,160 @@ export default defineSchema({
     .index('by_threshold_type', ['thresholdType'])
     .index('by_active', ['isActive'])
     .index('by_team_user', ['teamId', 'userId']),
+
+  // A/B Testing Experiments - Configuration and management of prompt experiments
+  experiments: defineTable({
+    name: v.string(), // Human-readable experiment name
+    description: v.string(), // Experiment description and goals
+    experimentType: v.union(
+      v.literal('prompt_variant'), // Testing different prompt variations
+      v.literal('feature_flag'), // Feature enablement testing
+      v.literal('algorithm') // Algorithm comparison testing
+    ),
+    status: v.union(
+      v.literal('draft'), // Being configured
+      v.literal('active'), // Currently running
+      v.literal('paused'), // Temporarily stopped
+      v.literal('completed'), // Finished running
+      v.literal('cancelled') // Cancelled before completion
+    ),
+    variants: v.array(
+      v.object({
+        id: v.string(), // Variant identifier (e.g., 'control', 'treatment_a')
+        name: v.string(), // Human-readable variant name
+        description: v.string(), // What this variant does
+        config: v.any(), // Variant-specific configuration (prompt template, feature flags, etc.)
+        trafficAllocation: v.number(), // Percentage of traffic (0-100)
+        isControl: v.boolean(), // Whether this is the control group
+      })
+    ),
+    targetingRules: v.object({
+      userSegments: v.array(v.string()), // User segments to include ('new_users', 'power_users', etc.)
+      teamIds: v.optional(v.array(v.id('teams'))), // Specific teams to include
+      excludeUserIds: v.optional(v.array(v.string())), // Users to exclude
+      rolloutPercentage: v.number(), // Overall experiment rollout percentage (0-100)
+      geoRestrictions: v.optional(v.array(v.string())), // Geographic restrictions
+    }),
+    metrics: v.object({
+      primaryMetric: v.string(), // Primary success metric ('confidence_score', 'user_satisfaction', etc.)
+      secondaryMetrics: v.array(v.string()), // Additional metrics to track
+      minimumSampleSize: v.number(), // Minimum sample size for statistical significance
+      significanceThreshold: v.number(), // P-value threshold (e.g., 0.05)
+      minimumEffect: v.number(), // Minimum detectable effect size
+    }),
+    schedule: v.object({
+      startDate: v.number(), // Experiment start timestamp
+      endDate: v.optional(v.number()), // Experiment end timestamp (null for indefinite)
+      duration: v.optional(v.number()), // Duration in milliseconds
+      rampUpPeriod: v.optional(v.number()), // Gradual rollout period in milliseconds
+    }),
+    createdBy: v.id('users'),
+    lastModifiedBy: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_status', ['status'])
+    .index('by_experiment_type', ['experimentType'])
+    .index('by_created_by', ['createdBy'])
+    .index('by_created_at', ['createdAt'])
+    .index('by_start_date', ['schedule.startDate']),
+
+  // User Experiment Assignments - Track which users are in which experiments
+  userExperimentAssignments: defineTable({
+    userId: v.string(), // User identifier (Clerk ID)
+    experimentId: v.id('experiments'),
+    variantId: v.string(), // Which variant the user is assigned to
+    assignmentMethod: v.union(
+      v.literal('random'), // Randomly assigned
+      v.literal('manual'), // Manually assigned by admin
+      v.literal('override'), // Override for testing purposes
+      v.literal('targeting') // Assigned based on targeting rules
+    ),
+    assignedAt: v.number(), // When user was assigned
+    firstInteraction: v.optional(v.number()), // First time user interacted with experiment
+    lastInteraction: v.optional(v.number()), // Last interaction timestamp
+    isActive: v.boolean(), // Whether assignment is still active
+    metadata: v.optional(v.any()), // Additional assignment metadata
+  })
+    .index('by_user', ['userId'])
+    .index('by_experiment', ['experimentId'])
+    .index('by_variant', ['variantId'])
+    .index('by_assignment_method', ['assignmentMethod'])
+    .index('by_user_experiment', ['userId', 'experimentId'])
+    .index('by_active', ['isActive']),
+
+  // Experiment Events - Track interactions and outcomes for experiments
+  experimentEvents: defineTable({
+    experimentId: v.id('experiments'),
+    variantId: v.string(),
+    userId: v.string(),
+    eventType: v.union(
+      v.literal('assignment'), // User assigned to experiment
+      v.literal('exposure'), // User exposed to experiment variant
+      v.literal('interaction'), // User interacted with experiment feature
+      v.literal('conversion'), // User performed target action
+      v.literal('error') // Error occurred during experiment
+    ),
+    eventName: v.string(), // Specific event name ('message_analyzed', 'thumbs_up', etc.)
+    properties: v.any(), // Event-specific properties and metrics
+    messageId: v.optional(v.id('messages')), // Associated message if applicable
+    analysisId: v.optional(v.id('analyses')), // Associated analysis if applicable
+    timestamp: v.number(),
+    sessionId: v.optional(v.string()), // User session identifier
+  })
+    .index('by_experiment', ['experimentId'])
+    .index('by_variant', ['variantId'])
+    .index('by_user', ['userId'])
+    .index('by_event_type', ['eventType'])
+    .index('by_timestamp', ['timestamp'])
+    .index('by_experiment_timestamp', ['experimentId', 'timestamp'])
+    .index('by_user_experiment', ['userId', 'experimentId']),
+
+  // Experiment Results - Aggregated metrics and statistical analysis
+  experimentResults: defineTable({
+    experimentId: v.id('experiments'),
+    variantId: v.string(),
+    metricName: v.string(), // Name of the metric being measured
+    aggregationType: v.union(
+      v.literal('count'), // Simple count
+      v.literal('rate'), // Conversion rate
+      v.literal('average'), // Average value
+      v.literal('percentile'), // Percentile value
+      v.literal('sum') // Sum of values
+    ),
+    timeWindow: v.union(
+      v.literal('daily'), // Daily aggregation
+      v.literal('weekly'), // Weekly aggregation
+      v.literal('experiment_lifetime') // Entire experiment duration
+    ),
+    windowStart: v.number(), // Start of time window
+    windowEnd: v.number(), // End of time window
+    sampleSize: v.number(), // Number of users/events in sample
+    value: v.number(), // Metric value
+    confidence: v.optional(v.number()), // Statistical confidence level
+    standardError: v.optional(v.number()), // Standard error of measurement
+    statisticalSignificance: v.optional(v.boolean()), // Whether result is statistically significant
+    pValue: v.optional(v.number()), // P-value for significance testing
+    confidenceInterval: v.optional(
+      v.object({
+        lower: v.number(),
+        upper: v.number(),
+        level: v.number(), // Confidence level (e.g., 0.95 for 95%)
+      })
+    ),
+    comparisonToControl: v.optional(
+      v.object({
+        relativeLift: v.number(), // Percentage improvement over control
+        absoluteDifference: v.number(), // Absolute difference from control
+        isSignificant: v.boolean(), // Whether difference is statistically significant
+      })
+    ),
+    lastUpdated: v.number(),
+  })
+    .index('by_experiment', ['experimentId'])
+    .index('by_variant', ['variantId'])
+    .index('by_metric', ['metricName'])
+    .index('by_time_window', ['timeWindow'])
+    .index('by_window_start', ['windowStart'])
+    .index('by_experiment_metric', ['experimentId', 'metricName']),
 })
