@@ -143,7 +143,7 @@ export default function SharePage() {
               </div>
             </div>
 
-            {link.expiresAt && (
+            {link?.expiresAt && (
               <div className="mt-4 flex items-center space-x-2 text-sm text-amber-600">
                 <AlertCircle className="h-4 w-4" />
                 <span>

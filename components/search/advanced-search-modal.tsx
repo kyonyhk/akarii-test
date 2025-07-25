@@ -203,8 +203,9 @@ export function AdvancedSearchModal({
                 </div>
                 {filters.useBooleanSearch && (
                   <p className="text-xs text-muted-foreground">
-                    Examples: &ldquo;AI AND machine learning&rdquo;, &ldquo;question OR opinion&rdquo;,
-                    &ldquo;NOT politics&rdquo;
+                    Examples: &ldquo;AI AND machine learning&rdquo;,
+                    &ldquo;question OR opinion&rdquo;, &ldquo;NOT
+                    politics&rdquo;
                   </p>
                 )}
               </div>
