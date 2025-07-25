@@ -198,12 +198,13 @@ export const updateAnalysis = mutation({
   },
 })
 
-// Thumb vote mutation with proper schema compliance
+// Thumb vote mutation with proper schema compliance and duplicate prevention
 export const thumbVote = mutation({
   args: {
     analysisId: v.id('analyses'),
     userId: v.string(),
     voteType: v.union(v.literal('up'), v.literal('down')),
+    requestId: v.optional(v.string()), // For request deduplication
   },
   handler: async (ctx, args) => {
     // Validate that the analysis exists
@@ -215,6 +216,33 @@ export const thumbVote = mutation({
     // Validate userId
     if (!args.userId || args.userId.trim() === '') {
       throw new Error('User ID is required')
+    }
+
+    // Simple duplicate request prevention using request ID and timestamp
+    if (args.requestId) {
+      const recentRequestThreshold = Date.now() - 1000 // 1 second window
+      const currentUserVotes = analysis.userVotes as Array<{
+        userId: string
+        voteType: 'up' | 'down'
+        timestamp: number
+      }>
+
+      // Check if there's a very recent vote from this user (within 1 second)
+      const recentVote = currentUserVotes.find(
+        vote =>
+          vote.userId === args.userId && vote.timestamp > recentRequestThreshold
+      )
+
+      if (recentVote && recentVote.voteType === args.voteType) {
+        // Return current state without changes for duplicate requests
+        return {
+          analysisId: args.analysisId,
+          thumbsUp: analysis.thumbsUp,
+          thumbsDown: analysis.thumbsDown,
+          userVote: recentVote.voteType,
+          isDuplicate: true,
+        }
+      }
     }
 
     // Get current user votes (properly typed as array per schema)
@@ -279,6 +307,7 @@ export const thumbVote = mutation({
         existingVote && existingVote.voteType === args.voteType
           ? null
           : args.voteType,
+      isDuplicate: false,
     }
   },
 })
