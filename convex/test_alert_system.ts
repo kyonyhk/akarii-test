@@ -55,16 +55,19 @@ export const testAlertSystem = action({
 async function testCreateAlertConfig(ctx: any, teamId: string, results: any[]) {
   // Test creating alert configuration
   try {
-    const alertConfigId = await ctx.runMutation('alert_configs:createAlertConfig', {
-      teamId,
-      alertType: 'cost_limit',
-      thresholdValue: 10.0,
-      thresholdUnit: 'dollars',
-      timeWindow: 'monthly',
-      notificationMethods: ['email', 'dashboard'],
-      warningThreshold: 8.0,
-      createdBy: `test_user_${Date.now()}`,
-    })
+    const alertConfigId = await ctx.runMutation(
+      'alert_configs:createAlertConfig',
+      {
+        teamId,
+        alertType: 'cost_limit',
+        thresholdValue: 10.0,
+        thresholdUnit: 'dollars',
+        timeWindow: 'monthly',
+        notificationMethods: ['email', 'dashboard'],
+        warningThreshold: 8.0,
+        createdBy: `test_user_${Date.now()}`,
+      }
+    )
 
     results.push({
       test: 'Create Alert Config',
@@ -73,15 +76,18 @@ async function testCreateAlertConfig(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test retrieving the configuration
-    const configs = await ctx.runQuery('alert_configs:getTeamAlertConfigs', { teamId })
+    const configs = await ctx.runQuery('alert_configs:getTeamAlertConfigs', {
+      teamId,
+    })
     const createdConfig = configs.find((c: any) => c._id === alertConfigId)
 
     results.push({
       test: 'Retrieve Alert Config',
       passed: !!createdConfig && createdConfig.thresholdValue === 10.0,
-      details: createdConfig ? `Retrieved config with threshold ${createdConfig.thresholdValue}` : 'Config not found',
+      details: createdConfig
+        ? `Retrieved config with threshold ${createdConfig.thresholdValue}`
+        : 'Config not found',
     })
-
   } catch (error) {
     results.push({
       test: 'Create Alert Config',
@@ -106,7 +112,10 @@ async function testTriggerAlert(ctx: any, teamId: string, results: any[]) {
     })
 
     // Check if alerts are triggered
-    const triggeredAlerts = await ctx.runQuery('alert_monitor:checkTeamAlerts', { teamId })
+    const triggeredAlerts = await ctx.runQuery(
+      'alert_monitor:checkTeamAlerts',
+      { teamId }
+    )
 
     results.push({
       test: 'Check Triggered Alerts',
@@ -115,17 +124,19 @@ async function testTriggerAlert(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test usage status
-    const usageStatus = await ctx.runQuery('alert_monitor:getTeamUsageInWindow', {
-      teamId,
-      timeWindow: 'monthly',
-    })
+    const usageStatus = await ctx.runQuery(
+      'alert_monitor:getTeamUsageInWindow',
+      {
+        teamId,
+        timeWindow: 'monthly',
+      }
+    )
 
     results.push({
       test: 'Usage Status Check',
       passed: usageStatus && typeof usageStatus.totalTokens === 'number',
       details: `Total tokens: ${usageStatus?.totalTokens}, Total cost: $${usageStatus?.totalCost}`,
     })
-
   } catch (error) {
     results.push({
       test: 'Trigger Alert',
@@ -154,11 +165,14 @@ async function testCheckLimits(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test usage limit checking
-    const limitCheck = await ctx.runQuery('usage_enforcement:checkUsageLimits', {
-      teamId,
-      estimatedTokens: 1000,
-      estimatedCost: 0.02,
-    })
+    const limitCheck = await ctx.runQuery(
+      'usage_enforcement:checkUsageLimits',
+      {
+        teamId,
+        estimatedTokens: 1000,
+        estimatedCost: 0.02,
+      }
+    )
 
     results.push({
       test: 'Check Usage Limits',
@@ -167,14 +181,16 @@ async function testCheckLimits(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test limit status
-    const limitStatus = await ctx.runQuery('usage_enforcement:getUsageLimitStatus', { teamId })
+    const limitStatus = await ctx.runQuery(
+      'usage_enforcement:getUsageLimitStatus',
+      { teamId }
+    )
 
     results.push({
       test: 'Get Limit Status',
       passed: limitStatus && Array.isArray(limitStatus.limits),
       details: `Found ${limitStatus?.limits?.length || 0} active limits`,
     })
-
   } catch (error) {
     results.push({
       test: 'Check Limits',
@@ -187,12 +203,15 @@ async function testCheckLimits(ctx: any, teamId: string, results: any[]) {
 async function testSendNotification(ctx: any, teamId: string, results: any[]) {
   try {
     // Test email notification
-    const emailResult = await ctx.runAction('alert_notifications:sendEmailNotification', {
-      to: ['test@example.com'],
-      subject: 'Test Alert',
-      message: 'This is a test alert notification',
-      urgency: 'medium',
-    })
+    const emailResult = await ctx.runAction(
+      'alert_notifications:sendEmailNotification',
+      {
+        to: ['test@example.com'],
+        subject: 'Test Alert',
+        message: 'This is a test alert notification',
+        urgency: 'medium',
+      }
+    )
 
     results.push({
       test: 'Send Email Notification',
@@ -201,10 +220,13 @@ async function testSendNotification(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test webhook notification
-    const webhookResult = await ctx.runAction('alert_notifications:sendWebhookNotification', {
-      webhookUrl: 'https://httpbin.org/post',
-      payload: { test: true, timestamp: Date.now() },
-    })
+    const webhookResult = await ctx.runAction(
+      'alert_notifications:sendWebhookNotification',
+      {
+        webhookUrl: 'https://httpbin.org/post',
+        payload: { test: true, timestamp: Date.now() },
+      }
+    )
 
     results.push({
       test: 'Send Webhook Notification',
@@ -226,17 +248,19 @@ async function testSendNotification(ctx: any, teamId: string, results: any[]) {
       usage: { totalTokens: 1000, totalCost: 12, requestCount: 5 },
     }
 
-    const processResult = await ctx.runAction('alert_notifications:processAlertNotifications', {
-      teamId,
-      alerts: [mockAlert],
-    })
+    const processResult = await ctx.runAction(
+      'alert_notifications:processAlertNotifications',
+      {
+        teamId,
+        alerts: [mockAlert],
+      }
+    )
 
     results.push({
       test: 'Process Alert Notifications',
       passed: processResult.alertsProcessed === 1,
       details: `Processed ${processResult.alertsProcessed} alerts`,
     })
-
   } catch (error) {
     results.push({
       test: 'Send Notification',
@@ -268,7 +292,9 @@ async function testFullWorkflow(ctx: any, teamId: string, results: any[]) {
     })
 
     // Check if this triggers monitoring
-    const alertStatus = await ctx.runQuery('alert_monitor:getTeamAlertStatus', { teamId })
+    const alertStatus = await ctx.runQuery('alert_monitor:getTeamAlertStatus', {
+      teamId,
+    })
 
     results.push({
       test: 'Full Workflow Integration',
@@ -277,14 +303,16 @@ async function testFullWorkflow(ctx: any, teamId: string, results: any[]) {
     })
 
     // Test dashboard alert display
-    const dashboardAlerts = await ctx.runMutation('alert_notifications:getDashboardAlerts', { teamId })
+    const dashboardAlerts = await ctx.runMutation(
+      'alert_notifications:getDashboardAlerts',
+      { teamId }
+    )
 
     results.push({
       test: 'Dashboard Alert Display',
       passed: dashboardAlerts && Array.isArray(dashboardAlerts.currentAlerts),
       details: `Dashboard shows ${dashboardAlerts?.currentAlerts?.length || 0} alerts`,
     })
-
   } catch (error) {
     results.push({
       test: 'Full Workflow Integration',
@@ -301,15 +329,15 @@ export const cleanupTestData = action({
     try {
       // Note: In a real implementation, you would need proper cleanup functions
       // This is a placeholder for test data cleanup
-      
+
       console.log(`Cleaning up test data for team ${args.teamId}`)
-      
+
       // Would clean up:
       // - Test alert configurations
       // - Test usage limits
       // - Test usage records
       // - Test alert history
-      
+
       return {
         success: true,
         message: 'Test data cleanup completed',
@@ -336,10 +364,12 @@ export const performanceTestAlerts = action({
     try {
       for (let i = 0; i < args.iterations; i++) {
         const iterationStart = Date.now()
-        
+
         // Test alert checking performance
-        await ctx.runQuery('alert_monitor:checkTeamAlerts', { teamId: args.teamId })
-        
+        await ctx.runQuery('alert_monitor:checkTeamAlerts', {
+          teamId: args.teamId,
+        })
+
         const iterationTime = Date.now() - iterationStart
         results.push(iterationTime)
       }

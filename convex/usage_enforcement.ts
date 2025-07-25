@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 
 // Check if a team is allowed to make a request based on usage limits
 export const checkUsageLimits = query({
-  args: { 
+  args: {
     teamId: v.id('teams'),
     estimatedTokens: v.optional(v.number()),
     estimatedCost: v.optional(v.number()),
@@ -12,8 +12,8 @@ export const checkUsageLimits = query({
     // Get active usage limits for the team
     const usageLimits = await ctx.db
       .query('usageLimits')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     if (usageLimits.length === 0) {
@@ -28,12 +28,12 @@ export const checkUsageLimits = query({
 
     for (const limit of usageLimits) {
       const windowStart = getTimeWindowStart(limit.timeWindow)
-      
+
       // Get current usage in this time window
       const usageRecords = await ctx.db
         .query('usageMetrics')
-        .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-        .filter((q) => q.gte(q.field('timestamp'), windowStart))
+        .withIndex('by_team', q => q.eq('teamId', args.teamId))
+        .filter(q => q.gte(q.field('timestamp'), windowStart))
         .collect()
 
       let currentValue = 0
@@ -41,11 +41,17 @@ export const checkUsageLimits = query({
 
       switch (limit.limitType) {
         case 'hard_token_limit':
-          currentValue = usageRecords.reduce((sum, record) => sum + record.totalTokens, 0)
+          currentValue = usageRecords.reduce(
+            (sum, record) => sum + record.totalTokens,
+            0
+          )
           estimatedNewValue = currentValue + (args.estimatedTokens || 0)
           break
         case 'hard_cost_limit':
-          currentValue = usageRecords.reduce((sum, record) => sum + record.cost, 0)
+          currentValue = usageRecords.reduce(
+            (sum, record) => sum + record.cost,
+            0
+          )
           estimatedNewValue = currentValue + (args.estimatedCost || 0)
           break
         case 'rate_limit':
@@ -66,8 +72,12 @@ export const checkUsageLimits = query({
     }
 
     // Determine response based on enforcement actions
-    const blockingViolations = violations.filter(v => v.limit.enforcementAction === 'block_requests')
-    const approvalViolations = violations.filter(v => v.limit.enforcementAction === 'require_approval')
+    const blockingViolations = violations.filter(
+      v => v.limit.enforcementAction === 'block_requests'
+    )
+    const approvalViolations = violations.filter(
+      v => v.limit.enforcementAction === 'require_approval'
+    )
 
     if (blockingViolations.length > 0) {
       return {
@@ -92,7 +102,9 @@ export const checkUsageLimits = query({
     return {
       allowed: true,
       message: 'Request within usage limits',
-      violations: violations.filter(v => v.limit.enforcementAction === 'notify_only'),
+      violations: violations.filter(
+        v => v.limit.enforcementAction === 'notify_only'
+      ),
     }
   },
 })
@@ -101,7 +113,7 @@ export const checkUsageLimits = query({
 function getTimeWindowStart(window: string): number {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  
+
   switch (window) {
     case 'daily':
       return today.getTime()
@@ -160,7 +172,7 @@ export const createApprovalRequest = mutation({
   handler: async (ctx, args) => {
     // For now, we'll create a placeholder approval system
     // In a full implementation, this would integrate with admin workflow
-    
+
     // Log the approval request
     console.log('APPROVAL REQUEST CREATED:', {
       teamId: args.teamId,
@@ -211,7 +223,7 @@ export const createUsageOverride = mutation({
 
     // Create override record (this would be a new table in a full implementation)
     const overrideId = `override_${Date.now()}`
-    
+
     console.log('USAGE OVERRIDE CREATED:', {
       overrideId,
       teamId: args.teamId,
@@ -248,19 +260,19 @@ export const getUsageLimitStatus = query({
   handler: async (ctx, args) => {
     const usageLimits = await ctx.db
       .query('usageLimits')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     const limitStatus = []
 
     for (const limit of usageLimits) {
       const windowStart = getTimeWindowStart(limit.timeWindow)
-      
+
       const usageRecords = await ctx.db
         .query('usageMetrics')
-        .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-        .filter((q) => q.gte(q.field('timestamp'), windowStart))
+        .withIndex('by_team', q => q.eq('teamId', args.teamId))
+        .filter(q => q.gte(q.field('timestamp'), windowStart))
         .collect()
 
       let currentValue = 0
@@ -268,11 +280,17 @@ export const getUsageLimitStatus = query({
 
       switch (limit.limitType) {
         case 'hard_token_limit':
-          currentValue = usageRecords.reduce((sum, record) => sum + record.totalTokens, 0)
+          currentValue = usageRecords.reduce(
+            (sum, record) => sum + record.totalTokens,
+            0
+          )
           unit = 'tokens'
           break
         case 'hard_cost_limit':
-          currentValue = usageRecords.reduce((sum, record) => sum + record.cost, 0)
+          currentValue = usageRecords.reduce(
+            (sum, record) => sum + record.cost,
+            0
+          )
           unit = 'dollars'
           break
         case 'rate_limit':
@@ -302,7 +320,9 @@ export const getUsageLimitStatus = query({
     return {
       limits: limitStatus,
       hasActiveLimits: limitStatus.length > 0,
-      hasBlockingLimits: limitStatus.some(l => l.isAtLimit && l.limit.enforcementAction === 'block_requests'),
+      hasBlockingLimits: limitStatus.some(
+        l => l.isAtLimit && l.limit.enforcementAction === 'block_requests'
+      ),
       hasNearLimits: limitStatus.some(l => l.isNearLimit),
     }
   },
@@ -330,10 +350,14 @@ export const estimateTokenUsage = query({
 
     switch (args.operationType) {
       case 'analysis':
-        estimatedTokens = baseTokensPerMessage + (args.messageLength || 0) * tokensPerCharacter + 500 // Analysis overhead
+        estimatedTokens =
+          baseTokensPerMessage +
+          (args.messageLength || 0) * tokensPerCharacter +
+          500 // Analysis overhead
         break
       case 'bulk_analysis':
-        estimatedTokens = (args.messageCount || 1) * (baseTokensPerMessage + 300) // Bulk processing
+        estimatedTokens =
+          (args.messageCount || 1) * (baseTokensPerMessage + 300) // Bulk processing
         break
       case 'test':
         estimatedTokens = 50 // Minimal for tests

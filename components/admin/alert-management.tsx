@@ -221,8 +221,8 @@ export function AlertManagement({
               <div className="space-y-4">
                 {currentConfigs.length === 0 && !isCreatingAlert && (
                   <p className="py-8 text-center text-sm text-gray-500">
-                    No alert configurations found. Click "Add Alert" to create
-                    your first one.
+                    No alert configurations found. Click &quot;Add Alert&quot;
+                    to create your first one.
                   </p>
                 )}
 
@@ -269,8 +269,8 @@ export function AlertManagement({
               <div className="space-y-4">
                 {currentLimits.length === 0 && !isCreatingLimit && (
                   <p className="py-8 text-center text-sm text-gray-500">
-                    No usage limits configured. Click "Add Limit" to create
-                    enforcement rules.
+                    No usage limits configured. Click &quot;Add Limit&quot; to
+                    create enforcement rules.
                   </p>
                 )}
 

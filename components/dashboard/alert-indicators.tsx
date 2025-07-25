@@ -108,7 +108,7 @@ export function AlertIndicators({
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
             <strong>Warning:</strong> {warningAlerts.length} usage threshold(s)
-            approaching. Consider reviewing your team's usage patterns.
+            approaching. Consider reviewing your team&apos;s usage patterns.
           </AlertDescription>
         </Alert>
       )}

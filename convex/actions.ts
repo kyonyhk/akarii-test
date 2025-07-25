@@ -99,11 +99,14 @@ export const analyzeMessage = action({
 
       // Check usage limits if teamId is provided
       if (args.teamId) {
-        const usageCheck = await ctx.runQuery('usage_enforcement:checkUsageLimits', {
-          teamId: args.teamId,
-          estimatedTokens,
-          estimatedCost,
-        })
+        const usageCheck = await ctx.runQuery(
+          'usage_enforcement:checkUsageLimits',
+          {
+            teamId: args.teamId,
+            estimatedTokens,
+            estimatedCost,
+          }
+        )
 
         if (!usageCheck.allowed) {
           // Record the blocked request

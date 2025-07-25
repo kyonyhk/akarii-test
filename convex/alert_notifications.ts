@@ -15,7 +15,10 @@ interface TeamData {
 }
 
 // Format alert message for different notification methods
-function formatAlertMessage(alert: AlertData, team: TeamData): {
+function formatAlertMessage(
+  alert: AlertData,
+  team: TeamData
+): {
   subject: string
   message: string
   urgency: 'low' | 'medium' | 'high'
@@ -23,10 +26,10 @@ function formatAlertMessage(alert: AlertData, team: TeamData): {
   const { config, currentValue, isWarning, usage } = alert
   const urgency = isWarning ? 'medium' : 'high'
   const alertLevel = isWarning ? 'Warning' : 'Alert'
-  
+
   let unit = ''
   let thresholdDescription = ''
-  
+
   switch (config.thresholdUnit) {
     case 'tokens':
       unit = 'tokens'
@@ -55,7 +58,7 @@ function formatAlertMessage(alert: AlertData, team: TeamData): {
   }
 
   const subject = `${alertLevel}: ${team.name} - ${thresholdDescription}`
-  
+
   const message = `
 Team: ${team.name}
 Alert Type: ${config.alertType}
@@ -70,9 +73,11 @@ Usage Summary:
 - Request Count: ${usage.requestCount}
 - Time Period: ${config.timeWindow}
 
-${isWarning 
-  ? 'This is a warning alert. Usage is approaching the configured limit.' 
-  : 'This is a critical alert. Usage has exceeded the configured limit.'}
+${
+  isWarning
+    ? 'This is a warning alert. Usage is approaching the configured limit.'
+    : 'This is a critical alert. Usage has exceeded the configured limit.'
+}
 
 Please review your team's usage and take appropriate action.
   `.trim()
@@ -91,7 +96,7 @@ export const sendEmailNotification = action({
   handler: async (ctx, args) => {
     // This would integrate with an actual email service like SendGrid, SES, etc.
     // For now, we'll log the email and mark it as sent
-    
+
     console.log('EMAIL NOTIFICATION:', {
       to: args.to,
       subject: args.subject,
@@ -105,7 +110,7 @@ export const sendEmailNotification = action({
     // 2. Format the message as HTML email
     // 3. Handle email delivery failures
     // 4. Track delivery status
-    
+
     return {
       success: true,
       method: 'email',
@@ -161,7 +166,7 @@ export const processAlertNotifications = action({
   },
   handler: async (ctx, args) => {
     const { teamId, alerts } = args
-    
+
     // Get team data
     const team = await ctx.runQuery('teams:getTeam', { teamId })
     if (!team) {
@@ -173,10 +178,13 @@ export const processAlertNotifications = action({
     for (const memberId of team.members) {
       const user = await ctx.runQuery('users:getUserById', { userId: memberId })
       if (user) {
-        const preferences = await ctx.runQuery('alert_configs:getUserNotificationPreferences', {
-          userId: memberId,
-          teamId,
-        })
+        const preferences = await ctx.runQuery(
+          'alert_configs:getUserNotificationPreferences',
+          {
+            userId: memberId,
+            teamId,
+          }
+        )
         teamMembers.push({ user, preferences })
       }
     }
@@ -193,35 +201,53 @@ export const processAlertNotifications = action({
 
       for (const member of teamMembers) {
         const { user, preferences } = member
-        
+
         // Check if user wants this type of alert
-        if (preferences && preferences.alertTypes.includes(alert.config.alertType)) {
-          if (preferences.emailEnabled && alert.config.notificationMethods.includes('email')) {
+        if (
+          preferences &&
+          preferences.alertTypes.includes(alert.config.alertType)
+        ) {
+          if (
+            preferences.emailEnabled &&
+            alert.config.notificationMethods.includes('email')
+          ) {
             emailRecipients.push(user.email)
           }
-          
-          if (preferences.webhookUrl && alert.config.notificationMethods.includes('webhook')) {
+
+          if (
+            preferences.webhookUrl &&
+            alert.config.notificationMethods.includes('webhook')
+          ) {
             webhookUrls.push(preferences.webhookUrl)
           }
         }
       }
 
       // Send email notifications
-      if (emailRecipients.length > 0 && alert.config.notificationMethods.includes('email')) {
-        const emailResult = await ctx.runAction('alert_notifications:sendEmailNotification', {
-          to: emailRecipients,
-          subject,
-          message,
-          urgency,
-        })
-        
+      if (
+        emailRecipients.length > 0 &&
+        alert.config.notificationMethods.includes('email')
+      ) {
+        const emailResult = await ctx.runAction(
+          'alert_notifications:sendEmailNotification',
+          {
+            to: emailRecipients,
+            subject,
+            message,
+            urgency,
+          }
+        )
+
         if (emailResult.success) {
           notificationsSent.push('email')
         }
       }
 
       // Send webhook notifications
-      if (webhookUrls.length > 0 && alert.config.notificationMethods.includes('webhook')) {
+      if (
+        webhookUrls.length > 0 &&
+        alert.config.notificationMethods.includes('webhook')
+      ) {
         const webhookPayload = {
           alertType: alert.config.alertType,
           teamId: teamId,
@@ -235,11 +261,14 @@ export const processAlertNotifications = action({
         }
 
         for (const webhookUrl of webhookUrls) {
-          const webhookResult = await ctx.runAction('alert_notifications:sendWebhookNotification', {
-            webhookUrl,
-            payload: webhookPayload,
-          })
-          
+          const webhookResult = await ctx.runAction(
+            'alert_notifications:sendWebhookNotification',
+            {
+              webhookUrl,
+              payload: webhookPayload,
+            }
+          )
+
           if (webhookResult.success && !notificationsSent.includes('webhook')) {
             notificationsSent.push('webhook')
           }
@@ -252,15 +281,18 @@ export const processAlertNotifications = action({
       }
 
       // Record the alert in history
-      const alertHistoryId = await ctx.runMutation('alert_monitor:recordAlert', {
-        alertConfigId: alert.config._id,
-        teamId,
-        alertType: alert.config.alertType,
-        thresholdValue: alert.config.thresholdValue,
-        actualValue: alert.currentValue,
-        isWarning: alert.isWarning,
-        notificationsSent,
-      })
+      const alertHistoryId = await ctx.runMutation(
+        'alert_monitor:recordAlert',
+        {
+          alertConfigId: alert.config._id,
+          teamId,
+          alertType: alert.config.alertType,
+          thresholdValue: alert.config.thresholdValue,
+          actualValue: alert.currentValue,
+          isWarning: alert.isWarning,
+          notificationsSent,
+        }
+      )
 
       notificationResults.push({
         alertConfigId: alert.config._id,
@@ -289,22 +321,31 @@ export const getDashboardAlerts = mutation({
     })
 
     // Get recent alert history for dashboard display
-    const recentAlerts = await ctx.runQuery('alert_monitor:getTeamAlertHistory', {
-      teamId: args.teamId,
-      limit: 10,
-    })
+    const recentAlerts = await ctx.runQuery(
+      'alert_monitor:getTeamAlertHistory',
+      {
+        teamId: args.teamId,
+        limit: 10,
+      }
+    )
 
     // Get unresolved alerts
-    const unresolvedAlerts = await ctx.runQuery('alert_monitor:getUnresolvedAlerts', {
-      teamId: args.teamId,
-    })
+    const unresolvedAlerts = await ctx.runQuery(
+      'alert_monitor:getUnresolvedAlerts',
+      {
+        teamId: args.teamId,
+      }
+    )
 
     // Format for dashboard display
     const dashboardAlerts = currentAlerts.map(alert => ({
       id: `current_${alert.config._id}`,
       type: alert.config.alertType,
       level: alert.isWarning ? 'warning' : 'critical',
-      message: formatAlertMessage(alert, { name: 'Current Team', _id: args.teamId }).subject,
+      message: formatAlertMessage(alert, {
+        name: 'Current Team',
+        _id: args.teamId,
+      }).subject,
       currentValue: alert.currentValue,
       thresholdValue: alert.config.thresholdValue,
       unit: alert.config.thresholdUnit,
@@ -351,9 +392,12 @@ export const testAlertNotification = action({
       },
     }
 
-    return await ctx.runAction('alert_notifications:processAlertNotifications', {
-      teamId: args.teamId,
-      alerts: [testAlert],
-    })
+    return await ctx.runAction(
+      'alert_notifications:processAlertNotifications',
+      {
+        teamId: args.teamId,
+        alerts: [testAlert],
+      }
+    )
   },
 })

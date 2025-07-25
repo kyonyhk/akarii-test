@@ -24,11 +24,7 @@ export const createAlertConfig = mutation({
       v.literal('total')
     ),
     notificationMethods: v.array(
-      v.union(
-        v.literal('email'),
-        v.literal('dashboard'),
-        v.literal('webhook')
-      )
+      v.union(v.literal('email'), v.literal('dashboard'), v.literal('webhook'))
     ),
     warningThreshold: v.optional(v.number()),
     createdBy: v.id('users'),
@@ -58,7 +54,7 @@ export const getTeamAlertConfigs = query({
   handler: async (ctx, args) => {
     const configs = await ctx.db
       .query('alertConfigurations')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
       .collect()
 
     return configs
@@ -71,8 +67,8 @@ export const getActiveAlertConfigs = query({
   handler: async (ctx, args) => {
     const configs = await ctx.db
       .query('alertConfigurations')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     return configs
@@ -98,7 +94,7 @@ export const updateAlertConfig = mutation({
   },
   handler: async (ctx, args) => {
     const { alertConfigId, ...updates } = args
-    
+
     const updateData: any = {
       ...updates,
       updatedAt: Date.now(),
@@ -112,7 +108,7 @@ export const updateAlertConfig = mutation({
     })
 
     await ctx.db.patch(alertConfigId, updateData)
-    
+
     return await ctx.db.get(alertConfigId)
   },
 })
@@ -140,7 +136,7 @@ export const upsertNotificationPreferences = mutation({
     // Check if preferences already exist
     const existing = await ctx.db
       .query('notificationPreferences')
-      .withIndex('by_user_team', (q) => 
+      .withIndex('by_user_team', q =>
         q.eq('userId', args.userId).eq('teamId', args.teamId)
       )
       .first()
@@ -174,14 +170,14 @@ export const upsertNotificationPreferences = mutation({
 
 // Get notification preferences for a user
 export const getUserNotificationPreferences = query({
-  args: { 
+  args: {
     userId: v.id('users'),
-    teamId: v.optional(v.id('teams'))
+    teamId: v.optional(v.id('teams')),
   },
   handler: async (ctx, args) => {
     const preferences = await ctx.db
       .query('notificationPreferences')
-      .withIndex('by_user_team', (q) => 
+      .withIndex('by_user_team', q =>
         q.eq('userId', args.userId).eq('teamId', args.teamId)
       )
       .first()
@@ -236,7 +232,7 @@ export const getTeamUsageLimits = query({
   handler: async (ctx, args) => {
     const limits = await ctx.db
       .query('usageLimits')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
       .collect()
 
     return limits
@@ -249,8 +245,8 @@ export const getActiveUsageLimits = query({
   handler: async (ctx, args) => {
     const limits = await ctx.db
       .query('usageLimits')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     return limits
@@ -273,7 +269,7 @@ export const updateUsageLimit = mutation({
   },
   handler: async (ctx, args) => {
     const { limitId, ...updates } = args
-    
+
     const updateData: any = {
       ...updates,
       updatedAt: Date.now(),
@@ -287,7 +283,7 @@ export const updateUsageLimit = mutation({
     })
 
     await ctx.db.patch(limitId, updateData)
-    
+
     return await ctx.db.get(limitId)
   },
 })
@@ -295,7 +291,7 @@ export const updateUsageLimit = mutation({
 // Get count of all alert configurations
 export const getAlertConfigCount = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async ctx => {
     const configs = await ctx.db.query('alertConfigurations').collect()
     return configs.length
   },

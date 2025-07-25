@@ -275,12 +275,11 @@ export const removeTeamMember = mutation({
   },
 })
 
-
 // Get all teams (for admin/system functions)
 export const getAllTeams = query({
   args: {},
-  handler: async (ctx) => {
-    const teams = await ctx.db.query("teams").collect()
+  handler: async ctx => {
+    const teams = await ctx.db.query('teams').collect()
     return teams
   },
 })

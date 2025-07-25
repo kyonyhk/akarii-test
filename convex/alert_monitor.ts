@@ -5,7 +5,7 @@ import { v } from 'convex/values'
 function getTimeWindowStart(window: string): number {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  
+
   switch (window) {
     case 'daily':
       return today.getTime()
@@ -35,15 +35,18 @@ export const getTeamUsageInWindow = query({
   },
   handler: async (ctx, args) => {
     const windowStart = getTimeWindowStart(args.timeWindow)
-    
+
     // Get usage from usageMetrics table
     const usageRecords = await ctx.db
       .query('usageMetrics')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.gte(q.field('timestamp'), windowStart))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.gte(q.field('timestamp'), windowStart))
       .collect()
 
-    const totalTokens = usageRecords.reduce((sum, record) => sum + record.totalTokens, 0)
+    const totalTokens = usageRecords.reduce(
+      (sum, record) => sum + record.totalTokens,
+      0
+    )
     const totalCost = usageRecords.reduce((sum, record) => sum + record.cost, 0)
     const requestCount = usageRecords.length
 
@@ -61,7 +64,7 @@ export const getTeamUsageInWindow = query({
 // Check all teams for alert conditions
 export const checkAllTeamAlerts = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async ctx => {
     const teams = await ctx.db.query('teams').collect()
     const alertsTriggered = []
 
@@ -87,8 +90,8 @@ export const checkTeamAlerts = query({
     // Get active alert configurations for the team
     const alertConfigs = await ctx.db
       .query('alertConfigurations')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     const triggeredAlerts = []
@@ -114,7 +117,10 @@ export const checkTeamAlerts = query({
           break
         case 'daily_usage':
         case 'monthly_usage':
-          currentValue = config.thresholdUnit === 'tokens' ? usage.totalTokens : usage.totalCost
+          currentValue =
+            config.thresholdUnit === 'tokens'
+              ? usage.totalTokens
+              : usage.totalCost
           break
       }
 
@@ -134,8 +140,8 @@ export const checkTeamAlerts = query({
         // Check if we've already sent this alert recently (avoid spam)
         const recentAlert = await ctx.db
           .query('alertHistory')
-          .withIndex('by_alert_config', (q) => q.eq('alertConfigId', config._id))
-          .filter((q) => 
+          .withIndex('by_alert_config', q => q.eq('alertConfigId', config._id))
+          .filter(q =>
             q.and(
               q.eq(q.field('isWarning'), isWarning),
               q.eq(q.field('resolvedAt'), undefined),
@@ -200,14 +206,14 @@ export const resolveAlert = mutation({
 
 // Get alert history for a team
 export const getTeamAlertHistory = query({
-  args: { 
+  args: {
     teamId: v.id('teams'),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const query = ctx.db
       .query('alertHistory')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
       .order('desc')
 
     if (args.limit) {
@@ -224,8 +230,8 @@ export const getUnresolvedAlerts = query({
   handler: async (ctx, args) => {
     const alerts = await ctx.db
       .query('alertHistory')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('resolvedAt'), undefined))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('resolvedAt'), undefined))
       .order('desc')
       .collect()
 
@@ -239,8 +245,8 @@ export const checkUsageLimits = query({
   handler: async (ctx, args) => {
     const usageLimits = await ctx.db
       .query('usageLimits')
-      .withIndex('by_team', (q) => q.eq('teamId', args.teamId))
-      .filter((q) => q.eq(q.field('isActive'), true))
+      .withIndex('by_team', q => q.eq('teamId', args.teamId))
+      .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
     const violations = []
@@ -289,7 +295,9 @@ export const getTeamAlertStatus = query({
       unresolvedAlerts,
       usageLimitViolations,
     ] = await Promise.all([
-      ctx.runQuery('alert_configs:getActiveAlertConfigs', { teamId: args.teamId }),
+      ctx.runQuery('alert_configs:getActiveAlertConfigs', {
+        teamId: args.teamId,
+      }),
       checkTeamAlerts(ctx, { teamId: args.teamId }),
       getUnresolvedAlerts(ctx, { teamId: args.teamId }),
       checkUsageLimits(ctx, { teamId: args.teamId }),
@@ -314,7 +322,7 @@ export const getAllAlertHistory = query({
     const alerts = await ctx.db
       .query('alertHistory')
       .withIndex('by_created_at')
-      .filter((q) => q.lt(q.field('createdAt'), args.beforeTimestamp))
+      .filter(q => q.lt(q.field('createdAt'), args.beforeTimestamp))
       .collect()
 
     return alerts

@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { MessageHistory } from '@/components/chat/message-history'
 import { ConversationSelector } from '@/components/review/conversation-selector'
+import { QuickSearchBar } from '@/components/search/quick-search-bar'
+import { SearchResults } from '@/components/search/search-results'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, Filter, Search, Download } from 'lucide-react'
+import { Calendar, Filter, Search, Download, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -14,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+// import { useQuery } from 'convex/react'
+// import { api } from '@/convex/_generated/api'
 
 interface ReviewHistoryPageProps {
   userId: string
@@ -29,9 +33,55 @@ export function ReviewHistoryPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [dateFilter, setDateFilter] = useState<string>('all')
   const [showFilters, setShowFilters] = useState(false)
+  const [searchFilters, setSearchFilters] = useState<any>(null)
+  const [showSearchResults, setShowSearchResults] = useState(false)
+
+  // Search functionality
+  // const searchResults = useQuery(
+  //   api.search.advancedSearch,
+  //   searchFilters ? {
+  //     searchTerm: searchFilters.searchTerm || undefined,
+  //     conversationId: searchFilters.conversationId || selectedConversationId || undefined,
+  //     userId: searchFilters.userId || undefined,
+  //     statementTypes: searchFilters.statementTypes?.length > 0 ? searchFilters.statementTypes : undefined,
+  //     confidenceMin: searchFilters.confidenceRange?.[0] !== 0 ? searchFilters.confidenceRange[0] : undefined,
+  //     confidenceMax: searchFilters.confidenceRange?.[1] !== 100 ? searchFilters.confidenceRange[1] : undefined,
+  //     dateStart: searchFilters.dateRange?.start?.getTime(),
+  //     dateEnd: searchFilters.dateRange?.end?.getTime(),
+  //     minVotes: searchFilters.minVotes > 0 ? searchFilters.minVotes : undefined,
+  //     hasAnalysis: searchFilters.hasAnalysis || undefined,
+  //     searchInBeliefs: searchFilters.searchInBeliefs || undefined,
+  //     searchInTradeOffs: searchFilters.searchInTradeOffs || undefined,
+  //     limit: 50,
+  //   } : 'skip'
+  // )
+  const searchResults = { results: [], totalCount: 0, hasMore: false } // Temporary placeholder
 
   const handleConversationSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId)
+    // Clear search when changing conversations
+    if (showSearchResults) {
+      setShowSearchResults(false)
+      setSearchFilters(null)
+    }
+  }
+
+  const handleQuickSearch = (query: string) => {
+    if (query.trim()) {
+      setSearchFilters({
+        searchTerm: query,
+        conversationId: selectedConversationId,
+      })
+      setShowSearchResults(true)
+    } else {
+      setShowSearchResults(false)
+      setSearchFilters(null)
+    }
+  }
+
+  const handleAdvancedSearch = (filters: any) => {
+    setSearchFilters(filters)
+    setShowSearchResults(true)
   }
 
   const handleExport = () => {
@@ -65,55 +115,25 @@ export function ReviewHistoryPage({
         </div>
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Search & Filter</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Search Messages</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search message content..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Date Range</label>
-                <Select value={dateFilter} onValueChange={setDateFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Conversation</label>
-                <ConversationSelector
-                  selectedConversation={selectedConversationId}
-                  onConversationSelect={handleConversationSelect}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Enhanced Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Search & Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <QuickSearchBar
+            onSearch={handleQuickSearch}
+            onAdvancedSearch={handleAdvancedSearch}
+            placeholder={
+              selectedConversationId
+                ? 'Search in this conversation...'
+                : 'Search all messages...'
+            }
+            conversationId={selectedConversationId}
+            className="w-full"
+          />
+        </CardContent>
+      </Card>
 
       {/* Main Content */}
       <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-4">
@@ -135,16 +155,38 @@ export function ReviewHistoryPage({
           </Card>
         </div>
 
-        {/* Message History */}
+        {/* Content Area - Search Results or Message History */}
         <div className="lg:col-span-3">
           <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-lg">
-                {selectedConversationId
-                  ? 'Message Timeline'
-                  : 'Select a Conversation'}
+                {showSearchResults
+                  ? `Search Results ${searchResults ? `(${searchResults.totalCount})` : ''}`
+                  : selectedConversationId
+                    ? 'Message Timeline'
+                    : 'Select a Conversation'}
               </CardTitle>
-              {selectedConversationId && (
+              {showSearchResults && (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {searchResults
+                      ? `Found ${searchResults.totalCount} results`
+                      : 'Searching...'}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowSearchResults(false)
+                      setSearchFilters(null)
+                    }}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Search
+                  </Button>
+                </div>
+              )}
+              {selectedConversationId && !showSearchResults && (
                 <p className="text-sm text-muted-foreground">
                   Scroll up to load older messages • Use search to find specific
                   content
@@ -152,7 +194,20 @@ export function ReviewHistoryPage({
               )}
             </CardHeader>
             <CardContent className="h-full p-0">
-              {selectedConversationId ? (
+              {showSearchResults ? (
+                <div className="h-[600px] overflow-y-auto p-4">
+                  <SearchResults
+                    results={searchResults?.results || []}
+                    searchTerms={
+                      searchFilters?.useBooleanSearch
+                        ? searchResults?.query
+                        : undefined
+                    }
+                    isLoading={searchResults === undefined}
+                    hasMore={searchResults?.hasMore}
+                  />
+                </div>
+              ) : selectedConversationId ? (
                 <MessageHistory
                   conversationId={selectedConversationId}
                   userId={userId}
@@ -168,7 +223,8 @@ export function ReviewHistoryPage({
                     </h3>
                     <p className="text-sm">
                       Choose a conversation from the left to view its message
-                      history
+                      history or use the search bar above to find specific
+                      content
                     </p>
                   </div>
                 </div>

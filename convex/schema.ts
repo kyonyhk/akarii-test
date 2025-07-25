@@ -142,11 +142,7 @@ export default defineSchema({
     ),
     isActive: v.boolean(),
     notificationMethods: v.array(
-      v.union(
-        v.literal('email'),
-        v.literal('dashboard'),
-        v.literal('webhook')
-      )
+      v.union(v.literal('email'), v.literal('dashboard'), v.literal('webhook'))
     ),
     warningThreshold: v.optional(v.number()), // For soft warnings at % of limit
     createdBy: v.id('users'),
@@ -197,7 +193,7 @@ export default defineSchema({
     limitValue: v.number(),
     timeWindow: v.union(
       v.literal('daily'),
-      v.literal('weekly'), 
+      v.literal('weekly'),
       v.literal('monthly'),
       v.literal('total')
     ),

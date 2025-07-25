@@ -703,11 +703,11 @@ export const getRecentUsage = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const usage = await ctx.db
-      .query("usageMetrics")
-      .withIndex("by_timestamp")
-      .order("desc")
+      .query('usageMetrics')
+      .withIndex('by_timestamp')
+      .order('desc')
       .take(args.limit || 10)
-    
+
     return usage
   },
 })

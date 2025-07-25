@@ -28,7 +28,7 @@ export default function AdminAlertsPage() {
             </p>
           </div>
 
-          <AlertManagement 
+          <AlertManagement
             teams={mockTeams}
             selectedTeamId={selectedTeamId}
             onTeamSelect={setSelectedTeamId}
