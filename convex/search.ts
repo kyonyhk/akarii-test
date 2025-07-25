@@ -20,13 +20,17 @@ export const advancedSearch = query({
     searchTerm: v.optional(v.string()),
     conversationId: v.optional(v.string()),
     userId: v.optional(v.string()),
-    statementTypes: v.optional(v.array(v.union(
-      v.literal('question'),
-      v.literal('opinion'), 
-      v.literal('fact'),
-      v.literal('request'),
-      v.literal('other')
-    ))),
+    statementTypes: v.optional(
+      v.array(
+        v.union(
+          v.literal('question'),
+          v.literal('opinion'),
+          v.literal('fact'),
+          v.literal('request'),
+          v.literal('other')
+        )
+      )
+    ),
     confidenceMin: v.optional(v.number()),
     confidenceMax: v.optional(v.number()),
     dateStart: v.optional(v.number()),
@@ -47,7 +51,10 @@ export const advancedSearch = query({
     // Apply basic filters
     let filteredMessages = allMessages.filter(message => {
       // Conversation filter
-      if (args.conversationId && message.conversationId !== args.conversationId) {
+      if (
+        args.conversationId &&
+        message.conversationId !== args.conversationId
+      ) {
         return false
       }
 
@@ -77,7 +84,7 @@ export const advancedSearch = query({
 
     // Get analyses for messages that have them
     const messagesWithAnalysis = await Promise.all(
-      filteredMessages.map(async (message) => {
+      filteredMessages.map(async message => {
         let analysis = null
         if (message.analysisId) {
           analysis = await ctx.db.get(message.analysisId)
@@ -91,61 +98,79 @@ export const advancedSearch = query({
     )
 
     // Apply analysis-based filters
-    const analysisFilteredResults = messagesWithAnalysis.filter(({ message, analysis }) => {
-      // Statement type filter
-      if (args.statementTypes && args.statementTypes.length > 0) {
-        if (!analysis || !args.statementTypes.includes(analysis.statementType)) {
-          return false
+    const analysisFilteredResults = messagesWithAnalysis.filter(
+      ({ message, analysis }) => {
+        // Statement type filter
+        if (args.statementTypes && args.statementTypes.length > 0) {
+          if (
+            !analysis ||
+            !args.statementTypes.includes(analysis.statementType)
+          ) {
+            return false
+          }
         }
-      }
 
-      // Confidence range filter
-      if (analysis && (args.confidenceMin !== undefined || args.confidenceMax !== undefined)) {
-        const confidence = analysis.confidenceLevel
-        if (args.confidenceMin !== undefined && confidence < args.confidenceMin) {
-          return false
+        // Confidence range filter
+        if (
+          analysis &&
+          (args.confidenceMin !== undefined || args.confidenceMax !== undefined)
+        ) {
+          const confidence = analysis.confidenceLevel
+          if (
+            args.confidenceMin !== undefined &&
+            confidence < args.confidenceMin
+          ) {
+            return false
+          }
+          if (
+            args.confidenceMax !== undefined &&
+            confidence > args.confidenceMax
+          ) {
+            return false
+          }
         }
-        if (args.confidenceMax !== undefined && confidence > args.confidenceMax) {
-          return false
-        }
-      }
 
-      // Vote count filter
-      if (args.minVotes !== undefined && analysis) {
-        const totalVotes = analysis.thumbsUp + analysis.thumbsDown
-        if (totalVotes < args.minVotes) {
-          return false
+        // Vote count filter
+        if (args.minVotes !== undefined && analysis) {
+          const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+          if (totalVotes < args.minVotes) {
+            return false
+          }
         }
-      }
 
-      return true
-    })
+        return true
+      }
+    )
 
     // Apply text search
     let textFilteredResults = analysisFilteredResults
     if (searchTerm) {
-      textFilteredResults = analysisFilteredResults.filter(({ message, analysis }) => {
-        // Search in message content
-        const contentMatch = message.content.toLowerCase().includes(searchTerm)
+      textFilteredResults = analysisFilteredResults.filter(
+        ({ message, analysis }) => {
+          // Search in message content
+          const contentMatch = message.content
+            .toLowerCase()
+            .includes(searchTerm)
 
-        // Search in beliefs if enabled
-        let beliefsMatch = false
-        if (args.searchInBeliefs && analysis?.beliefs) {
-          beliefsMatch = analysis.beliefs.some(belief => 
-            belief.toLowerCase().includes(searchTerm)
-          )
+          // Search in beliefs if enabled
+          let beliefsMatch = false
+          if (args.searchInBeliefs && analysis?.beliefs) {
+            beliefsMatch = analysis.beliefs.some(belief =>
+              belief.toLowerCase().includes(searchTerm)
+            )
+          }
+
+          // Search in trade-offs if enabled
+          let tradeOffsMatch = false
+          if (args.searchInTradeOffs && analysis?.tradeOffs) {
+            tradeOffsMatch = analysis.tradeOffs.some(tradeOff =>
+              tradeOff.toLowerCase().includes(searchTerm)
+            )
+          }
+
+          return contentMatch || beliefsMatch || tradeOffsMatch
         }
-
-        // Search in trade-offs if enabled
-        let tradeOffsMatch = false
-        if (args.searchInTradeOffs && analysis?.tradeOffs) {
-          tradeOffsMatch = analysis.tradeOffs.some(tradeOff => 
-            tradeOff.toLowerCase().includes(searchTerm)
-          )
-        }
-
-        return contentMatch || beliefsMatch || tradeOffsMatch
-      })
+      )
     }
 
     // Get user information for results
@@ -156,12 +181,14 @@ export const advancedSearch = query({
           .withIndex('by_clerk_id', q => q.eq('clerkId', message.userId))
           .first()
 
-        const userInfo = user ? {
-          name: user.name || user.email || 'Unknown User',
-          email: user.email,
-          avatar: user.avatar,
-          role: user.role,
-        } : null
+        const userInfo = user
+          ? {
+              name: user.name || user.email || 'Unknown User',
+              email: user.email,
+              avatar: user.avatar,
+              role: user.role,
+            }
+          : null
 
         return {
           message: {
@@ -185,15 +212,23 @@ export const advancedSearch = query({
 export const searchAnalysisContent = query({
   args: {
     searchTerm: v.string(),
-    contentType: v.union(v.literal('beliefs'), v.literal('tradeOffs'), v.literal('both')),
+    contentType: v.union(
+      v.literal('beliefs'),
+      v.literal('tradeOffs'),
+      v.literal('both')
+    ),
     conversationId: v.optional(v.string()),
-    statementTypes: v.optional(v.array(v.union(
-      v.literal('question'),
-      v.literal('opinion'), 
-      v.literal('fact'),
-      v.literal('request'),
-      v.literal('other')
-    ))),
+    statementTypes: v.optional(
+      v.array(
+        v.union(
+          v.literal('question'),
+          v.literal('opinion'),
+          v.literal('fact'),
+          v.literal('request'),
+          v.literal('other')
+        )
+      )
+    ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -216,13 +251,16 @@ export const searchAnalysisContent = query({
       let hasMatch = false
 
       if (args.contentType === 'beliefs' || args.contentType === 'both') {
-        hasMatch = analysis.beliefs.some(belief => 
+        hasMatch = analysis.beliefs.some(belief =>
           belief.toLowerCase().includes(searchTerm)
         )
       }
 
-      if (!hasMatch && (args.contentType === 'tradeOffs' || args.contentType === 'both')) {
-        hasMatch = analysis.tradeOffs.some(tradeOff => 
+      if (
+        !hasMatch &&
+        (args.contentType === 'tradeOffs' || args.contentType === 'both')
+      ) {
+        hasMatch = analysis.tradeOffs.some(tradeOff =>
           tradeOff.toLowerCase().includes(searchTerm)
         )
       }
@@ -232,12 +270,15 @@ export const searchAnalysisContent = query({
 
     // Get corresponding messages with user info
     const resultsWithMessages = await Promise.all(
-      matchingAnalyses.slice(0, limit).map(async (analysis) => {
+      matchingAnalyses.slice(0, limit).map(async analysis => {
         const message = await ctx.db.get(analysis.messageId)
         if (!message) return null
 
         // Conversation filter (applied here since we got message)
-        if (args.conversationId && message.conversationId !== args.conversationId) {
+        if (
+          args.conversationId &&
+          message.conversationId !== args.conversationId
+        ) {
           return null
         }
 
@@ -246,12 +287,14 @@ export const searchAnalysisContent = query({
           .withIndex('by_clerk_id', q => q.eq('clerkId', message.userId))
           .first()
 
-        const userInfo = user ? {
-          name: user.name || user.email || 'Unknown User',
-          email: user.email,
-          avatar: user.avatar,
-          role: user.role,
-        } : null
+        const userInfo = user
+          ? {
+              name: user.name || user.email || 'Unknown User',
+              email: user.email,
+              avatar: user.avatar,
+              role: user.role,
+            }
+          : null
 
         return {
           message: {
@@ -338,9 +381,7 @@ export const getSearchSuggestions = query({
       })
     }
 
-    return Array.from(suggestions)
-      .sort()
-      .slice(0, limit)
+    return Array.from(suggestions).sort().slice(0, limit)
   },
 })
 
@@ -366,7 +407,7 @@ export const getFacetedSearchData = query({
     const analyses = await Promise.all(
       messages
         .filter(m => m.analysisId)
-        .map(async (m) => {
+        .map(async m => {
           if (m.analysisId) {
             return await ctx.db.get(m.analysisId)
           }
@@ -377,15 +418,20 @@ export const getFacetedSearchData = query({
     const validAnalyses = analyses.filter(a => a !== null)
 
     // Calculate facets
-    const statementTypeCounts = validAnalyses.reduce((acc, analysis) => {
-      if (analysis) {
-        acc[analysis.statementType] = (acc[analysis.statementType] || 0) + 1
-      }
-      return acc
-    }, {} as Record<string, number>)
+    const statementTypeCounts = validAnalyses.reduce(
+      (acc, analysis) => {
+        if (analysis) {
+          acc[analysis.statementType] = (acc[analysis.statementType] || 0) + 1
+        }
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     const confidenceLevels = validAnalyses.map(a => a?.confidenceLevel || 0)
-    const voteCounts = validAnalyses.map(a => (a?.thumbsUp || 0) + (a?.thumbsDown || 0))
+    const voteCounts = validAnalyses.map(
+      a => (a?.thumbsUp || 0) + (a?.thumbsDown || 0)
+    )
 
     return {
       totalMessages: messages.length,
@@ -394,7 +440,9 @@ export const getFacetedSearchData = query({
       confidenceStats: {
         min: Math.min(...confidenceLevels),
         max: Math.max(...confidenceLevels),
-        avg: confidenceLevels.reduce((a, b) => a + b, 0) / confidenceLevels.length || 0,
+        avg:
+          confidenceLevels.reduce((a, b) => a + b, 0) /
+            confidenceLevels.length || 0,
       },
       voteStats: {
         min: Math.min(...voteCounts),
