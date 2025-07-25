@@ -406,4 +406,31 @@ export default defineSchema({
       searchField: 'content',
       filterFields: ['archiveId', 'contentType'],
     }),
+
+  // Confidence Thresholds - Team/user settings for confidence score filtering
+  confidenceThresholds: defineTable({
+    teamId: v.optional(v.id('teams')), // null for global defaults
+    userId: v.optional(v.id('users')), // null for team-wide settings
+    thresholdType: v.union(
+      v.literal('display_threshold'), // Minimum confidence to show normally
+      v.literal('hide_threshold'), // Minimum confidence to show at all
+      v.literal('warning_threshold') // Confidence level to show warning indicators
+    ),
+    confidenceValue: v.number(), // 0-100 confidence threshold
+    uiTreatment: v.union(
+      v.literal('hide'), // Hide completely
+      v.literal('grey_out'), // Show greyed out
+      v.literal('warning'), // Show with warning indicator
+      v.literal('normal') // Show normally
+    ),
+    isActive: v.boolean(),
+    createdBy: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_team', ['teamId'])
+    .index('by_user', ['userId'])
+    .index('by_threshold_type', ['thresholdType'])
+    .index('by_active', ['isActive'])
+    .index('by_team_user', ['teamId', 'userId']),
 })

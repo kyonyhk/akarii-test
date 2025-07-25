@@ -8,13 +8,25 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { ThumbVoteButtons } from '@/components/ui/thumb-vote-buttons'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, AlertTriangle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Analysis } from '@/types'
 import { useScrollSync } from '@/contexts/scroll-sync-context'
 import { useUser } from '@/hooks/useUser'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import {
+  useConfidenceThresholds,
+  getConfidenceTreatment,
+  getConfidenceColor,
+  shouldShowAnalysis,
+} from '@/hooks/useConfidenceThresholds'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface AnalysisRowProps {
   analysis: Analysis
@@ -30,7 +42,16 @@ export function AnalysisRow({
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isVoting, setIsVoting] = useState(false)
-  const isLowConfidence = analysis.confidenceLevel < 40
+  const thresholds = useConfidenceThresholds()
+  const confidenceTreatment = getConfidenceTreatment(
+    analysis.confidenceLevel,
+    thresholds
+  )
+  const confidenceColor = getConfidenceColor(
+    analysis.confidenceLevel,
+    thresholds
+  )
+  const shouldShow = shouldShowAnalysis(analysis.confidenceLevel, thresholds)
   const { syncToMessage, activeMessageId } = useScrollSync()
   const { clerkUser } = useUser()
   const thumbVote = useMutation(api.analyses.thumbVote)
@@ -45,6 +66,11 @@ export function AnalysisRow({
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Don't render if confidence is below hide threshold
+  if (!shouldShow) {
+    return null
+  }
 
   // Determine if this analysis is currently active
   const isCurrentlyActive = isActive || activeMessageId === analysis.messageId
@@ -107,7 +133,9 @@ export function AnalysisRow({
         onClick={handleRowClick}
         className={cn(
           'cursor-pointer touch-manipulation rounded-lg border bg-card transition-all hover:shadow-sm',
-          isLowConfidence && 'opacity-40',
+          confidenceTreatment === 'grey_out' && 'opacity-40',
+          confidenceTreatment === 'warning' &&
+            'ring-1 ring-yellow-200 dark:ring-yellow-800',
           isExpanded && 'shadow-sm ring-1 ring-primary/20',
           isCurrentlyActive && 'bg-accent/10 ring-2 ring-accent',
           isMobile ? 'p-4 active:scale-[0.98]' : 'p-3'
@@ -137,19 +165,35 @@ export function AnalysisRow({
                 >
                   {analysis.statementType}
                 </span>
-                <span
-                  className={cn(
-                    'font-medium',
-                    isLowConfidence
-                      ? 'text-red-500 dark:text-red-400'
-                      : analysis.confidenceLevel >= 70
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-yellow-600 dark:text-yellow-400',
-                    isMobile ? 'text-sm' : 'text-xs'
-                  )}
-                >
-                  {analysis.confidenceLevel}% confidence
-                </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 font-medium',
+                          confidenceColor.textColor,
+                          isMobile ? 'text-sm' : 'text-xs'
+                        )}
+                      >
+                        {confidenceTreatment === 'warning' && (
+                          <AlertTriangle className="h-3 w-3" />
+                        )}
+                        {confidenceTreatment === 'grey_out' && (
+                          <Info className="h-3 w-3" />
+                        )}
+                        {analysis.confidenceLevel}% confidence
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{confidenceColor.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Thresholds: Hide &lt;{thresholds.hideThreshold}%, Grey
+                        &lt;{thresholds.displayThreshold}%, Warning &lt;
+                        {thresholds.warningThreshold}%
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
               {/* Summary row */}
