@@ -124,7 +124,11 @@ export function ReviewHistoryPage({
           <QuickSearchBar
             onSearch={handleQuickSearch}
             onAdvancedSearch={handleAdvancedSearch}
-            placeholder={selectedConversationId ? "Search in this conversation..." : "Search all messages..."}
+            placeholder={
+              selectedConversationId
+                ? 'Search in this conversation...'
+                : 'Search all messages...'
+            }
             conversationId={selectedConversationId}
             className="w-full"
           />
@@ -161,13 +165,15 @@ export function ReviewHistoryPage({
                 {showSearchResults
                   ? `Search Results ${searchResults ? `(${searchResults.totalCount})` : ''}`
                   : selectedConversationId
-                  ? 'Message Timeline'
-                  : 'Select a Conversation'}
+                    ? 'Message Timeline'
+                    : 'Select a Conversation'}
               </CardTitle>
               {showSearchResults && (
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    {searchResults ? `Found ${searchResults.totalCount} results` : 'Searching...'}
+                    {searchResults
+                      ? `Found ${searchResults.totalCount} results`
+                      : 'Searching...'}
                   </p>
                   <Button
                     variant="ghost"
@@ -177,7 +183,7 @@ export function ReviewHistoryPage({
                       setSearchFilters(null)
                     }}
                   >
-                    <X className="h-4 w-4 mr-2" />
+                    <X className="mr-2 h-4 w-4" />
                     Clear Search
                   </Button>
                 </div>
@@ -194,7 +200,11 @@ export function ReviewHistoryPage({
                 <div className="h-[600px] overflow-y-auto p-4">
                   <SearchResults
                     results={searchResults?.results || []}
-                    searchTerms={searchFilters?.useBooleanSearch ? searchResults?.query : undefined}
+                    searchTerms={
+                      searchFilters?.useBooleanSearch
+                        ? searchResults?.query
+                        : undefined
+                    }
                     isLoading={searchResults === undefined}
                     hasMore={searchResults?.hasMore}
                   />
@@ -215,7 +225,8 @@ export function ReviewHistoryPage({
                     </h3>
                     <p className="text-sm">
                       Choose a conversation from the left to view its message
-                      history or use the search bar above to find specific content
+                      history or use the search bar above to find specific
+                      content
                     </p>
                   </div>
                 </div>

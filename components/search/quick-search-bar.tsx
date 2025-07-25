@@ -48,11 +48,11 @@ export function QuickSearchBar({
   // Get search suggestions
   // const suggestions = useQuery(
   //   api.search.getSearchSuggestions,
-  //   suggestionQuery.length >= 2 
-  //     ? { 
-  //         query: suggestionQuery, 
+  //   suggestionQuery.length >= 2
+  //     ? {
+  //         query: suggestionQuery,
   //         type: 'all' as const,
-  //         limit: 8 
+  //         limit: 8
   //       }
   //     : 'skip'
   // )
@@ -63,7 +63,7 @@ export function QuickSearchBar({
     debounce((query: string) => {
       setSuggestionQuery(query)
     }, 300),
-    []
+    [setSuggestionQuery]
   )
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export function QuickSearchBar({
                 type="text"
                 placeholder={placeholder}
                 value={searchQuery}
-                onChange={(e) => {
+                onChange={e => {
                   setSearchQuery(e.target.value)
                   setShowSuggestions(e.target.value.length >= 2)
                 }}
@@ -144,10 +144,10 @@ export function QuickSearchBar({
               )}
             </div>
           </PopoverTrigger>
-          <PopoverContent 
-            className="w-[var(--radix-popover-trigger-width)] p-0" 
+          <PopoverContent
+            className="w-[var(--radix-popover-trigger-width)] p-0"
             align="start"
-            onOpenAutoFocus={(e) => e.preventDefault()}
+            onOpenAutoFocus={e => e.preventDefault()}
           >
             <Command>
               <CommandList>
@@ -173,7 +173,7 @@ export function QuickSearchBar({
                     className="cursor-pointer font-medium"
                   >
                     <Search className="mr-2 h-4 w-4" />
-                    Search for "{searchQuery}"
+                    Search for &ldquo;{searchQuery}&rdquo;
                   </CommandItem>
                 </CommandGroup>
               </CommandList>
@@ -197,9 +197,9 @@ export function QuickSearchBar({
 
       {/* Show active search indicator */}
       {hasActiveSearch && (
-        <div className="flex items-center gap-2 mt-2">
+        <div className="mt-2 flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
-            Searching: "{searchQuery}"
+            Searching: &ldquo;{searchQuery}&rdquo;
           </Badge>
           <Button
             variant="ghost"
@@ -217,9 +217,9 @@ export function QuickSearchBar({
         isOpen={showAdvancedModal}
         onOpenChange={setShowAdvancedModal}
         onSearch={handleAdvancedSearch}
-        initialFilters={{ 
+        initialFilters={{
           searchTerm: searchQuery,
-          conversationId 
+          conversationId,
         }}
       />
     </>

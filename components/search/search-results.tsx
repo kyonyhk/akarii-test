@@ -1,7 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, User, Calendar, Star, ThumbsUp, ThumbsDown } from 'lucide-react'
+import {
+  MessageCircle,
+  User,
+  Calendar,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -45,21 +52,30 @@ interface SearchResultsProps {
 }
 
 // Function to highlight search terms in text
-function highlightText(text: string, terms: string[] = [], className: string = 'bg-yellow-200 dark:bg-yellow-800 px-1 rounded'): JSX.Element {
+function highlightText(
+  text: string,
+  terms: string[] = [],
+  className: string = 'bg-yellow-200 dark:bg-yellow-800 px-1 rounded'
+): JSX.Element {
   if (!terms.length) return <span>{text}</span>
 
   let highlightedText = text
-  const regex = new RegExp(`(${terms.map(term => 
-    term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
-  ).join('|')})`, 'gi')
+  const regex = new RegExp(
+    `(${terms
+      .map(
+        term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
+      )
+      .join('|')})`,
+    'gi'
+  )
 
   const parts = highlightedText.split(regex)
-  
+
   return (
     <span>
       {parts.map((part, index) => {
-        const isMatch = terms.some(term => 
-          part.toLowerCase() === term.toLowerCase()
+        const isMatch = terms.some(
+          term => part.toLowerCase() === term.toLowerCase()
         )
         return isMatch ? (
           <mark key={index} className={className}>
@@ -125,17 +141,17 @@ export function SearchResults({
           <Card key={i} className="animate-pulse">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                <div className="h-8 w-8 rounded-full bg-gray-200" />
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
-                  <div className="h-3 bg-gray-200 rounded w-32" />
+                  <div className="mb-1 h-4 w-24 rounded bg-gray-200" />
+                  <div className="h-3 w-32 rounded bg-gray-200" />
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 w-full rounded bg-gray-200" />
+                <div className="h-4 w-3/4 rounded bg-gray-200" />
               </div>
             </CardContent>
           </Card>
@@ -146,9 +162,9 @@ export function SearchResults({
 
   if (results.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <h3 className="text-lg font-medium mb-2">No results found</h3>
+      <div className="py-8 text-center text-muted-foreground">
+        <MessageCircle className="mx-auto mb-4 h-12 w-12 opacity-50" />
+        <h3 className="mb-2 text-lg font-medium">No results found</h3>
         <p className="text-sm">Try adjusting your search terms or filters</p>
       </div>
     )
@@ -161,19 +177,21 @@ export function SearchResults({
 
   return (
     <div className="space-y-4">
-      {results.map((result) => {
+      {results.map(result => {
         const isExpanded = expandedResults.has(result.message._id)
         const { message, analysis } = result
 
         return (
-          <Card key={message._id} className="hover:shadow-md transition-shadow">
+          <Card key={message._id} className="transition-shadow hover:shadow-md">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={message.user?.avatar} />
                     <AvatarFallback>
-                      {message.user?.name?.charAt(0) || <User className="h-4 w-4" />}
+                      {message.user?.name?.charAt(0) || (
+                        <User className="h-4 w-4" />
+                      )}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -195,7 +213,9 @@ export function SearchResults({
                 </div>
                 {analysis && (
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatementTypeColor(analysis.statementType)}>
+                    <Badge
+                      className={getStatementTypeColor(analysis.statementType)}
+                    >
                       {analysis.statementType}
                     </Badge>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -235,13 +255,25 @@ export function SearchResults({
                       {/* Beliefs */}
                       {analysis.beliefs.length > 0 && (
                         <div>
-                          <h5 className="text-xs font-medium text-muted-foreground mb-1">Beliefs:</h5>
-                          <div className="text-xs space-y-1">
-                            {analysis.beliefs.slice(0, isExpanded ? undefined : 2).map((belief, idx) => (
-                              <div key={idx} className="text-muted-foreground">
-                                • {highlightText(belief, allTerms, 'bg-blue-200 dark:bg-blue-800 px-1 rounded')}
-                              </div>
-                            ))}
+                          <h5 className="mb-1 text-xs font-medium text-muted-foreground">
+                            Beliefs:
+                          </h5>
+                          <div className="space-y-1 text-xs">
+                            {analysis.beliefs
+                              .slice(0, isExpanded ? undefined : 2)
+                              .map((belief, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-muted-foreground"
+                                >
+                                  •{' '}
+                                  {highlightText(
+                                    belief,
+                                    allTerms,
+                                    'bg-blue-200 dark:bg-blue-800 px-1 rounded'
+                                  )}
+                                </div>
+                              ))}
                             {!isExpanded && analysis.beliefs.length > 2 && (
                               <Button
                                 variant="ghost"
@@ -259,13 +291,25 @@ export function SearchResults({
                       {/* Trade-offs */}
                       {analysis.tradeOffs.length > 0 && (
                         <div>
-                          <h5 className="text-xs font-medium text-muted-foreground mb-1">Trade-offs:</h5>
-                          <div className="text-xs space-y-1">
-                            {analysis.tradeOffs.slice(0, isExpanded ? undefined : 2).map((tradeOff, idx) => (
-                              <div key={idx} className="text-muted-foreground">
-                                • {highlightText(tradeOff, allTerms, 'bg-orange-200 dark:bg-orange-800 px-1 rounded')}
-                              </div>
-                            ))}
+                          <h5 className="mb-1 text-xs font-medium text-muted-foreground">
+                            Trade-offs:
+                          </h5>
+                          <div className="space-y-1 text-xs">
+                            {analysis.tradeOffs
+                              .slice(0, isExpanded ? undefined : 2)
+                              .map((tradeOff, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-muted-foreground"
+                                >
+                                  •{' '}
+                                  {highlightText(
+                                    tradeOff,
+                                    allTerms,
+                                    'bg-orange-200 dark:bg-orange-800 px-1 rounded'
+                                  )}
+                                </div>
+                              ))}
                             {!isExpanded && analysis.tradeOffs.length > 2 && (
                               <Button
                                 variant="ghost"
@@ -280,16 +324,18 @@ export function SearchResults({
                         </div>
                       )}
 
-                      {isExpanded && (analysis.beliefs.length > 2 || analysis.tradeOffs.length > 2) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
-                          onClick={() => toggleExpanded(message._id)}
-                        >
-                          Show less
-                        </Button>
-                      )}
+                      {isExpanded &&
+                        (analysis.beliefs.length > 2 ||
+                          analysis.tradeOffs.length > 2) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => toggleExpanded(message._id)}
+                          >
+                            Show less
+                          </Button>
+                        )}
                     </div>
                   </>
                 )}
@@ -301,7 +347,7 @@ export function SearchResults({
 
       {/* Load More Button */}
       {hasMore && (
-        <div className="text-center py-4">
+        <div className="py-4 text-center">
           <Button variant="outline" onClick={onLoadMore} disabled={isLoading}>
             Load More Results
           </Button>

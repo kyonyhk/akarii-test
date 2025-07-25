@@ -116,7 +116,7 @@ export function AdvancedSearchModal({
       ...prev,
       statementTypes: checked
         ? [...prev.statementTypes, type]
-        : prev.statementTypes.filter(t => t !== type)
+        : prev.statementTypes.filter(t => t !== type),
     }))
   }
 
@@ -124,7 +124,8 @@ export function AdvancedSearchModal({
     let count = 0
     if (filters.searchTerm) count++
     if (filters.statementTypes.length > 0) count++
-    if (filters.confidenceRange[0] > 0 || filters.confidenceRange[1] < 100) count++
+    if (filters.confidenceRange[0] > 0 || filters.confidenceRange[1] < 100)
+      count++
     if (filters.dateRange.start || filters.dateRange.end) count++
     if (filters.minVotes > 0) count++
     if (filters.hasAnalysis) count++
@@ -135,7 +136,7 @@ export function AdvancedSearchModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -152,15 +153,22 @@ export function AdvancedSearchModal({
           {/* Search Query */}
           <Collapsible
             open={filtersExpanded.content}
-            onOpenChange={(open) => setFiltersExpanded(prev => ({ ...prev, content: open }))}
+            onOpenChange={open =>
+              setFiltersExpanded(prev => ({ ...prev, content: open }))
+            }
           >
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="h-auto w-full justify-between p-0"
+              >
                 <h3 className="text-lg font-semibold">Search Content</h3>
-                <ChevronDown className={`h-4 w-4 transition-transform ${filtersExpanded.content ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${filtersExpanded.content ? 'rotate-180' : ''}`}
+                />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 mt-4">
+            <CollapsibleContent className="mt-4 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="searchTerm">Search Query</Label>
                 <div className="relative">
@@ -169,7 +177,12 @@ export function AdvancedSearchModal({
                     id="searchTerm"
                     placeholder="Enter search terms..."
                     value={filters.searchTerm}
-                    onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                    onChange={e =>
+                      setFilters(prev => ({
+                        ...prev,
+                        searchTerm: e.target.value,
+                      }))
+                    }
                     className="pl-10"
                   />
                 </div>
@@ -177,7 +190,12 @@ export function AdvancedSearchModal({
                   <Switch
                     id="useBooleanSearch"
                     checked={filters.useBooleanSearch}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, useBooleanSearch: checked }))}
+                    onCheckedChange={checked =>
+                      setFilters(prev => ({
+                        ...prev,
+                        useBooleanSearch: checked,
+                      }))
+                    }
                   />
                   <Label htmlFor="useBooleanSearch" className="text-sm">
                     Use boolean operators (AND, OR, NOT)
@@ -185,7 +203,8 @@ export function AdvancedSearchModal({
                 </div>
                 {filters.useBooleanSearch && (
                   <p className="text-xs text-muted-foreground">
-                    Examples: "AI AND machine learning", "question OR opinion", "NOT politics"
+                    Examples: &ldquo;AI AND machine learning&rdquo;, &ldquo;question OR opinion&rdquo;,
+                    &ldquo;NOT politics&rdquo;
                   </p>
                 )}
               </div>
@@ -195,17 +214,31 @@ export function AdvancedSearchModal({
                   <Switch
                     id="searchInBeliefs"
                     checked={filters.searchInBeliefs}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, searchInBeliefs: checked }))}
+                    onCheckedChange={checked =>
+                      setFilters(prev => ({
+                        ...prev,
+                        searchInBeliefs: checked,
+                      }))
+                    }
                   />
-                  <Label htmlFor="searchInBeliefs" className="text-sm">Search in beliefs</Label>
+                  <Label htmlFor="searchInBeliefs" className="text-sm">
+                    Search in beliefs
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="searchInTradeOffs"
                     checked={filters.searchInTradeOffs}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, searchInTradeOffs: checked }))}
+                    onCheckedChange={checked =>
+                      setFilters(prev => ({
+                        ...prev,
+                        searchInTradeOffs: checked,
+                      }))
+                    }
                   />
-                  <Label htmlFor="searchInTradeOffs" className="text-sm">Search in trade-offs</Label>
+                  <Label htmlFor="searchInTradeOffs" className="text-sm">
+                    Search in trade-offs
+                  </Label>
                 </div>
               </div>
             </CollapsibleContent>
@@ -214,33 +247,52 @@ export function AdvancedSearchModal({
           {/* Analysis Filters */}
           <Collapsible
             open={filtersExpanded.analysis}
-            onOpenChange={(open) => setFiltersExpanded(prev => ({ ...prev, analysis: open }))}
+            onOpenChange={open =>
+              setFiltersExpanded(prev => ({ ...prev, analysis: open }))
+            }
           >
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="h-auto w-full justify-between p-0"
+              >
                 <h3 className="text-lg font-semibold">Analysis Filters</h3>
-                <ChevronDown className={`h-4 w-4 transition-transform ${filtersExpanded.analysis ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${filtersExpanded.analysis ? 'rotate-180' : ''}`}
+                />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 mt-4">
+            <CollapsibleContent className="mt-4 space-y-4">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="hasAnalysis"
                   checked={filters.hasAnalysis}
-                  onCheckedChange={(checked) => setFilters(prev => ({ ...prev, hasAnalysis: checked }))}
+                  onCheckedChange={checked =>
+                    setFilters(prev => ({ ...prev, hasAnalysis: checked }))
+                  }
                 />
-                <Label htmlFor="hasAnalysis">Only show messages with analysis</Label>
+                <Label htmlFor="hasAnalysis">
+                  Only show messages with analysis
+                </Label>
               </div>
 
               <div className="space-y-2">
                 <Label>Statement Types</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {STATEMENT_TYPES.map((type) => (
-                    <div key={type.value} className="flex items-center space-x-2">
+                  {STATEMENT_TYPES.map(type => (
+                    <div
+                      key={type.value}
+                      className="flex items-center space-x-2"
+                    >
                       <Checkbox
                         id={type.value}
                         checked={filters.statementTypes.includes(type.value)}
-                        onCheckedChange={(checked) => handleStatementTypeChange(type.value, checked as boolean)}
+                        onCheckedChange={checked =>
+                          handleStatementTypeChange(
+                            type.value,
+                            checked as boolean
+                          )
+                        }
                       />
                       <Label htmlFor={type.value} className="text-sm">
                         {type.label}
@@ -251,13 +303,21 @@ export function AdvancedSearchModal({
               </div>
 
               <div className="space-y-2">
-                <Label>Confidence Level Range: {filters.confidenceRange[0]}% - {filters.confidenceRange[1]}%</Label>
+                <Label>
+                  Confidence Level Range: {filters.confidenceRange[0]}% -{' '}
+                  {filters.confidenceRange[1]}%
+                </Label>
                 <Slider
                   min={0}
                   max={100}
                   step={5}
                   value={filters.confidenceRange}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, confidenceRange: value as [number, number] }))}
+                  onValueChange={value =>
+                    setFilters(prev => ({
+                      ...prev,
+                      confidenceRange: value as [number, number],
+                    }))
+                  }
                   className="w-full"
                 />
               </div>
@@ -267,23 +327,34 @@ export function AdvancedSearchModal({
           {/* Social Filters */}
           <Collapsible
             open={filtersExpanded.social}
-            onOpenChange={(open) => setFiltersExpanded(prev => ({ ...prev, social: open }))}
+            onOpenChange={open =>
+              setFiltersExpanded(prev => ({ ...prev, social: open }))
+            }
           >
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="h-auto w-full justify-between p-0"
+              >
                 <h3 className="text-lg font-semibold">Social Filters</h3>
-                <ChevronDown className={`h-4 w-4 transition-transform ${filtersExpanded.social ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${filtersExpanded.social ? 'rotate-180' : ''}`}
+                />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 mt-4">
+            <CollapsibleContent className="mt-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="minVotes">Minimum Total Votes: {filters.minVotes}</Label>
+                <Label htmlFor="minVotes">
+                  Minimum Total Votes: {filters.minVotes}
+                </Label>
                 <Slider
                   min={0}
                   max={20}
                   step={1}
                   value={[filters.minVotes]}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, minVotes: value[0] }))}
+                  onValueChange={value =>
+                    setFilters(prev => ({ ...prev, minVotes: value[0] }))
+                  }
                   className="w-full"
                 />
               </div>
@@ -293,29 +364,42 @@ export function AdvancedSearchModal({
           {/* Temporal Filters */}
           <Collapsible
             open={filtersExpanded.temporal}
-            onOpenChange={(open) => setFiltersExpanded(prev => ({ ...prev, temporal: open }))}
+            onOpenChange={open =>
+              setFiltersExpanded(prev => ({ ...prev, temporal: open }))
+            }
           >
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="h-auto w-full justify-between p-0"
+              >
                 <h3 className="text-lg font-semibold">Date Range</h3>
-                <ChevronDown className={`h-4 w-4 transition-transform ${filtersExpanded.temporal ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${filtersExpanded.temporal ? 'rotate-180' : ''}`}
+                />
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 mt-4">
+            <CollapsibleContent className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="startDate">Start Date</Label>
                   <Input
                     id="startDate"
                     type="date"
-                    value={filters.dateRange.start?.toISOString().split('T')[0] || ''}
-                    onChange={(e) => setFilters(prev => ({
-                      ...prev,
-                      dateRange: {
-                        ...prev.dateRange,
-                        start: e.target.value ? new Date(e.target.value) : undefined
-                      }
-                    }))}
+                    value={
+                      filters.dateRange.start?.toISOString().split('T')[0] || ''
+                    }
+                    onChange={e =>
+                      setFilters(prev => ({
+                        ...prev,
+                        dateRange: {
+                          ...prev.dateRange,
+                          start: e.target.value
+                            ? new Date(e.target.value)
+                            : undefined,
+                        },
+                      }))
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -323,14 +407,20 @@ export function AdvancedSearchModal({
                   <Input
                     id="endDate"
                     type="date"
-                    value={filters.dateRange.end?.toISOString().split('T')[0] || ''}
-                    onChange={(e) => setFilters(prev => ({
-                      ...prev,
-                      dateRange: {
-                        ...prev.dateRange,
-                        end: e.target.value ? new Date(e.target.value) : undefined
-                      }
-                    }))}
+                    value={
+                      filters.dateRange.end?.toISOString().split('T')[0] || ''
+                    }
+                    onChange={e =>
+                      setFilters(prev => ({
+                        ...prev,
+                        dateRange: {
+                          ...prev.dateRange,
+                          end: e.target.value
+                            ? new Date(e.target.value)
+                            : undefined,
+                        },
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -339,7 +429,7 @@ export function AdvancedSearchModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4 border-t">
+        <div className="flex items-center justify-between border-t pt-4">
           <Button variant="outline" onClick={resetFilters}>
             Reset All
           </Button>
@@ -348,7 +438,7 @@ export function AdvancedSearchModal({
               Cancel
             </Button>
             <Button onClick={handleSearch}>
-              <Search className="h-4 w-4 mr-2" />
+              <Search className="mr-2 h-4 w-4" />
               Search
             </Button>
           </div>
