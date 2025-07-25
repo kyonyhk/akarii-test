@@ -15,6 +15,19 @@ import {
   ANALYSIS_USER_PROMPT_TEMPLATE,
 } from './prompts'
 import {
+  getSystemPrompt,
+  getUserPrompt,
+  formatAnalysisOutput,
+  PromptConfiguration,
+  DEFAULT_PRODUCTION_CONFIG,
+  QUESTION_FOCUSED_TEST_CONFIG,
+} from './promptConfig'
+import {
+  extractConversationContext,
+  assessContextQuality,
+  adjustConfidenceForContext,
+} from './contextAnalysis'
+import {
   parseAnalysisResponse,
   withRetry,
   createPerformanceTracker,
@@ -32,7 +45,7 @@ import {
 } from './token_utils'
 import { api } from './_generated/api'
 
-// Action to analyze a message using OpenAI
+// Enhanced action to analyze a message using OpenAI with improved prompts
 export const analyzeMessage = action({
   args: {
     messageId: v.id('messages'),
@@ -40,6 +53,23 @@ export const analyzeMessage = action({
     userId: v.string(),
     conversationId: v.string(),
     teamId: v.optional(v.id('teams')),
+    promptConfig: v.optional(
+      v.object({
+        variant: v.union(
+          v.literal('standard'),
+          v.literal('question_focused'),
+          v.literal('confidence_calibrated'),
+          v.literal('context_aware')
+        ),
+        mode: v.union(
+          v.literal('production'),
+          v.literal('testing'),
+          v.literal('a_b_test')
+        ),
+        experimentId: v.optional(v.string()),
+      })
+    ),
+    useContext: v.optional(v.boolean()),
   },
   handler: async (ctx, args): Promise<AnalysisResponse> => {
     const tracker = createPerformanceTracker()
@@ -50,11 +80,53 @@ export const analyzeMessage = action({
         throw new Error('OpenAI API is not properly configured')
       }
 
-      // Check cache first for performance optimization
-      const cachedResult = getCachedAnalysis(args.content)
+      // Set up prompt configuration
+      const promptConfig: PromptConfiguration = {
+        variant: args.promptConfig?.variant || 'standard',
+        mode: args.promptConfig?.mode || 'production',
+        experimentId: args.promptConfig?.experimentId,
+        contextOptions: {
+          maxContextMessages: 5,
+          includeParticipants: true,
+          useContextAwarePrompt: args.useContext || false,
+        },
+      }
+
+      // Extract conversation context if needed
+      let conversationContext
+      let contextQuality: 'high' | 'medium' | 'low' = 'low'
+
+      if (args.useContext || promptConfig.variant === 'context_aware') {
+        try {
+          // Get conversation messages for context
+          const messages = await ctx.runQuery(
+            api.messages.getMessagesInConversation,
+            {
+              conversationId: args.conversationId,
+              limit: 10,
+            }
+          )
+
+          conversationContext = extractConversationContext(
+            messages,
+            args.messageId
+          )
+          contextQuality = assessContextQuality(
+            args.content,
+            conversationContext
+          )
+        } catch (contextError) {
+          console.warn('Failed to extract conversation context:', contextError)
+          // Continue without context
+        }
+      }
+
+      // Check enhanced cache (includes prompt variant)
+      const cacheKey = `${args.content}_${promptConfig.variant}_${contextQuality}`
+      const cachedResult = getCachedAnalysis(cacheKey)
       if (cachedResult) {
         console.log(
-          `Cache hit for message ${args.messageId} (${tracker.getElapsedMs()}ms)`
+          `Enhanced cache hit for message ${args.messageId} (${tracker.getElapsedMs()}ms)`
         )
 
         // Record cache hit metrics
@@ -73,20 +145,30 @@ export const analyzeMessage = action({
             modelUsed: ANALYSIS_MODEL,
             processingTimeMs: tracker.getElapsedMs(),
             cached: true,
+            promptVariant: promptConfig.variant,
+            contextQuality,
           },
         }
         return analysis
       }
 
-      // Prepare messages for token counting
+      // Generate enhanced prompts based on configuration
+      const systemPrompt = getSystemPrompt(promptConfig)
+      const userPrompt = getUserPrompt(
+        args.content,
+        promptConfig,
+        conversationContext
+      )
+
+      // Prepare messages for OpenAI API
       const messages = [
         {
           role: 'system' as const,
-          content: ANALYSIS_SYSTEM_PROMPT,
+          content: systemPrompt,
         },
         {
           role: 'user' as const,
-          content: ANALYSIS_USER_PROMPT_TEMPLATE(args.content),
+          content: userPrompt,
         },
       ]
 
@@ -146,60 +228,87 @@ export const analyzeMessage = action({
       }
 
       // Make OpenAI API call with enhanced retry logic and error handling
-      const { analysisResult, tokenUsage } = await withRetry(
-        async () => {
-          // Check timeout (target: sub-2-second)
-          tracker.checkTimeout(1800) // Leave 200ms buffer
+      const { analysisResult, tokenUsage, qualityScore, qualityFactors } =
+        await withRetry(
+          async () => {
+            // Check timeout (target: sub-2-second)
+            tracker.checkTimeout(1800) // Leave 200ms buffer
 
-          try {
-            const response = await openai.chat.completions.create(
-              {
-                model: ANALYSIS_MODEL,
-                messages,
-                max_tokens: MAX_TOKENS,
-                temperature: TEMPERATURE,
-                response_format: { type: 'json_object' },
-              },
-              {
-                timeout: 1500, // 1.5 second timeout per request
-              }
-            )
-
-            const openaiResponse = response.choices[0]?.message?.content
-            if (!openaiResponse) {
-              throw new Error('No response received from OpenAI')
-            }
-
-            // Extract token usage from API response
-            const apiTokenUsage = extractTokenUsageFromResponse(response)
-
-            // Create token usage record
-            const tokenUsage = createTokenUsage(
-              apiTokenUsage.inputTokens || inputTokens, // Use API data if available, fallback to our count
-              apiTokenUsage.outputTokens || countTokens(openaiResponse), // Use API data if available, fallback to our count
-              ANALYSIS_MODEL
-            )
-
-            // Parse and validate the response
-            const analysisResult = parseAnalysisResponse(openaiResponse)
-
-            return { analysisResult, tokenUsage }
-          } catch (error) {
-            // Check if this error should be retried
-            if (!isRetryableError(error)) {
-              console.log(
-                `Non-retryable error detected, failing immediately: ${error}`
+            try {
+              const response = await openai.chat.completions.create(
+                {
+                  model: ANALYSIS_MODEL,
+                  messages,
+                  max_tokens: MAX_TOKENS,
+                  temperature: TEMPERATURE,
+                  response_format: { type: 'json_object' },
+                },
+                {
+                  timeout: 1500, // 1.5 second timeout per request
+                }
               )
+
+              const openaiResponse = response.choices[0]?.message?.content
+              if (!openaiResponse) {
+                throw new Error('No response received from OpenAI')
+              }
+
+              // Extract token usage from API response
+              const apiTokenUsage = extractTokenUsageFromResponse(response)
+
+              // Create token usage record
+              const tokenUsage = createTokenUsage(
+                apiTokenUsage.inputTokens || inputTokens, // Use API data if available, fallback to our count
+                apiTokenUsage.outputTokens || countTokens(openaiResponse), // Use API data if available, fallback to our count
+                ANALYSIS_MODEL
+              )
+
+              // Parse the raw JSON response
+              let rawAnalysisResult
+              try {
+                rawAnalysisResult = JSON.parse(openaiResponse)
+              } catch (parseError) {
+                throw new Error(
+                  `Invalid JSON response from OpenAI: ${parseError}`
+                )
+              }
+
+              // Format and validate using enhanced output formatting
+              const formattedResult = formatAnalysisOutput(
+                rawAnalysisResult,
+                promptConfig,
+                tracker.getElapsedMs(),
+                contextQuality
+              )
+
+              if (!formattedResult.validation.isValid) {
+                throw new Error(
+                  `Invalid analysis output: ${formattedResult.validation.errors.join(', ')}`
+                )
+              }
+
+              return {
+                analysisResult: formattedResult.output,
+                tokenUsage,
+                qualityScore: formattedResult.quality.score,
+                qualityFactors: formattedResult.quality.factors,
+              }
+            } catch (error) {
+              // Check if this error should be retried
+              if (!isRetryableError(error)) {
+                console.log(
+                  `Non-retryable error detected, failing immediately: ${error}`
+                )
+                throw error
+              }
+
+              // Re-throw retryable errors to trigger retry logic
               throw error
             }
-
-            // Re-throw retryable errors to trigger retry logic
-            throw error
-          }
-        },
-        3,
-        750
-      ) // Max 3 retries, 750ms base delay for better rate limit handling
+          },
+          3,
+          750
+        ) // Max 3 retries, 750ms base delay for better rate limit handling
 
       // Record token usage in database
       try {
@@ -219,10 +328,10 @@ export const analyzeMessage = action({
         // Continue execution even if usage recording fails
       }
 
-      // Cache the successful result for future use
-      setCachedAnalysis(args.content, analysisResult)
+      // Cache the successful result with enhanced key
+      setCachedAnalysis(cacheKey, analysisResult)
 
-      // Convert to our response format
+      // Convert to our response format with enhanced metadata
       const analysis: AnalysisResponse = {
         messageId: args.messageId,
         success: true,
@@ -236,6 +345,11 @@ export const analyzeMessage = action({
           modelUsed: ANALYSIS_MODEL,
           processingTimeMs: tracker.getElapsedMs(),
           cached: false,
+          promptVariant: promptConfig.variant,
+          contextQuality,
+          qualityScore,
+          qualityFactors,
+          experimentId: promptConfig.experimentId,
           tokenUsage: {
             inputTokens: tokenUsage.inputTokens,
             outputTokens: tokenUsage.outputTokens,
@@ -360,6 +474,73 @@ export const testOpenAIConnection = action({
           error instanceof Error ? error.message : 'Connection test failed',
       }
     }
+  },
+})
+
+// A/B Testing action for question-focused prompt improvements
+export const analyzeMessageWithQuestionFocus = action({
+  args: {
+    messageId: v.id('messages'),
+    content: v.string(),
+    userId: v.string(),
+    conversationId: v.string(),
+    teamId: v.optional(v.id('teams')),
+  },
+  handler: async (ctx, args): Promise<AnalysisResponse> => {
+    // Use question-focused configuration for A/B testing
+    return ctx.runAction(api.actions.analyzeMessage, {
+      ...args,
+      promptConfig: {
+        variant: 'question_focused',
+        mode: 'a_b_test',
+        experimentId: 'question_analysis_improvement_v1',
+      },
+    })
+  },
+})
+
+// Confidence-calibrated analysis action for testing
+export const analyzeMessageWithConfidenceCalibration = action({
+  args: {
+    messageId: v.id('messages'),
+    content: v.string(),
+    userId: v.string(),
+    conversationId: v.string(),
+    teamId: v.optional(v.id('teams')),
+  },
+  handler: async (ctx, args): Promise<AnalysisResponse> => {
+    // Use confidence-calibrated configuration
+    return ctx.runAction(api.actions.analyzeMessage, {
+      ...args,
+      promptConfig: {
+        variant: 'confidence_calibrated',
+        mode: 'testing',
+        experimentId: 'confidence_calibration_v1',
+      },
+    })
+  },
+})
+
+// Context-aware analysis action for testing
+export const analyzeMessageWithContext = action({
+  args: {
+    messageId: v.id('messages'),
+    content: v.string(),
+    userId: v.string(),
+    conversationId: v.string(),
+    teamId: v.optional(v.id('teams')),
+  },
+  handler: async (ctx, args): Promise<AnalysisResponse> => {
+    // Use context-aware configuration
+    return ctx.runAction(api.actions.analyzeMessage, {
+      ...args,
+      promptConfig: {
+        variant: 'context_aware',
+        mode: 'testing',
+        experimentId: 'context_awareness_v1',
+      },
+      useContext: true,
+    })
   },
 })
 
