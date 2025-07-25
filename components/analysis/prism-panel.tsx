@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { useQuery } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 import { Analysis } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,6 +17,8 @@ import { cn } from '@/lib/utils'
 import { AnalysisRow } from './analysis-row'
 import { useScrollSync } from '@/contexts/scroll-sync-context'
 import { RawJSONDrawer } from './raw-json-drawer'
+import { useVoteUpdates } from '@/hooks/use-vote-updates'
+import type { Id } from '@/convex/_generated/dataModel'
 
 interface PrismPanelProps {
   className?: string
@@ -52,107 +56,40 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
     }
   }, [registerAnalysisScroll])
 
-  // Mock data for development - will be replaced with real-time subscription
-  // Using realistic Convex ID format for testing
-  const mockAnalyses: Analysis[] = [
-    {
-      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqy8' as any,
-      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy1' as any, // Mock message ID 1
-      statementType: 'question' as const,
-      beliefs: ['Users want better UX', 'Speed is critical'],
-      tradeOffs: ['Performance vs Features', 'Complexity vs Simplicity'],
-      confidenceLevel: 85,
-      rawData: {
-        originalMessage:
-          'How can we improve the user experience while maintaining performance?',
-        analysisTimestamp: Date.now(),
-        modelUsed: 'gpt-4o-mini',
-        processingTimeMs: 1200,
-        cached: false,
-        openaiResponse: {
-          id: 'chatcmpl-ABC123',
-          object: 'chat.completion',
-          created: 1699999999,
-          model: 'gpt-4o-mini',
-          usage: {
-            prompt_tokens: 150,
-            completion_tokens: 75,
-            total_tokens: 225,
-          },
-        },
-      },
-      thumbsUp: 2,
-      thumbsDown: 0,
-      userVotes: [
-        {
-          userId: 'user-1',
-          voteType: 'up' as const,
-          timestamp: Date.now() - 1000,
-        },
-        {
-          userId: 'user-2',
-          voteType: 'up' as const,
-          timestamp: Date.now() - 2000,
-        },
-      ],
-      createdAt: Date.now(),
-    },
-    {
-      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqy9' as any,
-      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy2' as any, // Mock message ID 2
-      statementType: 'opinion' as const,
-      beliefs: ['AI should be transparent'],
-      tradeOffs: ['Transparency vs Performance'],
-      confidenceLevel: 25, // Low confidence example
-      rawData: {
-        originalMessage:
-          'I think AI systems should show their reasoning process.',
-        analysisTimestamp: Date.now() - 30000,
-        modelUsed: 'gpt-4o-mini',
-        processingTimeMs: 950,
-        cached: true,
-        reasoning:
-          'Low confidence due to ambiguous phrasing and lack of context',
-        openaiResponse: {
-          id: 'chatcmpl-DEF456',
-          object: 'chat.completion',
-          created: 1699999969,
-          model: 'gpt-4o-mini',
-          usage: {
-            prompt_tokens: 120,
-            completion_tokens: 45,
-            total_tokens: 165,
-          },
-        },
-      },
-      thumbsUp: 0,
-      thumbsDown: 1,
-      userVotes: [
-        {
-          userId: 'user-3',
-          voteType: 'down' as const,
-          timestamp: Date.now() - 3000,
-        },
-      ],
-      createdAt: Date.now() - 30000,
-    },
-    {
-      _id: 'j177hcyk38hqxqhmcbrs36fj9n73nqya' as any,
-      messageId: 'j177hcyk38hqxqhmcbrs36fj9n73nqy3' as any, // Mock message ID 3
-      statementType: 'fact' as const,
-      beliefs: ['TypeScript provides type safety', 'Build tools are essential'],
-      tradeOffs: [
-        'Development speed vs Type safety',
-        'Bundle size vs Features',
-      ],
-      confidenceLevel: 92,
-      rawData: {},
-      thumbsUp: 0,
-      thumbsDown: 0,
-      userVotes: [],
-      createdAt: Date.now() - 60000,
-    },
-  ]
+  // Fetch real analyses data for the conversation
+  const rawAnalyses = useQuery(api.analyses.getAnalysesForConversation, {
+    conversationId: conversationId as Id<'conversations'>,
+  })
+
+  // Extract analysis IDs for real-time vote updates
+  const analysisIds = useMemo(() => {
+    return rawAnalyses?.map(analysis => analysis._id) || []
+  }, [rawAnalyses])
+
+  // Subscribe to real-time vote updates
+  const { voteMap, isLoading: voteLoading } = useVoteUpdates({
+    analysisIds,
+    enabled: analysisIds.length > 0,
+  })
+
+  // Merge analyses with real-time vote data
+  const analyses = useMemo(() => {
+    if (!rawAnalyses) return []
+
+    return rawAnalyses.map(analysis => {
+      const voteData = voteMap[analysis._id]
+      if (voteData) {
+        // Update vote counts with real-time data
+        return {
+          ...analysis,
+          thumbsUp: voteData.thumbsUp,
+          thumbsDown: voteData.thumbsDown,
+          userVotes: voteData.userVotes,
+        }
+      }
+      return analysis
+    })
+  }, [rawAnalyses, voteMap])
 
   if (!isVisible) {
     return (
@@ -228,7 +165,14 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
       <Collapsible open={!isCollapsed} onOpenChange={setIsCollapsed}>
         <CollapsibleContent className="min-h-0 flex-1">
           <CardContent className="flex h-full min-h-0 flex-col p-0">
-            {mockAnalyses.length === 0 ? (
+            {rawAnalyses === undefined ? (
+              <div className="flex flex-1 items-center justify-center p-4">
+                <div className="text-center text-sm text-muted-foreground">
+                  <Settings className="mx-auto mb-2 h-8 w-8 animate-pulse opacity-50" />
+                  <p>Loading analyses...</p>
+                </div>
+              </div>
+            ) : analyses.length === 0 ? (
               <div className="flex flex-1 items-center justify-center p-4">
                 <div className="text-center text-sm text-muted-foreground">
                   <Settings className="mx-auto mb-2 h-8 w-8 opacity-50" />
@@ -244,7 +188,7 @@ export function PrismPanel({ className, conversationId }: PrismPanelProps) {
                 <div
                   className={cn('min-h-0 space-y-2', isMobile ? 'p-3' : 'p-4')}
                 >
-                  {mockAnalyses.map(analysis => (
+                  {analyses.map(analysis => (
                     <AnalysisRow
                       key={analysis._id}
                       analysis={analysis}
