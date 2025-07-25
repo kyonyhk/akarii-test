@@ -315,6 +315,80 @@ export const getMessageCount = query({
   },
 })
 
+// Helper function to parse boolean search queries
+function parseBooleanQuery(query: string): {
+  andTerms: string[]
+  orTerms: string[]
+  notTerms: string[]
+} {
+  const andTerms: string[] = []
+  const orTerms: string[] = []
+  const notTerms: string[] = []
+
+  // Split by OR first (case insensitive)
+  const orParts = query.split(/\s+OR\s+/i)
+  
+  for (const orPart of orParts) {
+    // Split by AND (case insensitive)
+    const andParts = orPart.split(/\s+AND\s+/i)
+    
+    for (const andPart of andParts) {
+      const trimmed = andPart.trim()
+      
+      // Check for NOT operator
+      if (trimmed.toLowerCase().startsWith('not ')) {
+        notTerms.push(trimmed.substring(4).trim().toLowerCase())
+      } else if (orParts.length > 1) {
+        // If we have OR operations, treat as OR terms
+        orTerms.push(trimmed.toLowerCase())
+      } else {
+        // Default to AND terms
+        andTerms.push(trimmed.toLowerCase())
+      }
+    }
+  }
+
+  // If no explicit operators, treat as simple AND search
+  if (andTerms.length === 0 && orTerms.length === 0 && notTerms.length === 0) {
+    return {
+      andTerms: [query.toLowerCase()],
+      orTerms: [],
+      notTerms: []
+    }
+  }
+
+  return { andTerms, orTerms, notTerms }
+}
+
+// Helper function to check if content matches boolean query
+function matchesBooleanQuery(content: string, andTerms: string[], orTerms: string[], notTerms: string[]): boolean {
+  const lowerContent = content.toLowerCase()
+
+  // Check NOT terms first - if any match, exclude this content
+  for (const notTerm of notTerms) {
+    if (lowerContent.includes(notTerm)) {
+      return false
+    }
+  }
+
+  // Check AND terms - all must match
+  for (const andTerm of andTerms) {
+    if (!lowerContent.includes(andTerm)) {
+      return false
+    }
+  }
+
+  // Check OR terms - at least one must match (if any OR terms exist)
+  if (orTerms.length > 0) {
+    const hasOrMatch = orTerms.some(orTerm => lowerContent.includes(orTerm))
+    if (!hasOrMatch) {
+      return false
+    }
+  }
+
+  return true
+}
+
 // Search messages by content
 export const searchMessages = query({
   args: {
@@ -339,5 +413,71 @@ export const searchMessages = query({
     })
 
     return filteredMessages.slice(0, limit)
+  },
+})
+
+// Advanced search with boolean operators
+export const searchMessagesWithBoolean = query({
+  args: {
+    conversationId: v.optional(v.string()),
+    searchQuery: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20
+    
+    // Parse boolean query
+    const { andTerms, orTerms, notTerms } = parseBooleanQuery(args.searchQuery)
+
+    const allMessages = await ctx.db.query('messages').order('desc').collect()
+
+    // Filter messages by boolean query and conversation
+    const filteredMessages = allMessages.filter(message => {
+      const conversationMatch = args.conversationId
+        ? message.conversationId === args.conversationId
+        : true
+
+      if (!conversationMatch) {
+        return false
+      }
+
+      return matchesBooleanQuery(message.content, andTerms, orTerms, notTerms)
+    })
+
+    // Get user information for each message
+    const messagesWithUsers = await Promise.all(
+      filteredMessages.slice(0, limit).map(async message => {
+        const user = await ctx.db
+          .query('users')
+          .withIndex('by_clerk_id', q => q.eq('clerkId', message.userId))
+          .first()
+
+        let userInfo = null
+        if (user) {
+          userInfo = {
+            name: user.name || user.email || 'Unknown User',
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role,
+          }
+        }
+
+        return {
+          ...message,
+          user: userInfo,
+        }
+      })
+    )
+
+    return {
+      results: messagesWithUsers,
+      totalCount: filteredMessages.length,
+      hasMore: filteredMessages.length > limit,
+      query: {
+        andTerms,
+        orTerms,
+        notTerms
+      }
+    }
   },
 })
