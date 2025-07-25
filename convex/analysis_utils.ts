@@ -234,6 +234,77 @@ function validateConfidenceLevel(value: any): number {
   return 50
 }
 
+// Enhanced confidence validation with threshold checking
+export function validateConfidenceLevelWithThresholds(
+  value: any,
+  thresholds?: {
+    displayThreshold: number
+    hideThreshold: number
+    warningThreshold: number
+  }
+): {
+  isValid: boolean
+  normalizedLevel: number
+  treatment: 'hide' | 'grey_out' | 'warning' | 'normal'
+  shouldDisplay: boolean
+  validationWarnings: string[]
+} {
+  const warnings: string[] = []
+  let normalizedLevel: number
+
+  // Basic validation
+  if (typeof value === 'number' && value >= 0 && value <= 100) {
+    normalizedLevel = Math.round(value)
+  } else if (typeof value === 'string') {
+    const parsed = parseFloat(value)
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+      normalizedLevel = Math.round(parsed)
+    } else {
+      normalizedLevel = 50
+      warnings.push(
+        `Invalid confidence_level string: ${value}, defaulting to 50`
+      )
+    }
+  } else {
+    normalizedLevel = 50
+    warnings.push(
+      `Invalid confidence_level type: ${typeof value}, defaulting to 50`
+    )
+  }
+
+  // Apply threshold checking if provided
+  let treatment: 'hide' | 'grey_out' | 'warning' | 'normal' = 'normal'
+  let shouldDisplay = true
+
+  if (thresholds) {
+    if (normalizedLevel < thresholds.hideThreshold) {
+      treatment = 'hide'
+      shouldDisplay = false
+      warnings.push(
+        `Confidence ${normalizedLevel}% below hide threshold (${thresholds.hideThreshold}%)`
+      )
+    } else if (normalizedLevel < thresholds.displayThreshold) {
+      treatment = 'grey_out'
+      warnings.push(
+        `Confidence ${normalizedLevel}% below display threshold (${thresholds.displayThreshold}%)`
+      )
+    } else if (normalizedLevel < thresholds.warningThreshold) {
+      treatment = 'warning'
+      warnings.push(
+        `Confidence ${normalizedLevel}% below warning threshold (${thresholds.warningThreshold}%)`
+      )
+    }
+  }
+
+  return {
+    isValid: normalizedLevel >= 0 && normalizedLevel <= 100,
+    normalizedLevel,
+    treatment,
+    shouldDisplay,
+    validationWarnings: warnings,
+  }
+}
+
 // Enhanced retry logic utilities with OpenAI-specific error handling
 export async function withRetry<T>(
   operation: () => Promise<T>,
