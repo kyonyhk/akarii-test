@@ -22,7 +22,11 @@ export interface Analysis {
   rawData: any
   thumbsUp: number
   thumbsDown: number
-  userVotes: Record<string, 'up' | 'down'>
+  userVotes: Array<{
+    userId: string
+    voteType: 'up' | 'down'
+    timestamp: number
+  }>
   createdAt: number
 }
 

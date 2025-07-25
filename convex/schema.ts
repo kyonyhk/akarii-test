@@ -119,4 +119,95 @@ export default defineSchema({
     .index('by_team_timestamp', ['teamId', 'timestamp'])
     .index('by_message', ['messageId'])
     .index('by_timestamp', ['timestamp']),
+
+  alertConfigurations: defineTable({
+    teamId: v.id('teams'),
+    alertType: v.union(
+      v.literal('token_limit'),
+      v.literal('cost_limit'),
+      v.literal('daily_usage'),
+      v.literal('monthly_usage')
+    ),
+    thresholdValue: v.number(), // Token count or cost amount
+    thresholdUnit: v.union(
+      v.literal('tokens'),
+      v.literal('dollars'),
+      v.literal('percentage')
+    ),
+    timeWindow: v.union(
+      v.literal('daily'),
+      v.literal('weekly'),
+      v.literal('monthly'),
+      v.literal('total')
+    ),
+    isActive: v.boolean(),
+    notificationMethods: v.array(
+      v.union(v.literal('email'), v.literal('dashboard'), v.literal('webhook'))
+    ),
+    warningThreshold: v.optional(v.number()), // For soft warnings at % of limit
+    createdBy: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_team', ['teamId'])
+    .index('by_alert_type', ['alertType'])
+    .index('by_active', ['isActive']),
+
+  alertHistory: defineTable({
+    alertConfigId: v.id('alertConfigurations'),
+    teamId: v.id('teams'),
+    alertType: v.string(),
+    thresholdValue: v.number(),
+    actualValue: v.number(),
+    isWarning: v.boolean(), // true for soft warnings, false for hard limits
+    notificationsSent: v.array(v.string()), // Methods used to send alert
+    resolvedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_alert_config', ['alertConfigId'])
+    .index('by_team', ['teamId'])
+    .index('by_created_at', ['createdAt'])
+    .index('by_resolved', ['resolvedAt']),
+
+  notificationPreferences: defineTable({
+    userId: v.id('users'),
+    teamId: v.optional(v.id('teams')),
+    emailEnabled: v.boolean(),
+    dashboardEnabled: v.boolean(),
+    webhookUrl: v.optional(v.string()),
+    alertTypes: v.array(v.string()), // Which alert types user wants to receive
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_team', ['teamId'])
+    .index('by_user_team', ['userId', 'teamId']),
+
+  usageLimits: defineTable({
+    teamId: v.id('teams'),
+    limitType: v.union(
+      v.literal('hard_token_limit'),
+      v.literal('hard_cost_limit'),
+      v.literal('rate_limit')
+    ),
+    limitValue: v.number(),
+    timeWindow: v.union(
+      v.literal('daily'),
+      v.literal('weekly'),
+      v.literal('monthly'),
+      v.literal('total')
+    ),
+    isActive: v.boolean(),
+    enforcementAction: v.union(
+      v.literal('block_requests'),
+      v.literal('require_approval'),
+      v.literal('notify_only')
+    ),
+    createdBy: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_team', ['teamId'])
+    .index('by_limit_type', ['limitType'])
+    .index('by_active', ['isActive']),
 })

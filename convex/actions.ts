@@ -39,6 +39,7 @@ export const analyzeMessage = action({
     content: v.string(),
     userId: v.string(),
     conversationId: v.string(),
+    teamId: v.optional(v.id('teams')),
   },
   handler: async (ctx, args): Promise<AnalysisResponse> => {
     const tracker = createPerformanceTracker()
@@ -91,6 +92,58 @@ export const analyzeMessage = action({
 
       // Count input tokens
       const inputTokens = countChatTokens(messages)
+
+      // Estimate token usage and cost for usage limit checking
+      let estimatedTokens = inputTokens + 300 // Estimate output tokens
+      let estimatedCost = calculateCost(inputTokens, 300, ANALYSIS_MODEL)
+
+      // Check usage limits if teamId is provided
+      if (args.teamId) {
+        const usageCheck = await ctx.runQuery(
+          'usage_enforcement:checkUsageLimits',
+          {
+            teamId: args.teamId,
+            estimatedTokens,
+            estimatedCost,
+          }
+        )
+
+        if (!usageCheck.allowed) {
+          // Record the blocked request
+          if (usageCheck.reason === 'usage_limit_exceeded') {
+            await ctx.runMutation('usage_enforcement:recordBlockedRequest', {
+              teamId: args.teamId,
+              userId: args.userId,
+              limitType: 'token_limit',
+              estimatedTokens,
+              estimatedCost,
+              reason: usageCheck.message,
+            })
+          }
+
+          // Return error response for blocked request
+          return {
+            messageId: args.messageId,
+            success: false,
+            error: usageCheck.message,
+            errorCode: usageCheck.reason,
+            requiresApproval: usageCheck.requiresAdmin,
+            statementType: 'other',
+            beliefs: [],
+            tradeOffs: [],
+            confidenceLevel: 0,
+            rawData: {
+              originalMessage: args.content,
+              analysisTimestamp: Date.now(),
+              modelUsed: ANALYSIS_MODEL,
+              processingTimeMs: tracker.getElapsedMs(),
+              cached: false,
+              blocked: true,
+              blockReason: usageCheck.reason,
+            },
+          }
+        }
+      }
 
       // Make OpenAI API call with enhanced retry logic and error handling
       const { analysisResult, tokenUsage } = await withRetry(
@@ -152,6 +205,7 @@ export const analyzeMessage = action({
       try {
         await ctx.runMutation(api.usage_tracking.recordUsage, {
           messageId: args.messageId,
+          teamId: args.teamId,
           userId: args.userId,
           model: ANALYSIS_MODEL,
           inputTokens: tokenUsage.inputTokens,

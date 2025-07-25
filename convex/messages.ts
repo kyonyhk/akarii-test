@@ -182,7 +182,9 @@ export const getMessagesFromUserConversations = query({
     // Then get messages from those conversations
     const allMessages = await ctx.db.query('messages').order('desc').collect()
     const conversationMessages = allMessages
-      .filter(message => conversationIds.includes(message.conversationId))
+      .filter(message =>
+        conversationIds.some(id => id === message.conversationId)
+      )
       .slice(0, limit)
 
     // Get user information for each message
@@ -327,14 +329,14 @@ function parseBooleanQuery(query: string): {
 
   // Split by OR first (case insensitive)
   const orParts = query.split(/\s+OR\s+/i)
-  
+
   for (const orPart of orParts) {
     // Split by AND (case insensitive)
     const andParts = orPart.split(/\s+AND\s+/i)
-    
+
     for (const andPart of andParts) {
       const trimmed = andPart.trim()
-      
+
       // Check for NOT operator
       if (trimmed.toLowerCase().startsWith('not ')) {
         notTerms.push(trimmed.substring(4).trim().toLowerCase())
@@ -353,7 +355,7 @@ function parseBooleanQuery(query: string): {
     return {
       andTerms: [query.toLowerCase()],
       orTerms: [],
-      notTerms: []
+      notTerms: [],
     }
   }
 
@@ -361,7 +363,12 @@ function parseBooleanQuery(query: string): {
 }
 
 // Helper function to check if content matches boolean query
-function matchesBooleanQuery(content: string, andTerms: string[], orTerms: string[], notTerms: string[]): boolean {
+function matchesBooleanQuery(
+  content: string,
+  andTerms: string[],
+  orTerms: string[],
+  notTerms: string[]
+): boolean {
   const lowerContent = content.toLowerCase()
 
   // Check NOT terms first - if any match, exclude this content
@@ -425,7 +432,7 @@ export const searchMessagesWithBoolean = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20
-    
+
     // Parse boolean query
     const { andTerms, orTerms, notTerms } = parseBooleanQuery(args.searchQuery)
 
@@ -476,8 +483,8 @@ export const searchMessagesWithBoolean = query({
       query: {
         andTerms,
         orTerms,
-        notTerms
-      }
+        notTerms,
+      },
     }
   },
 })

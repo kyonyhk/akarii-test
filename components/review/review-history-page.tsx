@@ -148,10 +148,8 @@ export function ReviewHistoryPage({
             </CardHeader>
             <CardContent className="p-0">
               <ConversationSelector
-                selectedConversationId={selectedConversationId}
+                selectedConversation={selectedConversationId}
                 onConversationSelect={handleConversationSelect}
-                showAsList={true}
-                className="rounded-none border-0"
               />
             </CardContent>
           </Card>
