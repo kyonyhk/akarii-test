@@ -478,3 +478,32 @@ export const getAnalysisStats = query({
     return stats
   },
 })
+
+// Live query for real-time vote updates
+export const getVoteUpdates = query({
+  args: {
+    analysisIds: v.array(v.id('analyses')),
+  },
+  handler: async (ctx, args) => {
+    if (args.analysisIds.length === 0) {
+      return []
+    }
+
+    // Fetch all analyses and return their vote data
+    const analyses = await Promise.all(
+      args.analysisIds.map(async id => {
+        const analysis = await ctx.db.get(id)
+        if (!analysis) return null
+
+        return {
+          analysisId: analysis._id,
+          thumbsUp: analysis.thumbsUp,
+          thumbsDown: analysis.thumbsDown,
+          userVotes: analysis.userVotes,
+        }
+      })
+    )
+
+    return analyses.filter(Boolean)
+  },
+})
