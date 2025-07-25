@@ -1,4 +1,5 @@
 import { cronJobs } from 'convex/server'
+import { internalAction } from './_generated/server'
 import { internal } from './_generated/api'
 
 // Schedule alert monitoring to run every 5 minutes
@@ -13,7 +14,7 @@ crons.interval(
 export { crons as default }
 
 // Internal function to run alert monitoring
-export const runAlertMonitoring = internal.action({
+export const runAlertMonitoring = internalAction({
   handler: async ctx => {
     console.log('Starting scheduled alert monitoring...')
 
@@ -92,7 +93,7 @@ export const runAlertMonitoring = internal.action({
 })
 
 // Internal function to check and clean up old alert history
-export const cleanupOldAlerts = internal.action({
+export const cleanupOldAlerts = internalAction({
   handler: async ctx => {
     console.log('Starting alert history cleanup...')
 
@@ -150,7 +151,7 @@ crons.daily(
 )
 
 // Health check function for alert system
-export const healthCheck = internal.action({
+export const healthCheck = internalAction({
   handler: async ctx => {
     const checks = []
 

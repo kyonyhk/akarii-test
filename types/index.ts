@@ -74,6 +74,103 @@ export interface UsageMetrics {
   date: number
 }
 
+export interface ConversationArchive {
+  _id: Id<'conversationArchives'>
+  conversationId: string
+  title: string
+  originalParticipants: string[]
+  archivedBy: string
+  archiveReason?: string
+  archiveType: 'manual' | 'automatic' | 'bulk'
+  status: 'archived' | 'processing' | 'failed'
+  messageCount: number
+  analysisCount: number
+  timeRange: {
+    startDate: number
+    endDate: number
+    duration: number
+  }
+  metadata: {
+    tags: string[]
+    category?: string
+    priority: 'low' | 'medium' | 'high' | 'critical'
+    retentionPeriod?: number
+    accessLevel: 'private' | 'participants' | 'team' | 'public'
+  }
+  archivedAt: number
+  lastAccessedAt?: number
+  accessCount: number
+}
+
+export interface ArchiveSummary {
+  _id: Id<'archiveSummaries'>
+  archiveId: Id<'conversationArchives'>
+  summaryType: 'overview' | 'decisions' | 'insights' | 'sentiment' | 'topics'
+  content: string
+  keyPoints: string[]
+  participants: Array<{
+    userId: string
+    name?: string
+    messageCount: number
+    participationLevel: 'low' | 'medium' | 'high'
+  }>
+  statistics: {
+    totalMessages: number
+    avgMessageLength: number
+    questionCount: number
+    opinionCount: number
+    factCount: number
+    requestCount: number
+    sentimentScore?: number
+    confidenceLevel: number
+  }
+  generatedAt: number
+  generatedBy: string
+  version: string
+}
+
+export interface ArchiveInsight {
+  _id: Id<'archiveInsights'>
+  archiveId: Id<'conversationArchives'>
+  insightType:
+    | 'decision_pattern'
+    | 'communication_pattern'
+    | 'topic_evolution'
+    | 'conflict_resolution'
+    | 'consensus_building'
+    | 'knowledge_sharing'
+  title: string
+  description: string
+  evidence: Array<{
+    messageId: string
+    excerpt: string
+    timestamp: number
+    relevanceScore: number
+  }>
+  patterns: Array<{
+    pattern: string
+    frequency: number
+    significance: 'low' | 'medium' | 'high'
+  }>
+  recommendations: string[]
+  confidence: number
+  impact: 'low' | 'medium' | 'high' | 'critical'
+  generatedAt: number
+  validatedBy?: string
+  validatedAt?: number
+  isActive: boolean
+}
+
+export interface ArchiveSearchIndex {
+  _id: Id<'archiveSearchIndex'>
+  archiveId: Id<'conversationArchives'>
+  content: string
+  contentType: 'message' | 'summary' | 'insight' | 'metadata'
+  sourceId: string
+  keywords: string[]
+  createdAt: number
+}
+
 // Helper types for form inputs and API responses
 export type CreateMessageInput = Omit<
   Message,
@@ -87,6 +184,16 @@ export type CreateConversationInput = Omit<
   Conversation,
   '_id' | 'createdAt' | 'updatedAt'
 >
+
+// Archive helper types
+export type CreateArchiveInput = Omit<
+  ConversationArchive,
+  '_id' | 'archivedAt' | 'lastAccessedAt' | 'accessCount'
+>
+export type ArchiveStatus = ConversationArchive['status']
+export type ArchiveType = ConversationArchive['archiveType']
+export type SummaryType = ArchiveSummary['summaryType']
+export type InsightType = ArchiveInsight['insightType']
 
 // Vote types
 export type VoteType = 'up' | 'down'
