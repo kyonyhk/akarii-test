@@ -210,4 +210,32 @@ export default defineSchema({
     .index('by_team', ['teamId'])
     .index('by_limit_type', ['limitType'])
     .index('by_active', ['isActive']),
+
+  conversationLinks: defineTable({
+    conversationId: v.string(), // Keep as string for compatibility with existing conversation IDs
+    token: v.string(), // Unique token for the shareable link
+    accessType: v.union(
+      v.literal('public'), // Anyone with the link can view
+      v.literal('private') // Only specific users can view (for future use)
+    ),
+    permissions: v.union(
+      v.literal('view'), // Read-only access to conversation
+      v.literal('comment') // Can view and add messages (for future use)
+    ),
+    expiresAt: v.optional(v.number()), // Optional expiration timestamp
+    createdBy: v.string(), // User ID who created the link (keep as string for compatibility)
+    isActive: v.boolean(), // Whether the link is currently active
+    viewCount: v.number(), // Track how many times the link has been accessed
+    lastAccessedAt: v.optional(v.number()), // When the link was last used
+    title: v.optional(v.string()), // Optional custom title for shared link
+    description: v.optional(v.string()), // Optional description for the shared content
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_conversation', ['conversationId'])
+    .index('by_token', ['token'])
+    .index('by_creator', ['createdBy'])
+    .index('by_active', ['isActive'])
+    .index('by_expires_at', ['expiresAt'])
+    .index('by_created_at', ['createdAt']),
 })

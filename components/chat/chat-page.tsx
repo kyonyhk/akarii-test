@@ -81,7 +81,11 @@ export function ChatPage({
 
   if (!isConnected) {
     return (
-      <ChatContainer title="Loading Chat...">
+      <ChatContainer
+        title="Loading Chat..."
+        conversationId={conversationId}
+        showShareButton={true}
+      >
         <div className="flex flex-1 items-center justify-center">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -93,7 +97,11 @@ export function ChatPage({
   }
 
   return (
-    <ChatContainer title={`Chat (${messages.length} messages)`}>
+    <ChatContainer
+      title={`Chat (${messages.length} messages)`}
+      conversationId={conversationId}
+      showShareButton={true}
+    >
       <ScrollArea
         ref={scrollAreaRef}
         className="flex-1 p-2"
