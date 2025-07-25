@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ShareButton } from './share-button'
@@ -20,6 +21,7 @@ export function ChatContainer({
   conversationId,
   showShareButton = false,
 }: ChatContainerProps) {
+  const { isSignedIn } = useAuth()
   return (
     <Card
       className={cn(
@@ -31,7 +33,7 @@ export function ChatContainer({
       <div className="flex items-center justify-between border-b bg-muted/50 p-4">
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="flex items-center gap-2">
-          {showShareButton && conversationId && (
+          {showShareButton && conversationId && isSignedIn && (
             <ShareButton conversationId={conversationId} />
           )}
           <div className="flex items-center gap-1">

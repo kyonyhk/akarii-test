@@ -7,9 +7,10 @@ import { api } from '@/convex/_generated/api'
 interface UseChatProps {
   conversationId: string
   userId: string
+  userName?: string
 }
 
-export function useChat({ conversationId, userId }: UseChatProps) {
+export function useChat({ conversationId, userId, userName }: UseChatProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   // Real-time messages subscription with user information
@@ -30,6 +31,7 @@ export function useChat({ conversationId, userId }: UseChatProps) {
         content: content.trim(),
         userId,
         conversationId,
+        username: userName,
       })
     } catch (error) {
       console.error('Failed to send message:', error)
