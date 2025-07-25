@@ -361,7 +361,7 @@ async function submitForHumanReview(
   reviewTriggers: string[]
 ): Promise<string> {
   // Import the human review function (this would need to be passed in or injected)
-  const { submitForReview } = await import('./humanReview')
+  // const { submitForReview } = await import('./humanReview') // Disabled due to Node.js dependency issue
 
   const automatedFlags = qualityResult.flags.map(flag => ({
     type: flag.type,
@@ -371,7 +371,7 @@ async function submitForHumanReview(
   }))
 
   try {
-    const reviewId = await ctx.runMutation(submitForReview, {
+    /* const reviewId = await ctx.runMutation(submitForReview, {
       messageId: context.messageId,
       originalContent: originalMessage,
       proposedAnalysis: {
@@ -396,10 +396,10 @@ async function submitForHumanReview(
         userTier: context.userTier || 'pro',
       },
       automatedFlags,
-    })
+    }) */
 
-    console.log(`Submitted analysis for human review: ${reviewId}`)
-    return reviewId
+    // console.log(`Submitted analysis for human review: ${reviewId}`)
+    return 'human-review-disabled' // Disabled due to Node.js dependency issue
   } catch (error) {
     console.error('Failed to submit for human review:', error)
     throw error

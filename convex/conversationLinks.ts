@@ -239,7 +239,8 @@ export const getConversationLinks = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) {
-      throw new Error('Not authenticated')
+      // Return empty array for unauthenticated users (demo mode)
+      return []
     }
 
     const user = await ctx.db

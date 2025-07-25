@@ -8,6 +8,7 @@ export const sendMessage = mutation({
     content: v.string(),
     userId: v.string(),
     conversationId: v.string(),
+    username: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Validate message content
@@ -24,6 +25,7 @@ export const sendMessage = mutation({
       content: args.content.trim(),
       userId: args.userId,
       conversationId: args.conversationId,
+      username: args.username || 'Anonymous',
       timestamp: getCurrentTimestamp(),
     })
 

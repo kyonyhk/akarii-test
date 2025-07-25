@@ -24,6 +24,7 @@ export function ChatPage({
   const { messages, sendMessage, isLoading, isConnected } = useChat({
     conversationId,
     userId,
+    userName,
   })
 
   const [isScrolledUp, setIsScrolledUp] = useState(false)

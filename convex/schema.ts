@@ -2,17 +2,62 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 export default defineSchema({
-  // Existing tables...
+  // User management
+  users: defineTable({
+    clerkId: v.string(),
+    name: v.optional(v.string()),
+    email: v.string(),
+    avatar: v.optional(v.string()),
+    role: v.union(
+      v.literal('admin'),
+      v.literal('user'),
+      v.literal('guest'),
+      v.literal('member')
+    ),
+    teamId: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),
+    joinedAt: v.optional(v.number()),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
+  })
+    .index('by_clerk_id', ['clerkId'])
+    .index('by_email', ['email'])
+    .index('by_team', ['teamId']),
+
+  // Teams for multi-user workspaces
+  teams: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    ownerId: v.string(),
+    settings: v.optional(v.any()),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_owner', ['ownerId'])
+    .index('by_slug', ['slug']),
+
+  // Conversations
+  conversations: defineTable({
+    title: v.optional(v.string()),
+    participants: v.array(v.string()),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_created_at', ['createdAt'])
+    .index('by_updated_at', ['updatedAt']),
+
   messages: defineTable({
     content: v.string(),
     userId: v.string(),
-    username: v.string(),
-    createdAt: v.number(),
+    username: v.optional(v.string()),
+    timestamp: v.number(),
     conversationId: v.optional(v.string()),
   })
     .index('by_user', ['userId'])
     .index('by_conversation', ['conversationId'])
-    .index('by_created_at', ['createdAt']),
+    .index('by_timestamp', ['timestamp']),
 
   analyses: defineTable({
     messageId: v.id('messages'),
