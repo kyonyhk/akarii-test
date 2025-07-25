@@ -282,38 +282,77 @@ export function formatAnalysisOutput(
   rawOutput: any,
   config: PromptConfiguration,
   processingTimeMs?: number,
-  contextQuality?: 'high' | 'medium' | 'low'
+  contextQuality?: 'high' | 'medium' | 'low',
+  originalMessage?: string
 ): {
   output: StructuredOutputFormat
-  validation: { isValid: boolean; errors: string[] }
+  validation: { isValid: boolean; errors: string[]; warnings?: string[] }
   quality: { score: number; factors: string[] }
 } {
-  // Validate output structure
-  const validation = validateStructuredOutput(rawOutput)
+  // Basic structural validation first
+  const basicValidation = validateStructuredOutput(rawOutput)
 
-  if (!validation.isValid || !validation.sanitizedOutput) {
+  if (!basicValidation.isValid || !basicValidation.sanitizedOutput) {
     return {
       output: {
         statement_type: 'other',
         beliefs: [],
         trade_offs: [],
         confidence_level: 0,
-        reasoning: 'Validation failed: ' + validation.errors.join('; '),
+        reasoning:
+          'Basic validation failed: ' + basicValidation.errors.join('; '),
       },
-      validation,
-      quality: { score: 0, factors: ['Validation failed'] },
+      validation: basicValidation,
+      quality: { score: 0, factors: ['Basic validation failed'] },
     }
   }
 
   // Apply confidence calibration
   const calibratedOutput = applyConfidenceCalibration(
-    validation.sanitizedOutput,
+    basicValidation.sanitizedOutput,
     config
   )
 
+  // Enhanced validation with coherence and quality checks
+  let enhancedValidation
+  if (originalMessage) {
+    // Import the enhanced validation function dynamically to avoid circular imports
+    try {
+      enhancedValidation = require('./outputValidation').validateAnalysisOutput(
+        calibratedOutput,
+        originalMessage
+      )
+    } catch (importError) {
+      console.warn('Enhanced validation not available:', importError)
+      enhancedValidation = {
+        isValid: true,
+        errors: [],
+        warnings: [],
+        qualityScore: 80,
+        coherenceScore: 80,
+        sanitizedOutput: calibratedOutput,
+        qualityFlags: [],
+      }
+    }
+  } else {
+    // Fallback to basic validation if no original message
+    enhancedValidation = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      qualityScore: 80,
+      coherenceScore: 80,
+      sanitizedOutput: calibratedOutput,
+      qualityFlags: [],
+    }
+  }
+
+  // Use enhanced validation results
+  const finalOutput = enhancedValidation.sanitizedOutput || calibratedOutput
+
   // Add metadata
   const outputWithMetadata: StructuredOutputFormat = {
-    ...calibratedOutput,
+    ...finalOutput,
     metadata: {
       prompt_variant: config.variant,
       context_quality: contextQuality,
@@ -322,13 +361,46 @@ export function formatAnalysisOutput(
     },
   }
 
-  // Calculate quality score
-  const quality = calculateQualityScore(outputWithMetadata)
+  // Calculate quality score incorporating enhanced metrics
+  const basicQuality = calculateQualityScore(outputWithMetadata)
+
+  // Combine basic quality score with enhanced validation scores
+  const combinedQualityScore = Math.round(
+    (basicQuality.score +
+      enhancedValidation.qualityScore +
+      enhancedValidation.coherenceScore) /
+      3
+  )
+
+  const qualityFactors = [
+    ...basicQuality.factors,
+    `Quality score: ${enhancedValidation.qualityScore}`,
+    `Coherence score: ${enhancedValidation.coherenceScore}`,
+  ]
+
+  // Add quality flags as factors
+  enhancedValidation.qualityFlags.forEach(flag => {
+    if (flag.severity === 'medium' || flag.severity === 'high') {
+      qualityFactors.push(`${flag.type}: ${flag.description}`)
+    }
+  })
+
+  // Log warnings if any
+  if (enhancedValidation.warnings.length > 0) {
+    console.warn('Analysis quality warnings:', enhancedValidation.warnings)
+  }
 
   return {
     output: outputWithMetadata,
-    validation,
-    quality,
+    validation: {
+      isValid: enhancedValidation.isValid,
+      errors: [...basicValidation.errors, ...enhancedValidation.errors],
+      warnings: enhancedValidation.warnings,
+    },
+    quality: {
+      score: combinedQualityScore,
+      factors: qualityFactors,
+    },
   }
 }
 

@@ -36,7 +36,19 @@ import {
   setCachedAnalysis,
   recordAnalysisMetrics,
   getPerformanceMetrics,
+  withFallback,
+  createFallbackAnalysis,
+  classifyErrorForFallback,
 } from './analysis_utils'
+import {
+  validateAnalysisInput,
+  ContentValidationResult,
+} from './inputValidation'
+import {
+  validateAnalysisOutput,
+  createFallbackResponse,
+  EnhancedValidationResult,
+} from './outputValidation'
 import {
   countChatTokens,
   countTokens,
@@ -75,6 +87,35 @@ export const analyzeMessage = action({
     const tracker = createPerformanceTracker()
 
     try {
+      // Input validation and sanitization
+      const inputValidation = validateAnalysisInput(args)
+
+      if (!inputValidation.isValid) {
+        console.error('Input validation failed:', inputValidation.errors)
+        return {
+          messageId: args.messageId,
+          success: false,
+          error: `Input validation failed: ${inputValidation.errors.join(', ')}`,
+          rawData: {
+            originalMessage: args.content,
+            analysisTimestamp: Date.now(),
+            modelUsed: ANALYSIS_MODEL,
+            processingTimeMs: tracker.getElapsedMs(),
+            cached: false,
+            validationErrors: inputValidation.errors,
+            riskLevel: inputValidation.riskLevel,
+          },
+        }
+      }
+
+      // Log validation warnings if any
+      if (inputValidation.warnings.length > 0) {
+        console.warn('Input validation warnings:', inputValidation.warnings)
+      }
+
+      // Use sanitized arguments for processing
+      const sanitizedArgs = inputValidation.sanitizedArgs || args
+
       // Validate OpenAI configuration
       if (!validateOpenAIConfig()) {
         throw new Error('OpenAI API is not properly configured')
@@ -82,13 +123,13 @@ export const analyzeMessage = action({
 
       // Set up prompt configuration
       const promptConfig: PromptConfiguration = {
-        variant: args.promptConfig?.variant || 'standard',
-        mode: args.promptConfig?.mode || 'production',
-        experimentId: args.promptConfig?.experimentId,
+        variant: sanitizedArgs.promptConfig?.variant || 'standard',
+        mode: sanitizedArgs.promptConfig?.mode || 'production',
+        experimentId: sanitizedArgs.promptConfig?.experimentId,
         contextOptions: {
           maxContextMessages: 5,
           includeParticipants: true,
-          useContextAwarePrompt: args.useContext || false,
+          useContextAwarePrompt: sanitizedArgs.useContext || false,
         },
       }
 
@@ -96,23 +137,26 @@ export const analyzeMessage = action({
       let conversationContext
       let contextQuality: 'high' | 'medium' | 'low' = 'low'
 
-      if (args.useContext || promptConfig.variant === 'context_aware') {
+      if (
+        sanitizedArgs.useContext ||
+        promptConfig.variant === 'context_aware'
+      ) {
         try {
           // Get conversation messages for context
           const messages = await ctx.runQuery(
             api.messages.getMessagesInConversation,
             {
-              conversationId: args.conversationId,
+              conversationId: sanitizedArgs.conversationId,
               limit: 10,
             }
           )
 
           conversationContext = extractConversationContext(
             messages,
-            args.messageId
+            sanitizedArgs.messageId
           )
           contextQuality = assessContextQuality(
-            args.content,
+            sanitizedArgs.content,
             conversationContext
           )
         } catch (contextError) {
@@ -122,25 +166,25 @@ export const analyzeMessage = action({
       }
 
       // Check enhanced cache (includes prompt variant)
-      const cacheKey = `${args.content}_${promptConfig.variant}_${contextQuality}`
+      const cacheKey = `${sanitizedArgs.content}_${promptConfig.variant}_${contextQuality}`
       const cachedResult = getCachedAnalysis(cacheKey)
       if (cachedResult) {
         console.log(
-          `Enhanced cache hit for message ${args.messageId} (${tracker.getElapsedMs()}ms)`
+          `Enhanced cache hit for message ${sanitizedArgs.messageId} (${tracker.getElapsedMs()}ms)`
         )
 
         // Record cache hit metrics
         recordAnalysisMetrics(tracker.getElapsedMs(), true, true)
 
         const analysis: AnalysisResponse = {
-          messageId: args.messageId,
+          messageId: sanitizedArgs.messageId,
           success: true,
           statementType: cachedResult.statement_type,
           beliefs: cachedResult.beliefs,
           tradeOffs: cachedResult.trade_offs,
           confidenceLevel: cachedResult.confidence_level,
           rawData: {
-            originalMessage: args.content,
+            originalMessage: sanitizedArgs.content,
             analysisTimestamp: Date.now(),
             modelUsed: ANALYSIS_MODEL,
             processingTimeMs: tracker.getElapsedMs(),
@@ -155,7 +199,7 @@ export const analyzeMessage = action({
       // Generate enhanced prompts based on configuration
       const systemPrompt = getSystemPrompt(promptConfig)
       const userPrompt = getUserPrompt(
-        args.content,
+        sanitizedArgs.content,
         promptConfig,
         conversationContext
       )
@@ -180,11 +224,11 @@ export const analyzeMessage = action({
       let estimatedCost = calculateCost(inputTokens, 300, ANALYSIS_MODEL)
 
       // Check usage limits if teamId is provided
-      if (args.teamId) {
+      if (sanitizedArgs.teamId) {
         const usageCheck = await ctx.runQuery(
           'usage_enforcement:checkUsageLimits',
           {
-            teamId: args.teamId,
+            teamId: sanitizedArgs.teamId,
             estimatedTokens,
             estimatedCost,
           }
@@ -194,8 +238,8 @@ export const analyzeMessage = action({
           // Record the blocked request
           if (usageCheck.reason === 'usage_limit_exceeded') {
             await ctx.runMutation('usage_enforcement:recordBlockedRequest', {
-              teamId: args.teamId,
-              userId: args.userId,
+              teamId: sanitizedArgs.teamId,
+              userId: sanitizedArgs.userId,
               limitType: 'token_limit',
               estimatedTokens,
               estimatedCost,
@@ -205,7 +249,7 @@ export const analyzeMessage = action({
 
           // Return error response for blocked request
           return {
-            messageId: args.messageId,
+            messageId: sanitizedArgs.messageId,
             success: false,
             error: usageCheck.message,
             errorCode: usageCheck.reason,
@@ -215,7 +259,7 @@ export const analyzeMessage = action({
             tradeOffs: [],
             confidenceLevel: 0,
             rawData: {
-              originalMessage: args.content,
+              originalMessage: sanitizedArgs.content,
               analysisTimestamp: Date.now(),
               modelUsed: ANALYSIS_MODEL,
               processingTimeMs: tracker.getElapsedMs(),
@@ -227,95 +271,129 @@ export const analyzeMessage = action({
         }
       }
 
-      // Make OpenAI API call with enhanced retry logic and error handling
-      const { analysisResult, tokenUsage, qualityScore, qualityFactors } =
-        await withRetry(
-          async () => {
-            // Check timeout (target: sub-2-second)
-            tracker.checkTimeout(1800) // Leave 200ms buffer
+      // Make OpenAI API call with enhanced retry logic and fallback handling
+      const analysisAttempt = await withFallback(
+        async () => {
+          // Check timeout (target: sub-2-second)
+          tracker.checkTimeout(1800) // Leave 200ms buffer
 
+          try {
+            const response = await openai.chat.completions.create(
+              {
+                model: ANALYSIS_MODEL,
+                messages,
+                max_tokens: MAX_TOKENS,
+                temperature: TEMPERATURE,
+                response_format: { type: 'json_object' },
+              },
+              {
+                timeout: 1500, // 1.5 second timeout per request
+              }
+            )
+
+            const openaiResponse = response.choices[0]?.message?.content
+            if (!openaiResponse) {
+              throw new Error('No response received from OpenAI')
+            }
+
+            // Extract token usage from API response
+            const apiTokenUsage = extractTokenUsageFromResponse(response)
+
+            // Create token usage record
+            const tokenUsage = createTokenUsage(
+              apiTokenUsage.inputTokens || inputTokens, // Use API data if available, fallback to our count
+              apiTokenUsage.outputTokens || countTokens(openaiResponse), // Use API data if available, fallback to our count
+              ANALYSIS_MODEL
+            )
+
+            // Parse the raw JSON response
+            let rawAnalysisResult
             try {
-              const response = await openai.chat.completions.create(
-                {
-                  model: ANALYSIS_MODEL,
-                  messages,
-                  max_tokens: MAX_TOKENS,
-                  temperature: TEMPERATURE,
-                  response_format: { type: 'json_object' },
-                },
-                {
-                  timeout: 1500, // 1.5 second timeout per request
-                }
+              rawAnalysisResult = JSON.parse(openaiResponse)
+            } catch (parseError) {
+              throw new Error(
+                `Invalid JSON response from OpenAI: ${parseError}`
               )
+            }
 
-              const openaiResponse = response.choices[0]?.message?.content
-              if (!openaiResponse) {
-                throw new Error('No response received from OpenAI')
-              }
+            // Format and validate using enhanced output formatting
+            const formattedResult = formatAnalysisOutput(
+              rawAnalysisResult,
+              promptConfig,
+              tracker.getElapsedMs(),
+              contextQuality,
+              sanitizedArgs.content
+            )
 
-              // Extract token usage from API response
-              const apiTokenUsage = extractTokenUsageFromResponse(response)
-
-              // Create token usage record
-              const tokenUsage = createTokenUsage(
-                apiTokenUsage.inputTokens || inputTokens, // Use API data if available, fallback to our count
-                apiTokenUsage.outputTokens || countTokens(openaiResponse), // Use API data if available, fallback to our count
-                ANALYSIS_MODEL
+            if (!formattedResult.validation.isValid) {
+              throw new Error(
+                `Invalid analysis output: ${formattedResult.validation.errors.join(', ')}`
               )
+            }
 
-              // Parse the raw JSON response
-              let rawAnalysisResult
-              try {
-                rawAnalysisResult = JSON.parse(openaiResponse)
-              } catch (parseError) {
-                throw new Error(
-                  `Invalid JSON response from OpenAI: ${parseError}`
-                )
-              }
-
-              // Format and validate using enhanced output formatting
-              const formattedResult = formatAnalysisOutput(
-                rawAnalysisResult,
-                promptConfig,
-                tracker.getElapsedMs(),
-                contextQuality
+            return {
+              analysisResult: formattedResult.output,
+              tokenUsage,
+              qualityScore: formattedResult.quality.score,
+              qualityFactors: formattedResult.quality.factors,
+            }
+          } catch (error) {
+            // Check if this error should be retried
+            if (!isRetryableError(error)) {
+              console.log(
+                `Non-retryable error detected, failing immediately: ${error}`
               )
-
-              if (!formattedResult.validation.isValid) {
-                throw new Error(
-                  `Invalid analysis output: ${formattedResult.validation.errors.join(', ')}`
-                )
-              }
-
-              return {
-                analysisResult: formattedResult.output,
-                tokenUsage,
-                qualityScore: formattedResult.quality.score,
-                qualityFactors: formattedResult.quality.factors,
-              }
-            } catch (error) {
-              // Check if this error should be retried
-              if (!isRetryableError(error)) {
-                console.log(
-                  `Non-retryable error detected, failing immediately: ${error}`
-                )
-                throw error
-              }
-
-              // Re-throw retryable errors to trigger retry logic
               throw error
             }
+
+            // Re-throw retryable errors to trigger retry logic
+            throw error
+          }
+        },
+        sanitizedArgs.messageId,
+        sanitizedArgs.content,
+        3,
+        750
+      ) // Max 3 retries, 750ms base delay for better rate limit handling
+
+      // Handle fallback response if analysis failed
+      if ('statement_type' in analysisAttempt) {
+        // This is a fallback OpenAIAnalysisResponse
+        const fallbackResult = analysisAttempt
+        console.log(
+          `Using fallback analysis for message ${sanitizedArgs.messageId}`
+        )
+
+        return {
+          messageId: sanitizedArgs.messageId,
+          success: false,
+          error: 'Analysis completed with fallback due to service issues',
+          statementType: fallbackResult.statement_type,
+          beliefs: fallbackResult.beliefs,
+          tradeOffs: fallbackResult.trade_offs,
+          confidenceLevel: fallbackResult.confidence_level,
+          rawData: {
+            originalMessage: sanitizedArgs.content,
+            analysisTimestamp: Date.now(),
+            modelUsed: ANALYSIS_MODEL,
+            processingTimeMs: tracker.getElapsedMs(),
+            cached: false,
+            fallbackUsed: true,
+            fallbackReason: fallbackResult.reasoning,
           },
-          3,
-          750
-        ) // Max 3 retries, 750ms base delay for better rate limit handling
+        }
+      }
+
+      // Normal analysis succeeded
+      const { analysisResult, tokenUsage, qualityScore, qualityFactors } =
+        analysisAttempt
 
       // Record token usage in database
       try {
         await ctx.runMutation(api.usage_tracking.recordUsage, {
-          messageId: args.messageId,
-          teamId: args.teamId,
-          userId: args.userId,
+          messageId: sanitizedArgs.messageId,
+          teamId: sanitizedArgs.teamId,
+          userId: sanitizedArgs.userId,
           model: ANALYSIS_MODEL,
           inputTokens: tokenUsage.inputTokens,
           outputTokens: tokenUsage.outputTokens,
@@ -333,14 +411,14 @@ export const analyzeMessage = action({
 
       // Convert to our response format with enhanced metadata
       const analysis: AnalysisResponse = {
-        messageId: args.messageId,
+        messageId: sanitizedArgs.messageId,
         success: true,
         statementType: analysisResult.statement_type,
         beliefs: analysisResult.beliefs,
         tradeOffs: analysisResult.trade_offs,
         confidenceLevel: analysisResult.confidence_level,
         rawData: {
-          originalMessage: args.content,
+          originalMessage: sanitizedArgs.content,
           analysisTimestamp: Date.now(),
           modelUsed: ANALYSIS_MODEL,
           processingTimeMs: tracker.getElapsedMs(),
@@ -363,7 +441,7 @@ export const analyzeMessage = action({
       recordAnalysisMetrics(tracker.getElapsedMs(), false, true)
 
       console.log(
-        `Analysis completed for message ${args.messageId} in ${tracker.getElapsedMs()}ms`
+        `Analysis completed for message ${sanitizedArgs.messageId} in ${tracker.getElapsedMs()}ms`
       )
       return analysis
     } catch (error) {
@@ -373,7 +451,7 @@ export const analyzeMessage = action({
       recordAnalysisMetrics(tracker.getElapsedMs(), false, false)
 
       return {
-        messageId: args.messageId,
+        messageId: sanitizedArgs.messageId,
         success: false,
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',
@@ -382,7 +460,7 @@ export const analyzeMessage = action({
         tradeOffs: [],
         confidenceLevel: 0,
         rawData: {
-          originalMessage: args.content,
+          originalMessage: sanitizedArgs.content,
           analysisTimestamp: Date.now(),
           modelUsed: ANALYSIS_MODEL,
           processingTimeMs: tracker.getElapsedMs(),

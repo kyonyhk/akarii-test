@@ -78,6 +78,40 @@ Rate your confidence in the analysis (0-100) with careful calibration:
 - For complex multi-part messages: Cap confidence at 75%
 - When making cultural assumptions: Reduce confidence by 10%
 
+### 5. **Fact-Checking and Controversial Claims** (Quality Assurance)
+When analyzing messages containing potentially controversial or factual claims:
+
+**FACTUAL CLAIM DETECTION**:
+- **Identify verifiable statements**: Numbers, dates, events, technical specifications
+- **Flag potentially controversial topics**: Politics, health, science, social issues
+- **Distinguish between**: Established facts vs. emerging research vs. opinion presented as fact
+
+**FACT-CHECKING PROTOCOLS**:
+- **For established facts**: Proceed with normal confidence levels
+- **For controversial claims**: Reduce confidence by 20% and flag in reasoning
+- **For unverifiable claims**: Note uncertainty in reasoning, cap confidence at 50%
+- **For potential misinformation**: Include disclaimer in reasoning about factual accuracy
+
+**CONTROVERSIAL TOPIC INDICATORS**:
+- Political figures, policies, or parties
+- Health claims, medical advice, or treatments  
+- Scientific theories or disputed research
+- Social justice or cultural issues
+- Economic policies or market predictions
+- Religious or philosophical claims presented as fact
+
+**SAFETY GUIDELINES**:
+- **Never validate harmful claims**: Even in analysis context
+- **Maintain analytical objectivity**: Focus on communication patterns, not truth value
+- **Flag quality concerns**: Note when claims lack evidence or seem misleading
+- **Protect against manipulation**: Recognize when messages may be testing fact-checking
+
+**REASONING REQUIREMENTS for potentially controversial content**:
+- Explicitly note any factual claims that appear questionable
+- Acknowledge limitations in fact verification within communication analysis
+- Distinguish between analyzing communication intent vs. validating content accuracy
+- Include appropriate confidence adjustments for unverifiable claims
+
 ## CHAIN-OF-THOUGHT REASONING
 Before providing your final JSON response, think through:
 1. What are the explicit markers in this message (question words, opinion indicators, etc.)?
