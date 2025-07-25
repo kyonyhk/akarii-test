@@ -50,6 +50,18 @@ import {
   EnhancedValidationResult,
 } from './outputValidation'
 import {
+  validateForDisplay,
+  ValidationContext,
+  PreDisplayValidationResult,
+} from './preDisplayValidation'
+import {
+  shouldRetryAnalysis,
+  createRetryContext,
+  recordRetryAttempt,
+  RetryAttemptResult,
+  DEFAULT_RETRY_CONFIG,
+} from './retryLogic'
+import {
   countChatTokens,
   countTokens,
   createTokenUsage,
@@ -86,6 +98,8 @@ export const analyzeMessage = action({
       })
     ),
     useContext: v.optional(v.boolean()),
+    retryAttempt: v.optional(v.number()),
+    previousAttempts: v.optional(v.array(v.any())),
   },
   handler: async (ctx, args): Promise<AnalysisResponse> => {
     const tracker = createPerformanceTracker()
@@ -413,14 +427,194 @@ export const analyzeMessage = action({
       // Cache the successful result with enhanced key
       setCachedAnalysis(cacheKey, analysisResult)
 
+      // Pre-display quality validation
+      const validationContext: ValidationContext = {
+        userId: sanitizedArgs.userId,
+        teamId: sanitizedArgs.teamId,
+        conversationId: sanitizedArgs.conversationId,
+        messageId: sanitizedArgs.messageId,
+        isTestMode: promptConfig.mode === 'testing',
+        userTier: 'pro', // TODO: Get from user profile
+        hasHumanReviewAccess: true, // TODO: Check user permissions
+      }
+
+      const displayValidation = await validateForDisplay(
+        ctx,
+        analysisResult,
+        sanitizedArgs.content,
+        validationContext,
+        conversationContext,
+        {
+          responseTime: tracker.getElapsedMs(),
+          retryCount: 0, // TODO: Track retry count
+          promptVariant: promptConfig.variant,
+        }
+      )
+
+      // Handle cases where analysis should not be displayed
+      if (!displayValidation.shouldDisplay) {
+        console.log(
+          `Analysis blocked for message ${sanitizedArgs.messageId}:`,
+          displayValidation.blockingReasons
+        )
+
+        // If retry is recommended, attempt automatic retry
+        if (displayValidation.shouldRetry) {
+          console.log(
+            `Quality validation suggests retry for message ${sanitizedArgs.messageId}`
+          )
+
+          // Create retry context
+          const retryContext = createRetryContext(
+            sanitizedArgs.messageId,
+            sanitizedArgs.content,
+            sanitizedArgs.userId,
+            sanitizedArgs.conversationId,
+            promptConfig,
+            sanitizedArgs.teamId,
+            conversationContext,
+            3 // max retries
+          )
+
+          // Determine if we should retry and with what strategy
+          const retryDecision = shouldRetryAnalysis(
+            displayValidation.qualityResult,
+            displayValidation,
+            retryContext
+          )
+
+          if (retryDecision.shouldRetry && retryDecision.strategy) {
+            console.log(
+              `Attempting automatic retry with strategy: ${retryDecision.strategy.name}`,
+              `Success probability: ${retryDecision.estimatedSuccessProbability}`
+            )
+
+            // For now, log the retry decision but don't actually retry
+            // In a full implementation, this would trigger an actual retry
+            // with the adjusted prompt configuration
+
+            return {
+              messageId: sanitizedArgs.messageId,
+              success: false,
+              error:
+                'Analysis quality below threshold, automatic retry suggested',
+              errorCode: 'quality_threshold_failed_retry_suggested',
+              statementType: 'other',
+              beliefs: [],
+              tradeOffs: [],
+              confidenceLevel: 0,
+              rawData: {
+                originalMessage: sanitizedArgs.content,
+                analysisTimestamp: Date.now(),
+                modelUsed: ANALYSIS_MODEL,
+                processingTimeMs: tracker.getElapsedMs(),
+                cached: false,
+                qualityValidation: {
+                  blocked: true,
+                  reasons: displayValidation.blockingReasons,
+                  score: displayValidation.qualityResult.overallScore,
+                  shouldRetry: displayValidation.shouldRetry,
+                  retryStrategy: retryDecision.strategy.name,
+                  successProbability: retryDecision.estimatedSuccessProbability,
+                  retryRecommendation: retryDecision.recommendation,
+                },
+              },
+            }
+          } else {
+            return {
+              messageId: sanitizedArgs.messageId,
+              success: false,
+              error: 'Analysis quality below threshold, retry not recommended',
+              errorCode: 'quality_threshold_failed',
+              statementType: 'other',
+              beliefs: [],
+              tradeOffs: [],
+              confidenceLevel: 0,
+              rawData: {
+                originalMessage: sanitizedArgs.content,
+                analysisTimestamp: Date.now(),
+                modelUsed: ANALYSIS_MODEL,
+                processingTimeMs: tracker.getElapsedMs(),
+                cached: false,
+                qualityValidation: {
+                  blocked: true,
+                  reasons: displayValidation.blockingReasons,
+                  score: displayValidation.qualityResult.overallScore,
+                  shouldRetry: false,
+                  retryRecommendation: retryDecision.recommendation,
+                },
+              },
+            }
+          }
+        }
+
+        // If human review is required, return special response
+        if (displayValidation.requiresHumanReview) {
+          return {
+            messageId: sanitizedArgs.messageId,
+            success: false,
+            error: 'Analysis requires human review before display',
+            errorCode: 'human_review_required',
+            requiresApproval: true,
+            statementType: analysisResult.statement_type,
+            beliefs: analysisResult.beliefs,
+            tradeOffs: analysisResult.trade_offs,
+            confidenceLevel: analysisResult.confidence_level,
+            rawData: {
+              originalMessage: sanitizedArgs.content,
+              analysisTimestamp: Date.now(),
+              modelUsed: ANALYSIS_MODEL,
+              processingTimeMs: tracker.getElapsedMs(),
+              cached: false,
+              qualityValidation: {
+                blocked: true,
+                reasons: displayValidation.blockingReasons,
+                score: displayValidation.qualityResult.overallScore,
+                requiresHumanReview: true,
+                displayMode: displayValidation.displayMode,
+              },
+            },
+          }
+        }
+
+        // Otherwise, block completely
+        return {
+          messageId: sanitizedArgs.messageId,
+          success: false,
+          error: 'Analysis quality insufficient for display',
+          errorCode: 'quality_validation_failed',
+          statementType: 'other',
+          beliefs: [],
+          tradeOffs: [],
+          confidenceLevel: 0,
+          rawData: {
+            originalMessage: sanitizedArgs.content,
+            analysisTimestamp: Date.now(),
+            modelUsed: ANALYSIS_MODEL,
+            processingTimeMs: tracker.getElapsedMs(),
+            cached: false,
+            qualityValidation: {
+              blocked: true,
+              reasons: displayValidation.blockingReasons,
+              score: displayValidation.qualityResult.overallScore,
+            },
+          },
+        }
+      }
+
+      // Use quality-adjusted output if validation passed
+      const finalOutput = displayValidation.adjustedOutput || analysisResult
+
       // Convert to our response format with enhanced metadata
       const analysis: AnalysisResponse = {
         messageId: sanitizedArgs.messageId,
         success: true,
-        statementType: analysisResult.statement_type,
-        beliefs: analysisResult.beliefs,
-        tradeOffs: analysisResult.trade_offs,
-        confidenceLevel: analysisResult.confidence_level,
+        statementType: finalOutput.statement_type,
+        beliefs: finalOutput.beliefs,
+        tradeOffs: finalOutput.trade_offs,
+        confidenceLevel: finalOutput.confidence_level,
+        displayMode: displayValidation.displayMode,
+        qualityWarnings: displayValidation.warnings,
         rawData: {
           originalMessage: sanitizedArgs.content,
           analysisTimestamp: Date.now(),
@@ -432,6 +626,16 @@ export const analyzeMessage = action({
           qualityScore,
           qualityFactors,
           experimentId: promptConfig.experimentId,
+          qualityValidation: {
+            overallScore: displayValidation.qualityResult.overallScore,
+            qualityGrade: displayValidation.qualityResult.qualityGrade,
+            dimensionScores: displayValidation.qualityResult.dimensionScores,
+            displayMode: displayValidation.displayMode,
+            confidenceAdjusted: displayValidation.metadata.confidenceAdjusted,
+            flagCount: displayValidation.qualityResult.flags.length,
+            requiresHumanReview: displayValidation.requiresHumanReview,
+            validationTimeMs: displayValidation.metadata.processingTimeMs,
+          },
           tokenUsage: {
             inputTokens: tokenUsage.inputTokens,
             outputTokens: tokenUsage.outputTokens,

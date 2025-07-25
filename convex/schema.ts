@@ -212,4 +212,131 @@ export default defineSchema({
   })
     .index('by_date', ['date'])
     .index('by_created_at', ['createdAt']),
+
+  // Human review queue for borderline analysis cases
+  humanReviewQueue: defineTable({
+    messageId: v.id('messages'),
+    analysisId: v.optional(v.id('analyses')), // Set after analysis is approved
+    originalContent: v.string(),
+    proposedAnalysis: v.object({
+      statementType: v.union(
+        v.literal('question'),
+        v.literal('opinion'),
+        v.literal('fact'),
+        v.literal('request'),
+        v.literal('other')
+      ),
+      beliefs: v.array(v.string()),
+      tradeOffs: v.array(v.string()),
+      confidenceLevel: v.number(),
+      reasoning: v.string(),
+    }),
+    qualityMetrics: v.object({
+      overallScore: v.number(),
+      qualityGrade: v.union(
+        v.literal('A'),
+        v.literal('B'),
+        v.literal('C'),
+        v.literal('D'),
+        v.literal('F')
+      ),
+      dimensionScores: v.any(), // Record<string, number>
+      flagCount: v.number(),
+      blockingReasons: v.array(v.string()),
+    }),
+    reviewTriggers: v.array(v.string()), // Reasons why human review was triggered
+    priority: v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('urgent')
+    ),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('in_review'),
+      v.literal('approved'),
+      v.literal('rejected'),
+      v.literal('needs_revision'),
+      v.literal('escalated')
+    ),
+    assignedReviewer: v.optional(v.string()),
+    reviewStartedAt: v.optional(v.number()),
+    reviewCompletedAt: v.optional(v.number()),
+    reviewDecision: v.optional(
+      v.object({
+        action: v.union(
+          v.literal('approve'),
+          v.literal('reject'),
+          v.literal('revise'),
+          v.literal('escalate')
+        ),
+        revisedAnalysis: v.optional(
+          v.object({
+            statementType: v.union(
+              v.literal('question'),
+              v.literal('opinion'),
+              v.literal('fact'),
+              v.literal('request'),
+              v.literal('other')
+            ),
+            beliefs: v.array(v.string()),
+            tradeOffs: v.array(v.string()),
+            confidenceLevel: v.number(),
+            reasoning: v.string(),
+          })
+        ),
+        reviewerNotes: v.string(),
+        improvementSuggestions: v.optional(v.array(v.string())),
+      })
+    ),
+    escalationReason: v.optional(v.string()),
+    userContext: v.object({
+      userId: v.string(),
+      teamId: v.optional(v.string()),
+      conversationId: v.string(),
+      userTier: v.union(
+        v.literal('free'),
+        v.literal('pro'),
+        v.literal('enterprise')
+      ),
+    }),
+    automatedFlags: v.array(
+      v.object({
+        type: v.string(),
+        severity: v.union(
+          v.literal('low'),
+          v.literal('medium'),
+          v.literal('high')
+        ),
+        description: v.string(),
+        suggestion: v.optional(v.string()),
+      })
+    ),
+    slaDeadline: v.number(), // When review should be completed
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_message', ['messageId'])
+    .index('by_status', ['status'])
+    .index('by_priority', ['priority'])
+    .index('by_reviewer', ['assignedReviewer'])
+    .index('by_sla', ['slaDeadline'])
+    .index('by_created_at', ['createdAt']),
+
+  // Human review performance metrics
+  reviewMetrics: defineTable({
+    reviewerId: v.string(),
+    period: v.string(), // 'YYYY-MM-DD' or 'YYYY-MM' or 'YYYY-WW'
+    reviewsCompleted: v.number(),
+    averageReviewTime: v.number(), // in minutes
+    approvalRate: v.number(),
+    revisionRate: v.number(),
+    escalationRate: v.number(),
+    qualityImprovement: v.number(), // Average quality score improvement
+    slaCompliance: v.number(), // Percentage of reviews completed within SLA
+    createdAt: v.number(),
+  })
+    .index('by_reviewer', ['reviewerId'])
+    .index('by_period', ['period'])
+    .index('by_created_at', ['createdAt']),
 })
