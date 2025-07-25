@@ -76,3 +76,36 @@ bun run dev
 bun run build
 bun run test
 ```
+
+## Convex Development Commands
+
+**IMPORTANT: Use the correct Convex commands - NOT package.json scripts.**
+
+```bash
+# Start Convex development server (generates types)
+bunx convex dev
+
+# Deploy Convex functions
+bunx convex deploy
+
+# Run Convex functions locally
+bunx convex run functionName
+
+# Reset Convex database (development only)
+bunx convex run --prod=false clearAll
+
+# Check Convex status
+bunx convex status
+```
+
+**Common mistakes to avoid:**
+
+- ❌ `bun run dev:convex` (this script doesn't exist)
+- ❌ `npm run convex:dev` (use bun, not npm)
+- ✅ `bunx convex dev` (correct command)
+
+**Development workflow:**
+
+1. Start Convex dev server: `bunx convex dev`
+2. Start Next.js dev server: `bun run dev`
+3. Both servers should run simultaneously for full functionality
