@@ -7,10 +7,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { ThumbVoteButtons } from '@/components/ui/thumb-vote-buttons'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Analysis } from '@/types'
 import { useScrollSync } from '@/contexts/scroll-sync-context'
+import { useUser } from '@/hooks/useUser'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 interface AnalysisRowProps {
   analysis: Analysis
@@ -25,8 +29,11 @@ export function AnalysisRow({
 }: AnalysisRowProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isVoting, setIsVoting] = useState(false)
   const isLowConfidence = analysis.confidenceLevel < 40
   const { syncToMessage, activeMessageId } = useScrollSync()
+  const { clerkUser } = useUser()
+  const thumbVote = useMutation(api.analyses.thumbVote)
 
   // Detect mobile viewport
   useEffect(() => {
@@ -67,6 +74,28 @@ export function AnalysisRow({
     // Sync to the corresponding message when analysis row is clicked
     syncToMessage(analysis.messageId, 'analysis')
   }
+
+  const handleVote = async (voteType: 'up' | 'down') => {
+    if (!clerkUser?.id) return
+
+    setIsVoting(true)
+    try {
+      await thumbVote({
+        analysisId: analysis._id,
+        userId: clerkUser.id,
+        voteType,
+      })
+    } catch (error) {
+      console.error('Error voting:', error)
+    } finally {
+      setIsVoting(false)
+    }
+  }
+
+  // Get current user's vote
+  const currentUserVote =
+    analysis.userVotes.find(vote => vote.userId === clerkUser?.id)?.voteType ||
+    null
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -199,15 +228,26 @@ export function AnalysisRow({
 
           {/* Footer with actions and timestamp */}
           <div className="flex items-center justify-between border-t pt-3">
-            {rawJSONElement || (
-              <Button
-                variant="ghost"
+            <div className="flex items-center gap-3">
+              {rawJSONElement || (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  View Raw JSON
+                </Button>
+              )}
+              <ThumbVoteButtons
+                analysisId={analysis._id}
+                thumbsUp={analysis.thumbsUp}
+                thumbsDown={analysis.thumbsDown}
+                userVote={currentUserVote}
+                onVote={handleVote}
+                isLoading={isVoting}
                 size="sm"
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              >
-                View Raw JSON
-              </Button>
-            )}
+              />
+            </div>
             <span className="text-xs text-muted-foreground">
               {formatTimestamp(analysis.createdAt)}
             </span>
