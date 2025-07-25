@@ -7,8 +7,11 @@ import { UsageChartsComponent } from '@/components/dashboard/usage-charts'
 import { CostBreakdownComponent } from '@/components/dashboard/cost-breakdown'
 import { TeamUsageDistribution } from '@/components/dashboard/team-usage-distribution'
 import { BillingPeriodSummary } from '@/components/dashboard/billing-period-summary'
+import { AlertIndicators, useAlertData } from '@/components/dashboard/alert-indicators'
 
 export default function CostDashboard() {
+  const { alerts } = useAlertData()
+
   return (
     <ProtectedRoute>
       <MainLayout title="Cost Dashboard">
@@ -23,6 +26,15 @@ export default function CostDashboard() {
           </div>
 
           <div className="space-y-6">
+            {/* Alert Indicators Section */}
+            <AlertIndicators 
+              alerts={alerts} 
+              onResolveAlert={(alertId) => {
+                console.log('Resolving alert:', alertId)
+                // This would call the actual resolve function
+              }}
+            />
+
             <BillingPeriodSummary />
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

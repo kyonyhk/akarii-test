@@ -182,7 +182,9 @@ export const getMessagesFromUserConversations = query({
     // Then get messages from those conversations
     const allMessages = await ctx.db.query('messages').order('desc').collect()
     const conversationMessages = allMessages
-      .filter(message => conversationIds.includes(message.conversationId))
+      .filter(message =>
+        conversationIds.some(id => id === message.conversationId)
+      )
       .slice(0, limit)
 
     // Get user information for each message
