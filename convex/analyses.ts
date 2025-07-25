@@ -507,3 +507,552 @@ export const getVoteUpdates = query({
     return analyses.filter(Boolean)
   },
 })
+
+// Vote aggregation queries for analytics and metrics
+
+// Get vote statistics for a specific analysis
+export const getAnalysisVoteStats = query({
+  args: {
+    analysisId: v.id('analyses'),
+  },
+  handler: async (ctx, args) => {
+    const analysis = await ctx.db.get(args.analysisId)
+    if (!analysis) {
+      throw new Error('Analysis not found')
+    }
+
+    const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+    const voteScore = totalVotes > 0 ? analysis.thumbsUp / totalVotes : 0
+    const engagement = analysis.userVotes.length
+
+    return {
+      analysisId: analysis._id,
+      thumbsUp: analysis.thumbsUp,
+      thumbsDown: analysis.thumbsDown,
+      totalVotes,
+      voteScore,
+      engagement,
+      positiveRatio: voteScore,
+      negativeRatio: 1 - voteScore,
+      userVoteCount: analysis.userVotes.length,
+    }
+  },
+})
+
+// Get top analyses by vote score (most popular)
+export const getMostPopularAnalyses = query({
+  args: {
+    limit: v.optional(v.number()),
+    conversationId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 10
+
+    let analysesQuery = ctx.db.query('analyses')
+
+    // Filter by conversation if provided
+    if (args.conversationId) {
+      // First get messages in the conversation
+      const messages = await ctx.db
+        .query('messages')
+        .withIndex('by_conversation', q =>
+          q.eq('conversationId', args.conversationId)
+        )
+        .collect()
+
+      const messageIds = messages.map(m => m._id)
+      const analyses = await Promise.all(
+        messageIds.map(async messageId => {
+          return await ctx.db
+            .query('analyses')
+            .withIndex('by_message', q => q.eq('messageId', messageId))
+            .first()
+        })
+      )
+
+      const validAnalyses = analyses.filter(Boolean)
+
+      // Calculate vote scores and sort
+      const analysesWithScores = validAnalyses.map(analysis => {
+        const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+        const voteScore = totalVotes > 0 ? analysis.thumbsUp / totalVotes : 0
+        return {
+          ...analysis,
+          totalVotes,
+          voteScore,
+          engagement: analysis.userVotes.length,
+        }
+      })
+
+      return analysesWithScores
+        .sort((a, b) => {
+          // Primary sort: vote score (higher is better)
+          if (b.voteScore !== a.voteScore) {
+            return b.voteScore - a.voteScore
+          }
+          // Secondary sort: total votes (more engagement)
+          return b.totalVotes - a.totalVotes
+        })
+        .slice(0, limit)
+    }
+
+    // Global popular analyses
+    const analyses = await ctx.db
+      .query('analyses')
+      .withIndex('by_thumbs_up')
+      .order('desc')
+      .take(50) // Get more to calculate scores
+
+    const analysesWithScores = analyses.map(analysis => {
+      const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+      const voteScore = totalVotes > 0 ? analysis.thumbsUp / totalVotes : 0
+      return {
+        ...analysis,
+        totalVotes,
+        voteScore,
+        engagement: analysis.userVotes.length,
+      }
+    })
+
+    return analysesWithScores
+      .sort((a, b) => {
+        // Primary sort: vote score (higher is better)
+        if (b.voteScore !== a.voteScore) {
+          return b.voteScore - a.voteScore
+        }
+        // Secondary sort: total votes (more engagement)
+        return b.totalVotes - a.totalVotes
+      })
+      .slice(0, limit)
+  },
+})
+
+// Get least popular analyses (for identifying problematic content)
+export const getLeastPopularAnalyses = query({
+  args: {
+    limit: v.optional(v.number()),
+    conversationId: v.optional(v.string()),
+    minVotes: v.optional(v.number()), // Only include analyses with at least this many votes
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 10
+    const minVotes = args.minVotes || 3
+
+    let analyses: any[] = []
+
+    if (args.conversationId) {
+      // Get analyses for specific conversation
+      const messages = await ctx.db
+        .query('messages')
+        .withIndex('by_conversation', q =>
+          q.eq('conversationId', args.conversationId)
+        )
+        .collect()
+
+      const messageIds = messages.map(m => m._id)
+      const conversationAnalyses = await Promise.all(
+        messageIds.map(async messageId => {
+          return await ctx.db
+            .query('analyses')
+            .withIndex('by_message', q => q.eq('messageId', messageId))
+            .first()
+        })
+      )
+
+      analyses = conversationAnalyses.filter(Boolean)
+    } else {
+      // Get global analyses
+      analyses = await ctx.db.query('analyses').collect()
+    }
+
+    // Filter and calculate scores
+    const analysesWithScores = analyses
+      .filter(analysis => {
+        const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+        return totalVotes >= minVotes
+      })
+      .map(analysis => {
+        const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+        const voteScore = totalVotes > 0 ? analysis.thumbsUp / totalVotes : 0
+        return {
+          ...analysis,
+          totalVotes,
+          voteScore,
+          engagement: analysis.userVotes.length,
+        }
+      })
+
+    return analysesWithScores
+      .sort((a, b) => {
+        // Primary sort: vote score (lower is worse)
+        if (a.voteScore !== b.voteScore) {
+          return a.voteScore - b.voteScore
+        }
+        // Secondary sort: total votes (more data is better for insights)
+        return b.totalVotes - a.totalVotes
+      })
+      .slice(0, limit)
+  },
+})
+
+// Get user voting patterns and statistics
+export const getUserVotingPatterns = query({
+  args: {
+    userId: v.string(),
+    timeRange: v.optional(v.number()), // Hours to look back
+  },
+  handler: async (ctx, args) => {
+    const timeRange = args.timeRange || 24 * 7 // Default to 7 days
+    const cutoffTime = getCurrentTimestamp() - timeRange * 60 * 60 * 1000
+
+    // Get all analyses and filter for user votes
+    const analyses = await ctx.db.query('analyses').collect()
+
+    let userUpvotes = 0
+    let userDownvotes = 0
+    let totalUserVotes = 0
+    let recentVotes = 0
+    const votedAnalyses: any[] = []
+
+    analyses.forEach(analysis => {
+      const userVote = analysis.userVotes.find(
+        vote => vote.userId === args.userId
+      )
+      if (userVote) {
+        totalUserVotes++
+        if (userVote.voteType === 'up') {
+          userUpvotes++
+        } else {
+          userDownvotes++
+        }
+
+        if (userVote.timestamp >= cutoffTime) {
+          recentVotes++
+        }
+
+        votedAnalyses.push({
+          analysisId: analysis._id,
+          messageId: analysis.messageId,
+          voteType: userVote.voteType,
+          timestamp: userVote.timestamp,
+          statementType: analysis.statementType,
+          confidenceLevel: analysis.confidenceLevel,
+        })
+      }
+    })
+
+    const positiveVoteRatio =
+      totalUserVotes > 0 ? userUpvotes / totalUserVotes : 0
+
+    return {
+      userId: args.userId,
+      totalVotes: totalUserVotes,
+      upvotes: userUpvotes,
+      downvotes: userDownvotes,
+      positiveVoteRatio,
+      recentVotes,
+      timeRangeHours: timeRange,
+      votingActivity: votedAnalyses.sort((a, b) => b.timestamp - a.timestamp),
+      statistics: {
+        averageVotesPerDay: recentVotes / (timeRange / 24),
+        mostVotedStatementType: getMostFrequentStatementType(votedAnalyses),
+        engagement: totalUserVotes > 0 ? 'active' : 'inactive',
+      },
+    }
+  },
+})
+
+// Get overall vote aggregation statistics
+export const getVoteAggregationStats = query({
+  args: {
+    conversationId: v.optional(v.string()),
+    timeRange: v.optional(v.number()), // Hours to look back
+  },
+  handler: async (ctx, args) => {
+    const timeRange = args.timeRange
+    const cutoffTime = timeRange
+      ? getCurrentTimestamp() - timeRange * 60 * 60 * 1000
+      : 0
+
+    let analyses: any[] = []
+
+    if (args.conversationId) {
+      // Get analyses for specific conversation
+      const messages = await ctx.db
+        .query('messages')
+        .withIndex('by_conversation', q =>
+          q.eq('conversationId', args.conversationId)
+        )
+        .collect()
+
+      const messageIds = messages.map(m => m._id)
+      const conversationAnalyses = await Promise.all(
+        messageIds.map(async messageId => {
+          return await ctx.db
+            .query('analyses')
+            .withIndex('by_message', q => q.eq('messageId', messageId))
+            .first()
+        })
+      )
+
+      analyses = conversationAnalyses.filter(Boolean)
+    } else {
+      // Get all analyses
+      analyses = await ctx.db.query('analyses').collect()
+    }
+
+    // Filter by time range if specified
+    if (timeRange) {
+      analyses = analyses.filter(analysis => analysis.createdAt >= cutoffTime)
+    }
+
+    // Calculate aggregated statistics
+    let totalAnalyses = analyses.length
+    let totalUpvotes = 0
+    let totalDownvotes = 0
+    let totalEngagement = 0
+    let votedAnalyses = 0
+    const statementTypeStats = {
+      question: { count: 0, avgVotes: 0, avgScore: 0 },
+      opinion: { count: 0, avgVotes: 0, avgScore: 0 },
+      fact: { count: 0, avgVotes: 0, avgScore: 0 },
+      request: { count: 0, avgVotes: 0, avgScore: 0 },
+      other: { count: 0, avgVotes: 0, avgScore: 0 },
+    }
+
+    analyses.forEach(analysis => {
+      totalUpvotes += analysis.thumbsUp
+      totalDownvotes += analysis.thumbsDown
+      totalEngagement += analysis.userVotes.length
+
+      const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+      if (totalVotes > 0) {
+        votedAnalyses++
+      }
+
+      // Statement type statistics
+      const statType = analysis.statementType
+      if (statType in statementTypeStats) {
+        statementTypeStats[statType].count++
+        statementTypeStats[statType].avgVotes += totalVotes
+        if (totalVotes > 0) {
+          statementTypeStats[statType].avgScore +=
+            analysis.thumbsUp / totalVotes
+        }
+      }
+    })
+
+    // Calculate averages for statement types
+    Object.keys(statementTypeStats).forEach(type => {
+      const stats = statementTypeStats[type]
+      if (stats.count > 0) {
+        stats.avgVotes = stats.avgVotes / stats.count
+        stats.avgScore = stats.avgScore / stats.count
+      }
+    })
+
+    const totalVotes = totalUpvotes + totalDownvotes
+    const overallVoteScore = totalVotes > 0 ? totalUpvotes / totalVotes : 0
+    const engagementRate = totalAnalyses > 0 ? votedAnalyses / totalAnalyses : 0
+    const avgVotesPerAnalysis =
+      totalAnalyses > 0 ? totalVotes / totalAnalyses : 0
+
+    return {
+      period: {
+        timeRangeHours: timeRange,
+        analysisCount: totalAnalyses,
+      },
+      votes: {
+        totalUpvotes,
+        totalDownvotes,
+        totalVotes,
+        overallVoteScore,
+        positiveRatio: overallVoteScore,
+        negativeRatio: 1 - overallVoteScore,
+      },
+      engagement: {
+        totalEngagement,
+        votedAnalyses,
+        engagementRate,
+        avgVotesPerAnalysis,
+        avgEngagementPerAnalysis:
+          totalAnalyses > 0 ? totalEngagement / totalAnalyses : 0,
+      },
+      byStatementType: statementTypeStats,
+      insights: {
+        mostEngagedType: Object.entries(statementTypeStats).reduce((a, b) =>
+          statementTypeStats[a[0]].avgVotes > statementTypeStats[b[0]].avgVotes
+            ? a
+            : b
+        )[0],
+        highestRatedType: Object.entries(statementTypeStats).reduce((a, b) =>
+          statementTypeStats[a[0]].avgScore > statementTypeStats[b[0]].avgScore
+            ? a
+            : b
+        )[0],
+      },
+    }
+  },
+})
+
+// Helper functions for vote calculations and analysis
+
+// Calculate vote score (ratio of upvotes to total votes)
+export function calculateVoteScore(
+  thumbsUp: number,
+  thumbsDown: number
+): number {
+  const totalVotes = thumbsUp + thumbsDown
+  return totalVotes > 0 ? thumbsUp / totalVotes : 0
+}
+
+// Calculate engagement score based on total vote count and user participation
+export function calculateEngagementScore(analysis: any): number {
+  const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+  const uniqueVoters = analysis.userVotes.length
+
+  // Engagement score combines total votes and unique voter participation
+  // Higher weight on unique voters as it indicates broader engagement
+  return totalVotes * 0.4 + uniqueVoters * 0.6
+}
+
+// Sort analyses by various criteria
+export function sortAnalysesByScore(
+  analyses: any[],
+  sortBy: 'score' | 'engagement' | 'recent' | 'controversial' = 'score'
+): any[] {
+  return analyses.sort((a, b) => {
+    switch (sortBy) {
+      case 'score':
+        // Higher positive ratio is better
+        const scoreA = calculateVoteScore(a.thumbsUp, a.thumbsDown)
+        const scoreB = calculateVoteScore(b.thumbsUp, b.thumbsDown)
+        if (scoreB !== scoreA) return scoreB - scoreA
+        // Secondary sort by total votes
+        return b.thumbsUp + b.thumbsDown - (a.thumbsUp + a.thumbsDown)
+
+      case 'engagement':
+        // More total engagement is better
+        const engagementA = calculateEngagementScore(a)
+        const engagementB = calculateEngagementScore(b)
+        return engagementB - engagementA
+
+      case 'recent':
+        // More recent is better
+        return b.createdAt - a.createdAt
+
+      case 'controversial':
+        // Analyses with close to 50/50 split are more controversial
+        const totalA = a.thumbsUp + a.thumbsDown
+        const totalB = b.thumbsUp + b.thumbsDown
+        if (totalA === 0 && totalB === 0) return 0
+        if (totalA === 0) return 1
+        if (totalB === 0) return -1
+
+        const controversyA = Math.abs(0.5 - a.thumbsUp / totalA)
+        const controversyB = Math.abs(0.5 - b.thumbsUp / totalB)
+        // Lower controversy score means more controversial (closer to 0.5)
+        if (controversyA !== controversyB) return controversyA - controversyB
+        // Secondary sort by total votes (more data is better for controversy)
+        return totalB - totalA
+
+      default:
+        return 0
+    }
+  })
+}
+
+// Get most frequent statement type from voted analyses
+function getMostFrequentStatementType(votedAnalyses: any[]): string | null {
+  if (votedAnalyses.length === 0) return null
+
+  const typeCounts = votedAnalyses.reduce(
+    (acc, analysis) => {
+      acc[analysis.statementType] = (acc[analysis.statementType] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
+
+  return Object.entries(typeCounts).reduce((a, b) =>
+    typeCounts[a[0]] > typeCounts[b[0]] ? a : b
+  )[0]
+}
+
+// Calculate vote trend over time
+export function calculateVoteTrend(
+  analyses: any[],
+  timeWindowHours: number = 24
+): {
+  current: number
+  previous: number
+  trend: 'up' | 'down' | 'stable'
+  changePercent: number
+} {
+  const now = getCurrentTimestamp()
+  const windowMs = timeWindowHours * 60 * 60 * 1000
+  const currentWindow = now - windowMs
+  const previousWindow = now - windowMs * 2
+
+  let currentVotes = 0
+  let previousVotes = 0
+
+  analyses.forEach(analysis => {
+    const totalVotes = analysis.thumbsUp + analysis.thumbsDown
+
+    if (analysis.createdAt >= currentWindow) {
+      currentVotes += totalVotes
+    } else if (analysis.createdAt >= previousWindow) {
+      previousVotes += totalVotes
+    }
+  })
+
+  let trend: 'up' | 'down' | 'stable' = 'stable'
+  let changePercent = 0
+
+  if (previousVotes > 0) {
+    changePercent = ((currentVotes - previousVotes) / previousVotes) * 100
+    if (changePercent > 5) trend = 'up'
+    else if (changePercent < -5) trend = 'down'
+  } else if (currentVotes > 0) {
+    trend = 'up'
+    changePercent = 100
+  }
+
+  return {
+    current: currentVotes,
+    previous: previousVotes,
+    trend,
+    changePercent,
+  }
+}
+
+// Get vote distribution percentiles
+export function getVoteDistributionPercentiles(analyses: any[]): {
+  p25: number
+  p50: number
+  p75: number
+  p90: number
+  p95: number
+} {
+  const voteScores = analyses
+    .map(analysis => calculateVoteScore(analysis.thumbsUp, analysis.thumbsDown))
+    .sort((a, b) => a - b)
+
+  if (voteScores.length === 0) {
+    return { p25: 0, p50: 0, p75: 0, p90: 0, p95: 0 }
+  }
+
+  const getPercentile = (arr: number[], percentile: number) => {
+    const index = Math.ceil((percentile / 100) * arr.length) - 1
+    return arr[Math.max(0, index)]
+  }
+
+  return {
+    p25: getPercentile(voteScores, 25),
+    p50: getPercentile(voteScores, 50),
+    p75: getPercentile(voteScores, 75),
+    p90: getPercentile(voteScores, 90),
+    p95: getPercentile(voteScores, 95),
+  }
+}
