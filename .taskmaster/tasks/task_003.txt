@@ -1,0 +1,55 @@
+# Task ID: 3
+# Title: Implement Live Chat UI and Real-time Messaging
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Build the chat interface with real-time message sending and receiving using Convex live queries and mutations
+# Details:
+Create chat components using shadcn/ui (Input, ScrollArea, Button), implement sendMessage Convex mutation, create useQuery hook for live message subscription, build message list component with auto-scroll, add typing indicators, implement split-pane layout with chat on left side, ensure messages display with timestamp and author
+
+# Test Strategy:
+Test real-time messaging between multiple browser tabs, verify messages persist on page refresh, check auto-scroll behavior and responsive design
+
+# Subtasks:
+## 1. Create Core Chat UI Components [done]
+### Dependencies: None
+### Description: Build reusable chat components using shadcn/ui including message input, message bubbles, and chat container with proper styling
+### Details:
+Create ChatInput component with shadcn/ui Input and Button, MessageBubble component for individual messages with timestamp and author display, ChatContainer component with proper layout structure, implement proper styling for chat aesthetics
+
+## 2. Implement Convex sendMessage Mutation [done]
+### Dependencies: None
+### Description: Create Convex mutation for sending messages with proper data validation and error handling
+### Details:
+Create sendMessage mutation in convex/mutations.ts, implement message schema validation, add error handling for failed sends, ensure proper database insertion with messageId, content, authorId, and timestamp fields
+
+## 3. Set Up Real-time Message Subscription [done]
+### Dependencies: 3.2
+### Description: Implement Convex live query hooks for real-time message updates and subscription management
+### Details:
+Create useQuery hook for live message subscription, implement proper query optimization for performance, add connection state handling, ensure messages update in real-time across all connected clients
+
+## 4. Build Message Display Logic and List Component [done]
+### Dependencies: 3.1, 3.3
+### Description: Create message list component with proper rendering, sorting, and state management for chat history
+### Details:
+Build MessageList component using shadcn/ui ScrollArea, implement message sorting by timestamp, add proper key handling for React rendering, integrate with real-time subscription data, handle loading states
+
+## 5. Implement Auto-scroll Functionality [done]
+### Dependencies: 3.4
+### Description: Add intelligent auto-scroll behavior that follows new messages while preserving user scroll position when reviewing history
+### Details:
+Implement auto-scroll to bottom for new messages, detect user manual scrolling to disable auto-scroll, add scroll-to-bottom button when not at bottom, ensure smooth scrolling animation, handle edge cases for rapid message sending
+
+## 6. Add Typing Indicators and Status Features [done]
+### Dependencies: 3.3
+### Description: Implement typing indicators and online status to enhance real-time chat experience
+### Details:
+Create typing indicator component, implement typing state tracking in Convex, add real-time typing status updates, create online/offline user status indicators, ensure proper cleanup of typing states
+
+## 7. Implement Responsive Split-pane Layout [done]
+### Dependencies: 3.4, 3.5
+### Description: Create responsive layout with chat interface positioned on left side and proper mobile/desktop adaptations
+### Details:
+Implement split-pane layout with chat on left side, add responsive breakpoints for mobile/tablet/desktop, ensure proper resizing behavior, implement collapsible sidebar for smaller screens, maintain chat functionality across all screen sizes
+
