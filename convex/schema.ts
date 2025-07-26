@@ -54,6 +54,7 @@ export default defineSchema({
     username: v.optional(v.string()),
     timestamp: v.number(),
     conversationId: v.optional(v.string()),
+    analysisId: v.optional(v.id('analyses')),
   })
     .index('by_user', ['userId'])
     .index('by_conversation', ['conversationId'])
