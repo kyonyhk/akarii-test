@@ -224,6 +224,32 @@ export const analyzeMessage = action({
             contextQuality,
           },
         }
+
+        // CRITICAL FIX: Store cached analysis to database if not already there
+        // This ensures cache hits are also persisted for the UI to display
+        console.log(
+          `Storing cached analysis to database for message ${sanitizedArgs.messageId}`
+        )
+        try {
+          const analysisId = await ctx.runMutation(
+            api.analyses.createAnalysis,
+            {
+              messageId: sanitizedArgs.messageId,
+              statementType: cachedResult.statement_type,
+              beliefs: cachedResult.beliefs,
+              tradeOffs: cachedResult.trade_offs,
+              confidenceLevel: cachedResult.confidence_level,
+              rawData: analysis.rawData,
+            }
+          )
+          console.log(
+            `Cached analysis stored successfully with ID: ${analysisId}`
+          )
+        } catch (storageError) {
+          console.error(`Failed to store cached analysis:`, storageError)
+          // Continue anyway - cache hit still works for immediate response
+        }
+
         return analysis
       }
 
