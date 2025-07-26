@@ -33,15 +33,32 @@ cat .taskmaster/worktree-config.json
 
 ### 📋 Centralized Task Management
 
-**IMPORTANT: Only update tasks from the main worktree or using the central script.**
+**CRITICAL: Claude Code agents MUST use ./tm commands, NOT MCP task-master tools in worktrees.**
+
+**For Claude Code Agents:**
 
 ```bash
-# From ANY worktree, use the simplified tm command:
+# ✅ ALWAYS use these commands in worktrees:
 ./tm list                                        # View all tasks
 ./tm show 11.1                                  # See specific task
 ./tm set-status --id=11.1 --status=in-progress  # Start task
 ./tm set-status --id=11.1 --status=done         # Complete task
 
+# ❌ NEVER use MCP task-master tools in worktrees - they create conflicts:
+# mcp__task-master-ai__set_task_status         # DON'T USE
+# mcp__task-master-ai__get_tasks               # DON'T USE
+# mcp__task-master-ai__update_task             # DON'T USE
+```
+
+**Why ./tm instead of MCP:**
+
+- MCP tools operate on local worktree files → sync conflicts
+- ./tm script always operates on main worktree → centralized updates
+- Environment variable TASKMASTER_PROJECT_ROOT forces MCP to main worktree
+
+**For manual command line:**
+
+```bash
 # Or work directly in main worktree:
 cd /Users/kuoloonchong/Desktop/akarii-test
 task-master next
@@ -50,58 +67,117 @@ task-master set-status --id=12.1 --status=done
 
 ### 🔄 Development Workflow per Worktree
 
-**Each worktree follows this pattern:**
+**CRITICAL: Each individual task gets its own branch off the feature branch**
+
+**Branch Structure & Naming Convention:**
+
+```
+main
+├── feature/role-based-access (base branch for Task 12)
+│   ├── feature/task-12.1-configure-user-roles     ← Descriptive task branches
+│   ├── feature/task-12.2-access-middleware
+│   └── feature/task-12.3-admin-dashboard-access
+├── feature/ui-redesign (base branch for Tasks 11 & 17)
+│   ├── feature/task-11.1-message-bubble-component ← Descriptive task branches
+│   ├── feature/task-11.2-responsive-chat-layout
+│   └── feature/task-17.1-enhanced-chat-input
+```
+
+**Branch Naming Rules:**
+
+- Format: `feature/task-[ID]-[brief-description]`
+- Use kebab-case for descriptions (lowercase, hyphens)
+- Keep descriptions concise but descriptive (3-5 words)
+- Examples: `feature/task-14.1-multi-model-provider-setup`
+
+**Workflow for each task:**
 
 ```bash
 # 1. Check which tasks are assigned to your worktree
-./scripts/task-central.sh show 11  # UI tasks
-./scripts/task-central.sh show 12  # Access control tasks
+./tm show 12  # Role access tasks
+./tm show 11  # UI tasks
 
-# 2. Mark task as in-progress (centrally)
-./scripts/task-central.sh set-status --id=11.1 --status=in-progress
+# 2. Create descriptive task branch off the feature branch (NOT off main)
+git checkout feature/role-based-access  # Your worktree's base feature branch
 
-# 3. Do your work (code, test, etc.)
-# ... work on the feature ...
+# Create descriptive branch name: feature/task-[ID]-[brief-description]
+git checkout -b feature/task-12.1-configure-user-roles    # Descriptive task branch
 
-# 4. Commit to your feature branch
+# Branch naming examples:
+# feature/task-11.1-message-bubble-component
+# feature/task-11.2-responsive-chat-layout
+# feature/task-12.1-configure-user-roles
+# feature/task-12.2-access-middleware
+# feature/task-14.1-multi-model-provider-setup
+# feature/task-14.2-model-selection-ui
+
+# 3. Mark task as in-progress (centrally)
+./tm set-status --id=12.1 --status=in-progress
+
+# 4. Do your work (code, test, etc.)
+# ... implement task 12.1 ...
+
+# 5. Commit to your TASK branch
 git add .
-git commit -m "feat: Complete subtask 11.1 - MessageBubble Component
+git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
-- Created MessageBubble.tsx with sent/received variants
-- Added shadcn/ui Avatar integration
-- Implemented proper styling with Tailwind CSS
+- Implemented role assignment in Clerk metadata
+- Added admin/user role validation
+- Created role-based access middleware
 
-Resolves: Task 11.1
+Resolves: Task 12.1
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# 5. Push to your feature branch
-git push origin feature/ui-redesign
+# 6. Push to your descriptive TASK branch
+git push origin feature/task-12.1-configure-user-roles
 
-# 6. Mark task as complete (centrally)
-./scripts/task-central.sh set-status --id=11.1 --status=done
-
-# 7. When all tasks in your group are done, create PR
-gh pr create --title "Complete UI Redesign (Tasks 11.1-11.5)" --body "$(cat <<'EOF'
+# 7. Create PR: task branch → feature branch (NOT main)
+gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "$(cat <<'EOF'
 ## Summary
-- ✅ Redesigned message bubbles with modern styling
-- ✅ Implemented responsive chat layout
-- ✅ Added message grouping and smart timestamps
-- ✅ Enhanced visual design following WhatsApp/Telegram patterns
-
-## Tasks Completed
-- Task 11.1: MessageBubble Component
-- Task 11.2: Responsive Chat Layout
-- Task 11.3: Message Grouping Logic
-- Task 11.4: Integration Testing
-- Task 11.5: Visual Regression Testing
+- ✅ Implemented role assignment in Clerk metadata
+- ✅ Added role validation middleware
+- ✅ Created admin/user access controls
 
 ## Test Plan
-- [x] Components render correctly in Storybook
-- [x] Layout responsive across mobile/desktop
-- [x] Message grouping works with real data
-- [x] Visual design matches modern chat apps
+- [x] Role assignment works in Clerk dashboard
+- [x] Middleware properly validates roles
+- [x] Access controls function correctly
+
+Ready to merge into feature/role-based-access
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+EOF
+)"
+
+# 8. Merge task branch into feature branch
+git checkout feature/role-based-access
+git merge feature/task-12.1-configure-user-roles
+git push origin feature/role-based-access
+
+# 9. Delete task branch (cleanup)
+git branch -d feature/task-12.1-configure-user-roles
+git push origin --delete feature/task-12.1-configure-user-roles
+
+# 10. Mark task as complete (centrally)
+./tm set-status --id=12.1 --status=done
+
+# 11. When ALL tasks in your group are done, create final PR
+gh pr create --base main --title "Complete Role-Based Access Control (Tasks 12.1-12.5)" --body "$(cat <<'EOF'
+## Summary
+- ✅ Complete RBAC implementation
+- ✅ All role-based access features working
+- ✅ Comprehensive testing completed
+
+## Tasks Completed
+- Task 12.1: Configure User Roles
+- Task 12.2: Implement Access Middleware
+- Task 12.3: Admin Dashboard Access
+- Task 12.4: User Permission Checks
+- Task 12.5: Integration Testing
+
+Ready to merge into main
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 EOF
@@ -137,72 +213,93 @@ EOF
 
 ### ⚠️ Critical Branch Management Rules
 
-**🚨 NEVER COMMIT DIRECTLY TO MAIN BRANCH 🚨**
+**🚨 NEVER COMMIT DIRECTLY TO MAIN OR BASE FEATURE BRANCHES 🚨**
 
-1. **Feature Branch Only**: Each worktree MUST work on its assigned feature branch
-2. **No Direct Main Commits**: NEVER `git checkout main` or commit to main
-3. **Pull Request Required**: ALL merges to main happen via PR only
-4. **Task Management**: Use `./tm` (not direct task-master) to avoid conflicts
-5. **CLAUDE.md Reference**: Always read from main worktree (this file is always current)
+1. **Task Branches Only**: Each task MUST be on its own `feature/task-X.Y` branch
+2. **No Direct Feature Branch Commits**: NEVER commit directly to `feature/role-based-access`
+3. **No Direct Main Commits**: NEVER `git checkout main` or commit to main
+4. **Two-Level PR Process**: task branch → feature branch → main (via PRs)
+5. **Task Management**: Use `./tm` (not direct task-master) to avoid conflicts
+6. **CLAUDE.md Reference**: Always read from main worktree (this file is always current)
 
 ### 🔄 Branch Verification Commands
 
-**Before starting work in ANY worktree:**
+**Before starting work on ANY task:**
 
 ```bash
-# 1. ALWAYS verify you're on the correct feature branch
+# 1. ALWAYS verify you're on a TASK branch (not base feature branch)
 git branch --show-current
 
-# Expected outputs per worktree:
-# akarii-ui-redesign → feature/ui-redesign
-# akarii-share-feature → feature/share-enhancement
-# akarii-multi-model → feature/multi-model-support
-# akarii-conversational-ai → feature/conversational-ai
-# akarii-role-access → feature/role-based-access
-# akarii-real-analytics → feature/real-analytics
+# ✅ CORRECT descriptive task branch patterns:
+# feature/task-11.1-message-bubble-component
+# feature/task-11.2-responsive-chat-layout
+# feature/task-12.1-configure-user-roles
+# feature/task-12.2-access-middleware
+# feature/task-14.1-multi-model-provider-setup
+# feature/task-17.1-enhanced-chat-input
 
-# 2. If on wrong branch, switch immediately:
-git checkout feature/your-assigned-branch
+# ❌ WRONG - never work directly on these:
+# feature/ui-redesign, feature/role-based-access, main
 
-# 3. Never switch to main unless reading docs:
-# git checkout main  # ❌ DON'T DO THIS IN FEATURE WORKTREES
+# 2. If on wrong branch, create proper descriptive task branch:
+git checkout feature/role-based-access  # Base feature branch
+git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
+
+# 3. Never work directly on base branches:
+# git checkout feature/role-based-access  # ❌ DON'T WORK HERE
+# git checkout main                       # ❌ DON'T WORK HERE
 ```
 
 ### 🔧 Dynamic Startup Checklist
 
 ```bash
-# Smart workflow checklist that adapts to current configuration:
+# Smart workflow checklist for task-based development:
 
 # 1. Check your workflow status and assignments
-./scripts/workflow-helper.sh status
+./w status
 
-# 2. Verify you're on the correct branch
-./scripts/workflow-helper.sh check
+# 2. See your assigned tasks for this worktree
+./tm show 12  # Replace with your assigned task group number
 
-# 3. See your assigned tasks for this worktree
-./scripts/workflow-helper.sh tasks
+# 3. Create descriptive task branch for specific subtask
+git checkout feature/role-based-access  # Your base feature branch
 
-# 4. View detailed task breakdown for your assignments
-./tm show 11  # Replace with your assigned task number
+# Get task details first to create descriptive branch name
+./tm show 12.1  # Check task title and description
 
-# 5. Start working on specific subtask
-./tm set-status --id=11.1 --status=in-progress
+# Create descriptive branch: feature/task-[ID]-[brief-description]
+git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
 
-# 6. Do your development work...
+# 4. Mark task as in-progress
+./tm set-status --id=12.1 --status=in-progress
 
-# 7. Commit to the branch shown by workflow-helper
+# 5. Do your development work...
+
+# 6. Commit to your TASK branch (not base feature branch)
 git add .
-git commit -m "feat: complete task 11.1 - MessageBubble component"
+git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
-# 8. Push to your assigned branch
-BRANCH=$(./scripts/workflow-helper.sh branch)
-git push origin $BRANCH
+- Implemented role assignment in Clerk metadata
+- Added validation and middleware
 
-# 9. Mark task complete
-./tm set-status --id=11.1 --status=done
+Resolves: Task 12.1"
 
-# 10. When ALL assigned tasks done, create PR
-gh pr create --title "Complete [Your Feature] Tasks" --body "Ready for review"
+# 7. Push to your descriptive TASK branch
+git push origin feature/task-12.1-configure-user-roles
+
+# 8. Create PR: task branch → feature branch
+gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "Ready for review"
+
+# 9. Merge task branch into feature branch
+git checkout feature/role-based-access
+git merge feature/task-12.1-configure-user-roles
+git push origin feature/role-based-access
+
+# 10. Mark task complete
+./tm set-status --id=12.1 --status=done
+
+# 11. When ALL group tasks done, create final PR to main
+gh pr create --base main --title "Complete Role-Based Access Control" --body "All RBAC tasks completed"
 ```
 
 ### 🛡️ Safety Checks
