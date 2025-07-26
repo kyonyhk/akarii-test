@@ -1,12 +1,23 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Orbitron, Share_Tech_Mono } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ConvexClientProvider } from '@/providers/convex-provider'
 import { AuthProvider } from '@/providers/auth-provider'
 import { Toaster } from 'sonner'
 
-const inter = Inter({ subsets: ['latin'] })
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  variable: '--font-orbitron',
+  display: 'swap',
+})
+
+const sharetech = Share_Tech_Mono({
+  subsets: ['latin'],
+  variable: '--font-sharetech',
+  weight: '400',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Akarii - Real-time Chat Analysis',
@@ -20,8 +31,10 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
+      <html lang="en" className="dark">
+        <body
+          className={`${orbitron.variable} ${sharetech.variable} font-sans`}
+        >
           <ConvexClientProvider>
             <AuthProvider>{children}</AuthProvider>
           </ConvexClientProvider>
