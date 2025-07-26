@@ -83,8 +83,8 @@ export default function Chat() {
               />
             </div>
 
-            {/* Analysis Panel */}
-            <div className="w-80 min-w-0">
+            {/* Analysis Panel - Hidden on mobile since analysis is already shown in chat */}
+            <div className="hidden w-80 min-w-0 md:block">
               <PrismPanel conversationId={currentConversationId} />
             </div>
           </div>

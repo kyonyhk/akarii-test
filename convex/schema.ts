@@ -54,6 +54,7 @@ export default defineSchema({
     username: v.optional(v.string()),
     timestamp: v.number(),
     conversationId: v.optional(v.string()),
+    analysisId: v.optional(v.id('analyses')),
   })
     .index('by_user', ['userId'])
     .index('by_conversation', ['conversationId'])
@@ -384,4 +385,29 @@ export default defineSchema({
     .index('by_reviewer', ['reviewerId'])
     .index('by_period', ['period'])
     .index('by_created_at', ['createdAt']),
+
+  // Confidence thresholds for display decisions
+  confidenceThresholds: defineTable({
+    teamId: v.optional(v.id('teams')),
+    userId: v.optional(v.id('users')),
+    thresholdType: v.union(
+      v.literal('display_threshold'),
+      v.literal('hide_threshold'),
+      v.literal('warning_threshold')
+    ),
+    confidenceValue: v.number(),
+    uiTreatment: v.union(
+      v.literal('hide'),
+      v.literal('grey_out'),
+      v.literal('warning'),
+      v.literal('normal')
+    ),
+    isActive: v.boolean(),
+    createdBy: v.id('users'),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_team', ['teamId'])
+    .index('by_user', ['userId'])
+    .index('by_team_user', ['teamId', 'userId']),
 })

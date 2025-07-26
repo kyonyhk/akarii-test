@@ -15,7 +15,7 @@ export function useConfidenceThresholds() {
 
   // TODO: Add team context when available
   const teamId = undefined
-  const userId = user?.id as any // Convert to proper ID type
+  const userId = user?.id // Clerk user ID string
 
   const thresholds = useQuery(api.confidenceThresholds.getEffectiveThresholds, {
     userId,

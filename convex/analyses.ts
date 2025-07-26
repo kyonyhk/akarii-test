@@ -19,9 +19,22 @@ export const createAnalysis = mutation({
     rawData: v.any(),
   },
   handler: async (ctx, args) => {
+    console.log('createAnalysis called with args:', {
+      messageId: args.messageId,
+      messageIdType: typeof args.messageId,
+      statementType: args.statementType,
+      beliefsCount: args.beliefs?.length || 0,
+      tradeOffsCount: args.tradeOffs?.length || 0,
+      confidenceLevel: args.confidenceLevel,
+      rawDataExists: !!args.rawData,
+    })
+
     // Validate that the message exists
+    console.log('Looking up message with ID:', args.messageId)
     const message = await ctx.db.get(args.messageId)
+    console.log('Message lookup result:', !!message)
     if (!message) {
+      console.error('Message not found for ID:', args.messageId)
       throw new Error('Message not found')
     }
 
@@ -31,20 +44,34 @@ export const createAnalysis = mutation({
     }
 
     // Create the analysis
-    const analysisId = await ctx.db.insert('analyses', {
-      messageId: args.messageId,
-      statementType: args.statementType,
-      beliefs: args.beliefs,
-      tradeOffs: args.tradeOffs,
-      confidenceLevel: args.confidenceLevel,
-      rawData: args.rawData,
-      thumbsUp: 0,
-      thumbsDown: 0,
-      userVotes: [],
-      createdAt: getCurrentTimestamp(),
-    })
+    console.log('About to insert analysis into database')
+    let analysisId
+    try {
+      analysisId = await ctx.db.insert('analyses', {
+        messageId: args.messageId,
+        statementType: args.statementType,
+        beliefs: args.beliefs,
+        tradeOffs: args.tradeOffs,
+        confidenceLevel: args.confidenceLevel,
+        rawData: args.rawData,
+        thumbsUp: 0,
+        thumbsDown: 0,
+        userVotes: [],
+        createdAt: getCurrentTimestamp(),
+      })
+      console.log('Analysis inserted successfully, ID:', analysisId)
+    } catch (insertError) {
+      console.error('Failed to insert analysis:', insertError)
+      console.error('Insert error details:', {
+        name: insertError.name,
+        message: insertError.message,
+        stack: insertError.stack,
+      })
+      throw insertError
+    }
 
     // Update the message to link to this analysis
+    console.log('About to patch message with analysisId:', analysisId)
     await ctx.db.patch(args.messageId, {
       analysisId: analysisId,
     })
