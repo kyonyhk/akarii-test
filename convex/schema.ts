@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal('member')
     ),
     teamId: v.optional(v.string()),
+    preferredModel: v.optional(v.string()), // AI model preference for this user
     isActive: v.optional(v.boolean()),
     joinedAt: v.optional(v.number()),
     createdAt: v.optional(v.number()),
@@ -55,6 +56,8 @@ export default defineSchema({
     timestamp: v.number(),
     conversationId: v.optional(v.string()),
     analysisId: v.optional(v.id('analyses')),
+    model: v.optional(v.string()), // AI model used for this message
+    cost: v.optional(v.number()), // API cost for this message generation
   })
     .index('by_user', ['userId'])
     .index('by_conversation', ['conversationId'])
@@ -73,6 +76,8 @@ export default defineSchema({
     tradeOffs: v.array(v.string()),
     confidenceLevel: v.number(),
     rawData: v.any(),
+    model: v.optional(v.string()), // AI model used for this analysis
+    cost: v.optional(v.number()), // API cost for this analysis generation
     createdAt: v.number(),
     thumbsUp: v.number(),
     thumbsDown: v.number(),
