@@ -146,7 +146,7 @@ const RETRY_STRATEGIES: RetryStrategy[] = [
     },
     parameterAdjustments: {
       maxTokens: 500,
-      timeoutMs: 2500, // Allow more time for detailed analysis
+      timeoutMs: 10000, // Allow more time for GPT-4o detailed analysis
     },
   },
 ]
