@@ -1,0 +1,43 @@
+# Task ID: 11
+# Title: Redesign Core Chat UI Layout and Message Bubbles
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Overhaul the main chat interface to align with modern aesthetics, focusing on message bubbles, timestamps, and a responsive layout as per the PRD's UI redesign requirement.
+# Details:
+Using Next.js 14 and Tailwind CSS, refactor the chat view. Create a new React component for message bubbles with variants for sent and received messages. Implement logic to group messages by sender and display timestamps smartly (e.g., once per block of messages). Use `shadcn/ui` components like `Avatar` for user icons. Ensure the layout is fully responsive using Tailwind's breakpoint system (`sm`, `md`, `lg`) for a seamless experience on both mobile and desktop.
+
+# Test Strategy:
+Perform visual regression testing against mockups inspired by WhatsApp/Telegram. Use Storybook to develop and test the message bubble component in isolation. Verify responsiveness using browser developer tools across various device viewports. Manually test timestamp grouping logic with different message cadences.
+
+# Subtasks:
+## 1. Create `MessageBubble` Component with Variants [pending]
+### Dependencies: None
+### Description: Develop a new React component, `MessageBubble.tsx`, using Next.js and Tailwind CSS. This component will serve as the core UI for individual chat messages and will be developed in isolation.
+### Details:
+The component must accept props for message content, sender type, and timestamp. Implement two primary variants: 'sent' (right-aligned, primary brand color) and 'received' (left-aligned, neutral color). Integrate the `shadcn/ui` `Avatar` component for the 'received' variant to display the sender's icon.
+
+## 2. Develop Responsive Chat View Layout [pending]
+### Dependencies: None
+### Description: Construct the main container component for the chat interface, ensuring it is fully responsive across mobile, tablet, and desktop screen sizes using Tailwind CSS.
+### Details:
+Use Tailwind CSS's flexbox/grid utilities and breakpoint system (`sm`, `md`, `lg`) to create a layout where the message list occupies the majority of the vertical space and is scrollable. The layout should correctly position a header and a chat input area.
+
+## 3. Implement Message Grouping and Smart Timestamp Logic [pending]
+### Dependencies: None
+### Description: Create the business logic required to group consecutive messages from the same sender and to display timestamps intelligently based on time intervals.
+### Details:
+In the parent chat view component, create a function to process the array of message objects. This logic should determine if a message is the first in a new block from a sender (to show the avatar) and if enough time has passed since the last displayed timestamp (e.g., >5 minutes) to show a new one.
+
+## 4. Integrate `MessageBubble`s into Chat View with Grouping Logic [pending]
+### Dependencies: 11.1, 11.2, 11.3
+### Description: Combine the `MessageBubble` component, the responsive layout, and the grouping logic to render a complete, dynamic chat history from a data source.
+### Details:
+Within the responsive chat view layout, fetch or mock message data. Map over the data, applying the grouping and timestamp logic to determine the props for each `MessageBubble` instance. Render the list of configured `MessageBubble` components.
+
+## 5. Perform Visual Regression and Final Responsiveness Testing [pending]
+### Dependencies: 11.4
+### Description: Conduct final testing to ensure the redesigned chat UI matches the design mockups and functions correctly across all target devices.
+### Details:
+Perform visual regression testing of the completed chat view against the reference designs (e.g., inspired by WhatsApp/Telegram). Use browser developer tools to conduct a final, thorough check of the UI's responsiveness on mobile, tablet, and desktop viewports, focusing on element alignment, text wrapping, and spacing.
+

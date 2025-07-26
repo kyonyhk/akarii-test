@@ -1,0 +1,49 @@
+# Task ID: 9
+# Title: Create Cost Dashboard and Token Usage Tracking
+# Status: done
+# Dependencies: 4, 6
+# Priority: low
+# Description: Implement token usage monitoring and cost dashboard for team-level analytics and billing preparation
+# Details:
+Add token usage tracking to analyzeMessage action, create usage analytics schema (teamId, tokensUsed, cost, timestamp), build simple dashboard showing team token consumption, implement usage aggregation queries, add cost calculation based on OpenAI pricing, create usage alerts for approaching limits, prepare foundation for future billing integration
+
+# Test Strategy:
+Verify accurate token counting and cost calculation, test dashboard displays correct usage data, validate team-level usage aggregation
+
+# Subtasks:
+## 1. Implement token usage tracking in analyzeMessage action [done]
+### Dependencies: None
+### Description: Add token counting and usage tracking to the OpenAI API calls in the analyzeMessage Convex action
+### Details:
+Modify the analyzeMessage action to count tokens in both input prompts and API responses, store usage data with messageId, teamId, tokensUsed, cost, and timestamp in a new usage table
+
+## 2. Create usage analytics database schema [done]
+### Dependencies: 9.1
+### Description: Define Convex schema for token usage tracking and cost analytics
+### Details:
+Create usage table schema with fields: id, messageId, teamId, tokensUsed, cost, timestamp, model, and actionType. Add indexes for efficient querying by teamId and timestamp ranges
+
+## 3. Build cost dashboard UI components [done]
+### Dependencies: 9.2
+### Description: Create dashboard interface showing team token consumption and cost metrics
+### Details:
+Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations
+
+## 4. Implement usage aggregation queries [done]
+### Dependencies: 9.2
+### Description: Create Convex queries for aggregating token usage data by team and time periods
+### Details:
+Build queries for daily/weekly/monthly usage totals, team-level aggregations, cost calculations, and usage trends. Include filtering by date ranges and team members
+
+## 5. Add cost calculation logic based on OpenAI pricing [done]
+### Dependencies: 9.1
+### Description: Implement accurate cost calculation using current OpenAI token pricing models
+### Details:
+Create utility functions to calculate costs based on model type (GPT-4, GPT-3.5), token counts for input/output, and current OpenAI pricing. Handle different pricing tiers and model variations
+
+## 6. Create usage alert system for team limits [done]
+### Dependencies: 9.4, 9.5
+### Description: Implement alerts and notifications when teams approach usage or cost limits
+### Details:
+Build alert system with configurable thresholds, email notifications, dashboard warnings, and usage limit enforcement. Include both soft warnings and hard limits for token consumption
+
