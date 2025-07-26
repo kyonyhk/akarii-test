@@ -1266,8 +1266,16 @@ export const analyzeAndStoreMessage = action({
         tradeOffs: analysisResult.tradeOffs,
         confidenceLevel: analysisResult.confidenceLevel,
         rawDataType: typeof analysisResult.rawData,
+        rawDataExists: !!analysisResult.rawData,
+        messageIdType: typeof args.messageId,
       })
       try {
+        // First check if message exists
+        const messageExists = await ctx.runQuery(api.messages.getMessage, {
+          id: args.messageId,
+        })
+        console.log('Message exists check:', !!messageExists)
+
         const analysisId = await ctx.runMutation(api.analyses.createAnalysis, {
           messageId: args.messageId,
           statementType: analysisResult.statementType,
