@@ -120,7 +120,25 @@ function initializeProviders() {
     )
   }
 
-  // TODO: Add other providers (Anthropic, Google, Mistral) here
+  // Lazy import and register Anthropic adapter
+  try {
+    const anthropicModule = require('./providers/anthropic_adapter')
+    const { AnthropicAdapter } = anthropicModule
+    const anthropicAdapter = new AnthropicAdapter()
+    if (anthropicAdapter.validateConfig()) {
+      registerProvider('anthropic', anthropicAdapter)
+      console.log('Anthropic provider registered successfully')
+    } else {
+      console.warn('Anthropic provider available but not configured')
+    }
+  } catch (error: any) {
+    console.warn(
+      'Anthropic provider not available:',
+      error?.message || 'Unknown error'
+    )
+  }
+
+  // TODO: Add other providers (Google, Mistral) here
   // when they are implemented
 }
 
