@@ -33,15 +33,32 @@ cat .taskmaster/worktree-config.json
 
 ### 📋 Centralized Task Management
 
-**IMPORTANT: Only update tasks from the main worktree or using the central script.**
+**CRITICAL: Claude Code agents MUST use ./tm commands, NOT MCP task-master tools in worktrees.**
+
+**For Claude Code Agents:**
 
 ```bash
-# From ANY worktree, use the simplified tm command:
+# ✅ ALWAYS use these commands in worktrees:
 ./tm list                                        # View all tasks
 ./tm show 11.1                                  # See specific task
 ./tm set-status --id=11.1 --status=in-progress  # Start task
 ./tm set-status --id=11.1 --status=done         # Complete task
 
+# ❌ NEVER use MCP task-master tools in worktrees - they create conflicts:
+# mcp__task-master-ai__set_task_status         # DON'T USE
+# mcp__task-master-ai__get_tasks               # DON'T USE
+# mcp__task-master-ai__update_task             # DON'T USE
+```
+
+**Why ./tm instead of MCP:**
+
+- MCP tools operate on local worktree files → sync conflicts
+- ./tm script always operates on main worktree → centralized updates
+- Environment variable TASKMASTER_PROJECT_ROOT forces MCP to main worktree
+
+**For manual command line:**
+
+```bash
 # Or work directly in main worktree:
 cd /Users/kuoloonchong/Desktop/akarii-test
 task-master next
