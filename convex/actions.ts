@@ -66,6 +66,7 @@ import {
   countTokens,
   createTokenUsage,
   extractTokenUsageFromResponse,
+  calculateCost,
 } from './token_utils'
 import { api } from './_generated/api'
 import {
