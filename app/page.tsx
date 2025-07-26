@@ -1,8 +1,6 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { MainLayout } from '@/components/layout/main-layout'
 import { ChatPage } from '@/components/chat'
 import { PrismPanel } from '@/components/analysis'
@@ -13,7 +11,6 @@ import Link from 'next/link'
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth()
-  const router = useRouter()
 
   // Demo conversation ID - in production this would come from routing or user selection
   const demoConversationId = 'demo-conversation-123'
@@ -80,15 +77,11 @@ export default function Home() {
 
             {/* Divider */}
             <div className="hidden w-px bg-border lg:block" />
-            <div className="h-px bg-border lg:hidden" />
 
-            {/* Right side - Analysis Prism Panel */}
-            <div className="flex min-h-0 w-full flex-col space-y-4 p-4 lg:w-80">
+            {/* Right side - Analysis Prism Panel (hidden on mobile, analysis shown in chat) */}
+            <div className="hidden min-h-0 w-full flex-col space-y-4 p-4 lg:flex lg:w-80">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Analysis Prism</h2>
-                <span className="text-xs text-muted-foreground lg:hidden">
-                  Swipe or scroll to explore
-                </span>
               </div>
               <div className="min-h-0 flex-1">
                 <PrismPanel conversationId={demoConversationId} />
