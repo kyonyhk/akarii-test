@@ -249,6 +249,8 @@ export function useChatScrollDetection() {
         if (now !== lastScrollTimeRef.current) return
 
         const container = e.currentTarget
+        if (!container) return
+
         const messageElements = container.querySelectorAll('[data-message-id]')
 
         if (messageElements.length === 0) return
