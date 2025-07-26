@@ -19,12 +19,6 @@ export default function Home() {
   const demoConversationId = 'demo-conversation-123'
   const demoUserId = 'demo-user-456'
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.push('/chat')
-    }
-  }, [isSignedIn, isLoaded, router])
-
   if (!isLoaded) {
     return (
       <MainLayout title="Welcome to Akarii">
@@ -38,28 +32,35 @@ export default function Home() {
     )
   }
 
-  if (isSignedIn) {
-    return null // Will redirect to /chat
-  }
-
   return (
     <MainLayout title="Welcome to Akarii">
       <div className="w-full max-w-6xl space-y-8">
         <div className="space-y-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight">
-            Welcome to Akarii
+            {isSignedIn ? 'Welcome Back!' : 'Welcome to Akarii'}
           </h1>
           <p className="text-xl text-muted-foreground">
             AI-powered real-time message analysis platform
           </p>
-          <div className="flex justify-center gap-4">
-            <Button asChild size="lg">
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/sign-up">Sign Up</Link>
-            </Button>
-          </div>
+          {isSignedIn ? (
+            <div className="flex justify-center gap-4">
+              <Button asChild size="lg">
+                <Link href="/chat">Start Chatting</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/dashboard">View Dashboard</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex justify-center gap-4">
+              <Button asChild size="lg">
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/sign-up">Sign Up</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Chat Demo Section - Split Pane Layout */}
