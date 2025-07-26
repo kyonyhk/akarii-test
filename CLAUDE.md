@@ -69,19 +69,26 @@ task-master set-status --id=12.1 --status=done
 
 **CRITICAL: Each individual task gets its own branch off the feature branch**
 
-**Branch Structure:**
+**Branch Structure & Naming Convention:**
 
 ```
 main
 ├── feature/role-based-access (base branch for Task 12)
-│   ├── feature/task-12.1 ← Individual task branches
-│   ├── feature/task-12.2
-│   └── feature/task-12.3
+│   ├── feature/task-12.1-configure-user-roles     ← Descriptive task branches
+│   ├── feature/task-12.2-access-middleware
+│   └── feature/task-12.3-admin-dashboard-access
 ├── feature/ui-redesign (base branch for Tasks 11 & 17)
-│   ├── feature/task-11.1 ← Individual task branches
-│   ├── feature/task-11.2
-│   └── feature/task-17.1
+│   ├── feature/task-11.1-message-bubble-component ← Descriptive task branches
+│   ├── feature/task-11.2-responsive-chat-layout
+│   └── feature/task-17.1-enhanced-chat-input
 ```
+
+**Branch Naming Rules:**
+
+- Format: `feature/task-[ID]-[brief-description]`
+- Use kebab-case for descriptions (lowercase, hyphens)
+- Keep descriptions concise but descriptive (3-5 words)
+- Examples: `feature/task-14.1-multi-model-provider-setup`
 
 **Workflow for each task:**
 
@@ -90,9 +97,19 @@ main
 ./tm show 12  # Role access tasks
 ./tm show 11  # UI tasks
 
-# 2. Create task branch off the feature branch (NOT off main)
+# 2. Create descriptive task branch off the feature branch (NOT off main)
 git checkout feature/role-based-access  # Your worktree's base feature branch
-git checkout -b feature/task-12.1       # New branch for specific task
+
+# Create descriptive branch name: feature/task-[ID]-[brief-description]
+git checkout -b feature/task-12.1-configure-user-roles    # Descriptive task branch
+
+# Branch naming examples:
+# feature/task-11.1-message-bubble-component
+# feature/task-11.2-responsive-chat-layout
+# feature/task-12.1-configure-user-roles
+# feature/task-12.2-access-middleware
+# feature/task-14.1-multi-model-provider-setup
+# feature/task-14.2-model-selection-ui
 
 # 3. Mark task as in-progress (centrally)
 ./tm set-status --id=12.1 --status=in-progress
@@ -113,8 +130,8 @@ Resolves: Task 12.1
 🤖 Generated with [Claude Code](https://claude.ai/code)
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# 6. Push to your TASK branch
-git push origin feature/task-12.1
+# 6. Push to your descriptive TASK branch
+git push origin feature/task-12.1-configure-user-roles
 
 # 7. Create PR: task branch → feature branch (NOT main)
 gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "$(cat <<'EOF'
@@ -136,12 +153,12 @@ EOF
 
 # 8. Merge task branch into feature branch
 git checkout feature/role-based-access
-git merge feature/task-12.1
+git merge feature/task-12.1-configure-user-roles
 git push origin feature/role-based-access
 
 # 9. Delete task branch (cleanup)
-git branch -d feature/task-12.1
-git push origin --delete feature/task-12.1
+git branch -d feature/task-12.1-configure-user-roles
+git push origin --delete feature/task-12.1-configure-user-roles
 
 # 10. Mark task as complete (centrally)
 ./tm set-status --id=12.1 --status=done
@@ -213,17 +230,20 @@ EOF
 # 1. ALWAYS verify you're on a TASK branch (not base feature branch)
 git branch --show-current
 
-# ✅ CORRECT task branch patterns:
-# feature/task-11.1, feature/task-11.2, feature/task-17.1
-# feature/task-12.1, feature/task-12.2, feature/task-12.3
-# feature/task-13.1, feature/task-14.1, etc.
+# ✅ CORRECT descriptive task branch patterns:
+# feature/task-11.1-message-bubble-component
+# feature/task-11.2-responsive-chat-layout
+# feature/task-12.1-configure-user-roles
+# feature/task-12.2-access-middleware
+# feature/task-14.1-multi-model-provider-setup
+# feature/task-17.1-enhanced-chat-input
 
 # ❌ WRONG - never work directly on these:
 # feature/ui-redesign, feature/role-based-access, main
 
-# 2. If on wrong branch, create proper task branch:
+# 2. If on wrong branch, create proper descriptive task branch:
 git checkout feature/role-based-access  # Base feature branch
-git checkout -b feature/task-12.1       # New task branch
+git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
 
 # 3. Never work directly on base branches:
 # git checkout feature/role-based-access  # ❌ DON'T WORK HERE
@@ -241,9 +261,14 @@ git checkout -b feature/task-12.1       # New task branch
 # 2. See your assigned tasks for this worktree
 ./tm show 12  # Replace with your assigned task group number
 
-# 3. Create task branch for specific subtask
+# 3. Create descriptive task branch for specific subtask
 git checkout feature/role-based-access  # Your base feature branch
-git checkout -b feature/task-12.1       # New branch for this specific task
+
+# Get task details first to create descriptive branch name
+./tm show 12.1  # Check task title and description
+
+# Create descriptive branch: feature/task-[ID]-[brief-description]
+git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
 
 # 4. Mark task as in-progress
 ./tm set-status --id=12.1 --status=in-progress
@@ -259,15 +284,15 @@ git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
 Resolves: Task 12.1"
 
-# 7. Push to your TASK branch
-git push origin feature/task-12.1
+# 7. Push to your descriptive TASK branch
+git push origin feature/task-12.1-configure-user-roles
 
 # 8. Create PR: task branch → feature branch
-gh pr create --base feature/role-based-access --title "Complete Task 12.1" --body "Ready for review"
+gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "Ready for review"
 
 # 9. Merge task branch into feature branch
 git checkout feature/role-based-access
-git merge feature/task-12.1
+git merge feature/task-12.1-configure-user-roles
 git push origin feature/role-based-access
 
 # 10. Mark task complete
