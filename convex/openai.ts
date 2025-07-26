@@ -11,7 +11,7 @@ const openai = new OpenAI({
 export { openai }
 
 // Model configuration for message analysis
-export const ANALYSIS_MODEL = 'gpt-4o-mini' // Using GPT-4o-mini as requested
+export const ANALYSIS_MODEL = 'gpt-4o' // Using GPT-4o for better analysis quality
 export const MAX_TOKENS = 500
 export const TEMPERATURE = 0.1 // Low temperature for consistent, structured responses
 
