@@ -1,0 +1,49 @@
+# Task ID: 14
+# Title: Implement Multi-Model AI Provider Backend and UI
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Extend the backend to support multiple AI providers (OpenAI, Anthropic, etc.) and create a user-facing UI for model selection.
+# Details:
+In the Convex backend, refactor the AI interaction logic into a Convex `action`. Implement an adapter pattern to create a unified interface for different AI provider SDKs. Store provider API keys securely as Convex environment variables. Add a `model` field to the chat settings and a `cost` field to message logs in the database schema. In the Next.js frontend, use a `shadcn/ui` `Select` component within a settings panel to allow users to choose from a list of available models. Persist the user's choice in their profile data.
+
+# Test Strategy:
+Configure at least two AI providers (e.g., OpenAI and a mock/test provider). Use the UI to switch between models and send a message. Verify the backend action calls the correct provider's API. Check the database to ensure the message log correctly records which model was used and its associated cost. Test that user model preference is saved and loaded correctly across sessions.
+
+# Subtasks:
+## 1. Update Database Schema for Multi-Model Support [pending]
+### Dependencies: None
+### Description: Modify the Convex database schema to accommodate multiple AI models and track associated costs for each message generation.
+### Details:
+In `convex/schema.ts`, update the relevant table for user or chat settings to include a new `model` field of type `string`. Modify the messages or a dedicated logging table to include a `cost` field of type `number` to store the calculated cost of the API call.
+
+## 2. Refactor AI Logic into a Convex Action with an Adapter Pattern [pending]
+### Dependencies: 14.1
+### Description: Restructure the existing AI interaction logic from a mutation or query into a Convex `action` and implement a provider-agnostic adapter pattern.
+### Details:
+Create a new `generate` action in a dedicated Convex file (e.g., `convex/ai.ts`). Define a TypeScript interface, `AIProvider`, that specifies a common method signature (e.g., `generate(prompt, model)`). Refactor the current OpenAI API call logic into an `OpenAIAdapter` that implements this interface. The main `generate` action will be responsible for selecting the correct adapter based on the model requested.
+
+## 3. Configure Secure API Key Management in Convex [pending]
+### Dependencies: None
+### Description: Set up and configure secure storage for multiple AI provider API keys using Convex environment variables.
+### Details:
+In the Convex dashboard, navigate to Settings > Environment Variables and add secrets for `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. Update the adapter implementations to securely access these keys via `process.env`. Add a `.env.local` file to the project root with placeholder keys for local development and add it to `.gitignore`.
+
+## 4. Implement Anthropic Provider Adapter [pending]
+### Dependencies: 14.2, 14.3
+### Description: Create a new adapter for the Anthropic API (Claude) to integrate it as a second AI provider option in the backend.
+### Details:
+Install the Anthropic SDK (`npm install @anthropic-ai/sdk`). Create a new file, `convex/anthropicAdapter.ts`, that exports a class implementing the `AIProvider` interface. This class will handle the logic for authenticating and making API calls to an Anthropic model like Claude 3 Sonnet, using the key from the environment variables.
+
+## 5. Create Model Selection UI in Settings Panel [pending]
+### Dependencies: None
+### Description: Develop a user interface component within a settings panel to allow users to select their preferred AI model from a list of available options.
+### Details:
+In the Next.js frontend, create or identify a settings component (e.g., a dialog or a dedicated page). Use the `shadcn/ui` `Select` component to build the model selector. Populate the `Select` options with a static list of available models, including their provider (e.g., 'GPT-4o Mini (OpenAI)', 'Claude 3 Sonnet (Anthropic)').
+
+## 6. Persist User Model Selection and Integrate with Backend [pending]
+### Dependencies: 14.1, 14.2, 14.5
+### Description: Implement the logic to save the user's selected model to their profile and ensure the backend `generate` action uses this selection to route requests.
+### Details:
+Create a Convex mutation (e.g., `updateModelSelection`) that accepts a model identifier and updates the `model` field in the user's settings. In the frontend, attach an `onValueChange` handler to the `Select` component to call this mutation. Modify the `generate` Convex action to read the user's saved model preference from the database, instantiate the corresponding adapter (OpenAI or Anthropic), and execute the request.
+

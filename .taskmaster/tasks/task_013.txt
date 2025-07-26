@@ -1,0 +1,37 @@
+# Task ID: 13
+# Title: Enhance Real-time Collaboration and Sharing
+# Status: pending
+# Dependencies: 11
+# Priority: medium
+# Description: Fix the share link functionality and implement real-time multi-user chat capabilities, including user presence and typing indicators.
+# Details:
+In Convex, create a mutation to generate a unique, secure invitation token for a chat room. Create another query/mutation to validate the token and add the joining user to the conversation's participants list. Utilize Convex's built-in presence system to track and display online/offline status. For typing indicators, have the client call a Convex mutation on input change, which updates a 'typing' status in the database for a short duration. The frontend will use Convex's `useQuery` to subscribe to real-time updates for messages, participants, and typing statuses.
+
+# Test Strategy:
+Open two separate browser windows. Generate a share link in window 1. Open the link in window 2 and verify the user successfully joins the chat. Send messages from both windows and confirm they appear in real-time (<100ms latency). Test that online status updates correctly when a user closes/opens the tab. Verify typing indicators appear for the other user while typing.
+
+# Subtasks:
+## 1. Implement Convex Backend for Secure Chat Invitation Links [pending]
+### Dependencies: None
+### Description: Create the necessary Convex mutations and queries to generate and validate secure invitation tokens for chat rooms, forming the backend foundation for the share link functionality.
+### Details:
+Define a new `invitationTokens` table in the Convex schema. Create a `generateInvitationToken` mutation that takes a `conversationId`, generates a unique, secure token, and stores it with an expiry. Create a `joinConversationWithToken` mutation that validates an incoming token, adds the authenticated user to the conversation's participants list, and invalidates the token after use.
+
+## 2. Develop Frontend UI for Share Link Generation and Handling [pending]
+### Dependencies: 13.1
+### Description: Implement the user interface for creating a shareable link and the page flow for a new user to join a chat via that link.
+### Details:
+In the chat UI, add a 'Share' button that calls the `generateInvitationToken` mutation. On success, construct the full invitation URL (e.g., `/join/[token]`) and copy it to the clipboard. Create a dynamic Next.js page at `/join/[token]` that extracts the token, calls the `joinConversationWithToken` mutation, and redirects the user to the chat room upon success, handling loading and error states.
+
+## 3. Integrate and Display Real-time User Presence [pending]
+### Dependencies: None
+### Description: Utilize Convex's built-in presence system to track and display the online/offline status of users within a specific chat room.
+### Details:
+Configure Convex presence to store the user's current `conversationId`. On the frontend, use the `usePresence` hook within the chat component to subscribe to presence updates for the current conversation. Update the participant list UI to display a visual indicator (e.g., a green dot) next to the names of users who are currently online.
+
+## 4. Add Real-time 'User is Typing...' Indicators [pending]
+### Dependencies: None
+### Description: Implement the backend and frontend logic to show when another user is actively typing a message in the chat.
+### Details:
+Create a `setTypingStatus` Convex mutation that updates a user's typing status for a specific conversation. On the client, on input change, call this mutation. Use a debounce function to manage the frequency of calls and to set the status back to false after the user stops typing. Use a Convex query to subscribe to the typing status of all participants and display a 'User is typing...' message in the UI.
+

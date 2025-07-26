@@ -1,0 +1,31 @@
+# Task ID: 17
+# Title: Implement Interactive Chat Input Features
+# Status: pending
+# Dependencies: 11
+# Priority: low
+# Description: Enhance the chat input component with modern features, including a rich emoji picker and basic text formatting options.
+# Details:
+Integrate a lightweight emoji picker library, such as `emoji-picker-react`, into the chat input component. Add a button that toggles the visibility of the picker. Implement basic markdown-style formatting for user input (e.g., bold, italics). Use a library like `react-markdown` to render the formatted text correctly within the message bubbles. This task focuses on the client-side implementation within the Next.js application.
+
+# Test Strategy:
+Verify the emoji picker can be opened and closed. Select an emoji and confirm it is added to the input field and rendered correctly in the sent message. Type a message with markdown like `*bold*` and `_italic_` and verify it renders as bold and italic text in the chat view. Ensure these features work smoothly on both desktop and mobile layouts.
+
+# Subtasks:
+## 1. Integrate Emoji Picker into Chat Input Component [pending]
+### Dependencies: None
+### Description: Install and configure a lightweight emoji picker library within the chat input component, allowing users to open the picker and insert emojis into the text field.
+### Details:
+Install the `emoji-picker-react` library. Add a dedicated button to the chat input area that toggles the visibility of the emoji picker. Implement the necessary state management in the Next.js component to control the picker's open/closed state. Position the picker appropriately relative to the input field. The core functionality is to append the selected emoji character to the existing text in the input state upon user selection.
+
+## 2. Enable Markdown Rendering in Message Bubbles [pending]
+### Dependencies: None
+### Description: Update the component that displays chat messages to render basic markdown formatting, specifically for bold and italic text.
+### Details:
+Install the `react-markdown` library. Identify the React component responsible for rendering individual message bubbles in the chat history. Modify this component to process the message's text content using `react-markdown`. This will convert markdown syntax like `*bold*` and `_italic_` into the corresponding HTML elements for proper visual formatting.
+
+## 3. Validate End-to-End Emoji and Markdown Flow [pending]
+### Dependencies: 17.1, 17.2
+### Description: Conduct a comprehensive test of the entire feature flow, from typing markdown and adding emojis in the input to verifying they are sent and rendered correctly in the chat view.
+### Details:
+This subtask focuses on ensuring the two new features work together seamlessly. The chat input must send the raw string, including markdown syntax and emojis, to the backend. The primary work is testing the complete user journey: 1. Type a message with markdown. 2. Open the emoji picker. 3. Add an emoji. 4. Send the message. 5. Confirm the message appears correctly formatted in the message list.
+
