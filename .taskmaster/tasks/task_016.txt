@@ -1,0 +1,37 @@
+# Task ID: 16
+# Title: Integrate Real Data into Analytics Dashboard
+# Status: pending
+# Dependencies: 12, 14
+# Priority: low
+# Description: Replace all hardcoded and mock data in the admin analytics dashboard with real data fetched from the Convex backend.
+# Details:
+Create new Convex queries to aggregate analytics data. This includes: a query to sum the `cost` field from AI message logs (grouping by day/week/model), a query to fetch team members from the user database, and a query to get real-time usage metrics. In the Next.js analytics page, remove all mock data and use the `useQuery` hook to call these new Convex queries. Connect the fetched data to the existing chart components (e.g., using `recharts`) to visualize usage trends and costs.
+
+# Test Strategy:
+Generate significant test usage data across different models and users. Navigate to the analytics dashboard and verify that the charts and KPIs (Key Performance Indicators) reflect the generated data accurately. Cross-reference the dashboard's cost calculation with a manual sum from the database records. Add a new user to a team and confirm they appear in the team analytics section.
+
+# Subtasks:
+## 1. Implement Convex Analytics Aggregation Queries [pending]
+### Dependencies: None
+### Description: Create and expose the necessary Convex query functions to aggregate analytics data from the database, including cost summation, user data retrieval, and real-time metrics.
+### Details:
+In a new `convex/analytics.ts` file, create three query functions. First, a query to aggregate the `cost` field from AI message logs, which can be grouped by time intervals (day, week) and by AI model. Second, a simple query to fetch all team members from the user collection. Third, a query to calculate real-time usage metrics, such as total messages or total cost in the last 24 hours.
+
+## 2. Integrate Convex Queries into Next.js Analytics Page [pending]
+### Dependencies: 16.1
+### Description: Refactor the Next.js analytics page to remove all hardcoded mock data and replace it with live data fetched from the Convex backend using the `useQuery` hook.
+### Details:
+In the main analytics page component (`/pages/admin/analytics.tsx`), import the `useQuery` hook and the newly created analytics queries from `convex/analytics.ts`. Remove all static arrays and objects that represent mock data. Call the new queries using `useQuery` to fetch cost trends, the team member list, and real-time KPIs. Implement loading and error states for a better user experience.
+
+## 3. Connect Fetched Data to Recharts Visualization Components [pending]
+### Dependencies: 16.2
+### Description: Bind the live, fetched analytics data to the existing `recharts` chart components to visualize usage trends and costs accurately.
+### Details:
+Take the aggregated cost and usage data fetched via `useQuery` and transform it into the data structure expected by the `recharts` `BarChart` and `LineChart` components. Ensure the chart's axes, tooltips, and data points are rendered dynamically from this data. Connect any existing UI filters (e.g., time range selector) to re-fetch or re-process the data as needed.
+
+## 4. Populate KPI Cards and Team Member List with Real Data [pending]
+### Dependencies: 16.2
+### Description: Display the fetched real-time metrics and team member information in the corresponding UI components on the dashboard.
+### Details:
+Use the data from the team member query to populate the list or table of users on the dashboard. Connect the real-time usage metrics query to the Key Performance Indicator (KPI) cards to display values like 'Total Cost Today' or 'Total Messages'. Ensure these components correctly display the live data.
+

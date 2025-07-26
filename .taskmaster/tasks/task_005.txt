@@ -1,0 +1,55 @@
+# Task ID: 5
+# Title: Build Prism Panel for Live Analysis Display
+# Status: done
+# Dependencies: 3, 4
+# Priority: high
+# Description: Create the right-side panel that displays real-time message analysis results with collapsible rows and raw JSON drawer
+# Details:
+Build Prism Panel component using shadcn/ui (Card, Collapsible, Drawer), create analysis row components showing statement type, belief, trade-off, and confidence, implement click-to-expand drawer showing raw JSON analysis, add real-time subscription to analyses table, implement auto-scroll sync with chat, add latency indicator in corner, ensure mobile-responsive with panel hide option
+
+# Test Strategy:
+Verify analysis appears within 2 seconds of message send, test collapsible functionality, validate raw JSON display, check mobile responsiveness and panel hide/show
+
+# Subtasks:
+## 1. Create Prism Panel component structure [done]
+### Dependencies: None
+### Description: Build the main panel container with shadcn/ui Card component and responsive layout
+### Details:
+Create PrismPanel.tsx component using shadcn/ui Card, implement responsive width handling, add panel header with title and collapse toggle, set up proper positioning in split-pane layout on right side
+
+## 2. Build analysis row components [done]
+### Dependencies: 5.1
+### Description: Create individual analysis display components for statement type, belief, trade-off, and confidence
+### Details:
+Create AnalysisRow.tsx component showing analysis fields, implement confidence-based styling (grey out <0.4), add proper spacing and typography using shadcn/ui components, ensure consistent display format
+
+## 3. Implement collapsible functionality [done]
+### Dependencies: 5.2
+### Description: Add collapsible behavior to analysis rows using shadcn/ui Collapsible component
+### Details:
+Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row
+
+## 4. Create raw JSON drawer component [done]
+### Dependencies: 5.2
+### Description: Build click-to-expand drawer showing complete raw JSON analysis data
+### Details:
+Implement drawer using shadcn/ui Drawer component, add JSON syntax highlighting, create toggle button to open/close drawer, format raw analysis data for readable display, add copy-to-clipboard functionality
+
+## 5. Implement real-time data subscription [done]
+### Dependencies: 5.1
+### Description: Connect panel to live analyses data using Convex queries with real-time updates
+### Details:
+Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId
+
+## 6. Add auto-scroll synchronization with chat [done]
+### Dependencies: 5.5
+### Description: Implement synchronized scrolling between chat messages and corresponding analysis results
+### Details:
+Create scroll synchronization logic between chat and panel, implement smooth scrolling to active analysis, add visual indicators for currently selected message/analysis pair, handle edge cases for rapid message sending
+
+## 7. Implement mobile responsiveness and panel controls [done]
+### Dependencies: 5.6
+### Description: Add mobile-responsive design with panel hide/show functionality and latency indicator
+### Details:
+Implement responsive breakpoints for mobile/tablet views, add panel hide/show toggle button, create latency indicator in corner showing analysis processing time, ensure touch-friendly interactions on mobile devices
+

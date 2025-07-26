@@ -1,0 +1,43 @@
+# Task ID: 12
+# Title: Implement Role-Based Access Control (RBAC) for Admin Features
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement a robust RBAC system to hide and restrict access to admin-only sections (Experiments, Teams, Analytics) from regular users.
+# Details:
+Leverage Clerk's authentication to manage user roles by storing a 'role' (e.g., 'admin' or 'user') in the public metadata for each user. In the Convex backend, create a middleware or helper function that checks the caller's role from the auth context in relevant queries and mutations. In the Next.js frontend, create a custom hook `useRole()` that fetches the user's role. Use this hook for conditional rendering of navigation links and components. Implement page-level security, potentially in Next.js middleware or `getServerSideProps`, to redirect non-admins attempting to access admin URLs directly.
+
+# Test Strategy:
+Create two test users in Clerk: one with an 'admin' role and one with a 'user' role. Log in as the 'user' and verify that admin navigation links are hidden and direct URL access to `/admin/teams` or `/admin/analytics` results in a redirect or 'Access Denied' page. Log in as 'admin' and confirm full access. Write unit tests for the Convex role-checking logic.
+
+# Subtasks:
+## 1. Configure and Assign User Roles in Clerk Metadata [pending]
+### Dependencies: None
+### Description: Update the Clerk configuration to support a 'role' field in the publicMetadata. Manually assign the 'admin' role to a test user and ensure new users default to 'user'.
+### Details:
+Log into the Clerk dashboard and navigate to the User & Organization Settings -> Custom user properties. Add a 'role' property (Type: String, Private: No). Use the Clerk dashboard to set the publicMetadata.role to 'admin' for a designated admin user. Verify that newly signed-up users are assigned a default role of 'user' or have no role set, which the application will treat as 'user'.
+
+## 2. Create a Role-Checking Helper in Convex [pending]
+### Dependencies: 12.1
+### Description: Implement a reusable function in the Convex backend that authenticates the user and verifies they have the 'admin' role based on the publicMetadata passed from Clerk.
+### Details:
+In the Convex codebase, create a helper function, e.g., `ensureAdmin(ctx)`. This function will take the context `ctx` object, access `ctx.auth.getUserIdentity()`, and check the `publicMetadata.role` property. If the role is not 'admin', it should throw an error. Integrate this helper at the beginning of all admin-specific queries and mutations.
+
+## 3. Create `useRole` Custom Hook in Next.js [pending]
+### Dependencies: 12.1
+### Description: Develop a custom React hook, `useRole()`, in the Next.js frontend that fetches the current user's role from their Clerk session data.
+### Details:
+The hook will use Clerk's `useUser` hook to access `user.publicMetadata.role`. It should return the role string (e.g., 'admin', 'user') and handle cases where the user is not logged in or the metadata is not yet loaded by returning null or a loading state.
+
+## 4. Conditionally Render Admin UI and Navigation [pending]
+### Dependencies: 12.3
+### Description: Use the `useRole` hook to conditionally render navigation links and other UI elements for the admin sections (Experiments, Teams, Analytics).
+### Details:
+In the main navigation component, wrap the links to `/admin/teams`, `/admin/analytics`, and `/admin/experiments` in a conditional block. Use the `useRole` hook to check if `role === 'admin'`. Only render the links if the condition is true. Apply the same logic to any other admin-specific UI elements.
+
+## 5. Implement Page-Level Security for Admin Routes [pending]
+### Dependencies: 12.1
+### Description: Secure the admin pages (e.g., `/admin/*`) by implementing route protection in Next.js Middleware that redirects non-admin users.
+### Details:
+Create or update the `middleware.ts` file in the Next.js project. Configure the matcher to run on admin routes like `/admin/:path*`. Inside the middleware, use Clerk's `authMiddleware` or `getAuth` to access the user's session and check `auth().sessionClaims.publicMetadata.role`. If the role is not 'admin', redirect the user to the home page or an 'Access Denied' page.
+

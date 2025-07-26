@@ -1,0 +1,61 @@
+# Task ID: 4
+# Title: Integrate OpenAI API and Create Message Analysis Pipeline
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Set up OpenAI integration with o4-mini-high model and implement the analyzeMessage server action for real-time message analysis
+# Details:
+Install OpenAI SDK, create server action in convex/actions.ts for analyzeMessage, design prompt template for extracting statement type, beliefs, trade-offs, and confidence levels, implement JSON response parsing with error handling, add retry logic for API failures, ensure analysis completes within 2-second target, store results in analyses table linked to messageId
+
+# Test Strategy:
+Test analysis accuracy with sample messages, verify sub-2-second response times, test error handling for API failures, validate JSON parsing and database storage
+
+# Subtasks:
+## 1. OpenAI SDK Setup and Configuration [done]
+### Dependencies: None
+### Description: Install and configure OpenAI SDK with API key management
+### Details:
+Install OpenAI SDK package, configure API key in environment variables, set up client initialization with proper authentication and model selection (o4-mini-high)
+
+## 2. Prompt Template Design for Message Analysis [done]
+### Dependencies: 4.1
+### Description: Create structured prompt template for extracting statement type, beliefs, trade-offs, and confidence levels
+### Details:
+Design comprehensive prompt template that instructs the AI to analyze messages and return structured data including statement classification, belief extraction, trade-off identification, and confidence scoring
+
+## 3. Server Action Creation and API Integration [done]
+### Dependencies: 4.1, 4.2
+### Description: Implement analyzeMessage server action in convex/actions.ts with OpenAI API calls
+### Details:
+Create server action that receives message content, makes OpenAI API calls using the designed prompt template, and handles the complete analysis workflow
+
+## 4. JSON Parsing Implementation [done]
+### Dependencies: 4.3
+### Description: Implement robust JSON response parsing with validation and schema enforcement
+### Details:
+Create parsing logic to extract structured data from OpenAI responses, validate JSON format, enforce expected schema, and handle malformed responses gracefully
+
+## 5. Error Handling and Retry Logic [done]
+### Dependencies: 4.3
+### Description: Implement comprehensive error handling with retry mechanisms for API failures
+### Details:
+Add exponential backoff retry logic for API failures, handle rate limiting, timeout errors, and invalid responses with appropriate fallback strategies
+
+## 6. Performance Optimization for 2-Second Target [done]
+### Dependencies: 4.4, 4.5
+### Description: Optimize analysis pipeline to meet sub-2-second response time requirement
+### Details:
+Implement performance optimizations including request batching, response caching strategies, timeout configurations, and latency monitoring to ensure consistent sub-2-second analysis completion
+
+## 7. Database Storage Integration [done]
+### Dependencies: 4.4
+### Description: Integrate analysis results storage with Convex analyses table linked to messageId
+### Details:
+Implement database storage logic to save analysis results to the analyses table with proper messageId linking, handle concurrent writes, and ensure data consistency
+
+## 8. Comprehensive Testing Implementation [done]
+### Dependencies: 4.6, 4.7
+### Description: Create comprehensive test suite for analysis accuracy, performance, and error handling
+### Details:
+Develop test cases for analysis accuracy with sample messages, performance testing to verify sub-2-second response times, error handling validation for API failures, and database storage verification
+
