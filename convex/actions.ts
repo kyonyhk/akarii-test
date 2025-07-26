@@ -104,9 +104,12 @@ export const analyzeMessage = action({
   handler: async (ctx, args): Promise<AnalysisResponse> => {
     const tracker = createPerformanceTracker()
 
+    // Input validation and sanitization (moved outside try block for scope)
+    const inputValidation = validateAnalysisInput(args)
+    const sanitizedArgs = inputValidation.sanitizedArgs || args
+
     try {
-      // Input validation and sanitization
-      const inputValidation = validateAnalysisInput(args)
+      console.log(`Starting analysis for message ${args.messageId}`)
 
       if (!inputValidation.isValid) {
         console.error('Input validation failed:', inputValidation.errors)
@@ -131,13 +134,23 @@ export const analyzeMessage = action({
         console.warn('Input validation warnings:', inputValidation.warnings)
       }
 
-      // Use sanitized arguments for processing
-      const sanitizedArgs = inputValidation.sanitizedArgs || args
-
       // Validate OpenAI configuration
+      console.log('Validating OpenAI configuration...')
+      console.log(
+        'Environment check - OPENAI_API_KEY exists:',
+        !!process.env.OPENAI_API_KEY
+      )
       if (!validateOpenAIConfig()) {
+        console.error(
+          'OpenAI API configuration failed - missing or invalid API key'
+        )
+        console.error(
+          'OPENAI_API_KEY value:',
+          process.env.OPENAI_API_KEY ? '[PRESENT]' : '[MISSING]'
+        )
         throw new Error('OpenAI API is not properly configured')
       }
+      console.log('OpenAI configuration validated successfully')
 
       // Set up prompt configuration
       const promptConfig: PromptConfiguration = {
@@ -654,6 +667,14 @@ export const analyzeMessage = action({
       return analysis
     } catch (error) {
       console.error('Error analyzing message:', error)
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        messageId: sanitizedArgs.messageId,
+        userId: sanitizedArgs.userId,
+        conversationId: sanitizedArgs.conversationId,
+      })
 
       // Record failure metrics
       recordAnalysisMetrics(tracker.getElapsedMs(), false, false)
@@ -663,7 +684,7 @@ export const analyzeMessage = action({
         success: false,
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',
-        statementType: 'other',
+        statementType: 'other' as const,
         beliefs: [],
         tradeOffs: [],
         confidenceLevel: 0,
@@ -673,6 +694,10 @@ export const analyzeMessage = action({
           modelUsed: ANALYSIS_MODEL,
           processingTimeMs: tracker.getElapsedMs(),
           cached: false,
+          errorDetails: {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error),
+          },
         },
       }
     }
