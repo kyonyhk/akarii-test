@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery, useMutation, useAction } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 
 interface UseChatProps {
@@ -22,16 +22,31 @@ export function useChat({ conversationId, userId, userName }: UseChatProps) {
   // Send message mutation
   const sendMessageMutation = useMutation(api.messages.sendMessage)
 
+  // Analysis action
+  const analyzeMessageAction = useAction(api.actions.analyzeMessage)
+
   const sendMessage = async (content: string) => {
     if (!content.trim()) return
 
     setIsLoading(true)
     try {
-      await sendMessageMutation({
+      // Send the message first
+      const messageId = await sendMessageMutation({
         content: content.trim(),
         userId,
         conversationId,
         username: userName,
+      })
+
+      // Trigger analysis asynchronously (don't wait for it)
+      analyzeMessageAction({
+        messageId,
+        content: content.trim(),
+        userId,
+        conversationId,
+      }).catch(error => {
+        console.error('Failed to analyze message:', error)
+        // Don't throw here - analysis failure shouldn't prevent message sending
       })
     } catch (error) {
       console.error('Failed to send message:', error)
