@@ -17,6 +17,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        orbitron: ['var(--font-orbitron)', 'sans-serif'],
+        sharetech: ['var(--font-sharetech)', 'monospace'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -51,6 +55,12 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'neon-cyan': 'hsl(var(--neon-cyan))',
+        'neon-purple': 'hsl(var(--neon-purple))',
+        'neon-pink': 'hsl(var(--neon-pink))',
+        'dark-surface': 'hsl(var(--dark-surface))',
+        'darker-surface': 'hsl(var(--darker-surface))',
+        'grid-color': 'hsl(var(--grid-color))',
       },
       borderRadius: {
         lg: 'var(--radius)',

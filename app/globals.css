@@ -4,48 +4,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* Futuristic Dark Theme */
+    --background: 200 20% 5%;
+    --foreground: 180 100% 85%;
+    --card: 200 25% 8%;
+    --card-foreground: 180 100% 85%;
+    --popover: 200 30% 6%;
+    --popover-foreground: 180 100% 85%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 200 20% 5%;
+    --secondary: 195 100% 20%;
+    --secondary-foreground: 180 100% 85%;
+    --muted: 200 15% 12%;
+    --muted-foreground: 180 20% 60%;
+    --accent: 270 100% 60%;
+    --accent-foreground: 200 20% 5%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 200 20% 5%;
+    --border: 195 30% 15%;
+    --input: 200 25% 10%;
+    --ring: 180 100% 50%;
+    --radius: 0.75rem;
+    
+    /* Futuristic custom colors */
+    --neon-cyan: 180 100% 50%;
+    --neon-purple: 270 100% 60%;
+    --neon-pink: 320 100% 60%;
+    --dark-surface: 200 25% 8%;
+    --darker-surface: 200 30% 6%;
+    --grid-color: 180 50% 25%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Same colors for dark mode since this is already a dark theme */
+    --background: 200 20% 5%;
+    --foreground: 180 100% 85%;
+    --card: 200 25% 8%;
+    --card-foreground: 180 100% 85%;
+    --popover: 200 30% 6%;
+    --popover-foreground: 180 100% 85%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 200 20% 5%;
+    --secondary: 195 100% 20%;
+    --secondary-foreground: 180 100% 85%;
+    --muted: 200 15% 12%;
+    --muted-foreground: 180 20% 60%;
+    --accent: 270 100% 60%;
+    --accent-foreground: 200 20% 5%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 200 20% 5%;
+    --border: 195 30% 15%;
+    --input: 200 25% 10%;
+    --ring: 180 100% 50%;
   }
 }
 
@@ -53,7 +63,74 @@
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-orbitron;
+    background-image: 
+      radial-gradient(circle at 1px 1px, hsl(var(--grid-color)) 1px, transparent 0);
+    background-size: 20px 20px;
+    background-attachment: fixed;
+  }
+  
+  /* Futuristic scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+    box-shadow: 0 0 8px hsl(var(--primary));
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+    box-shadow: 0 0 12px hsl(var(--accent));
+  }
+}
+
+@layer components {
+  /* Neon glow effect utility classes */
+  .neon-glow {
+    box-shadow: 
+      0 0 5px hsl(var(--primary)),
+      0 0 10px hsl(var(--primary)),
+      0 0 15px hsl(var(--primary)),
+      0 0 20px hsl(var(--primary));
+  }
+  
+  .neon-text {
+    color: hsl(var(--primary));
+    text-shadow: 
+      0 0 5px hsl(var(--primary)),
+      0 0 10px hsl(var(--primary)),
+      0 0 15px hsl(var(--primary));
+  }
+  
+  .cyber-border {
+    border: 1px solid hsl(var(--primary));
+    box-shadow: 
+      inset 0 0 10px hsl(var(--primary) / 0.2),
+      0 0 10px hsl(var(--primary) / 0.3);
+  }
+  
+  .holographic {
+    background: linear-gradient(
+      45deg,
+      hsl(var(--primary) / 0.1),
+      hsl(var(--accent) / 0.1),
+      hsl(var(--neon-pink) / 0.1)
+    );
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--primary) / 0.3);
+  }
+  
+  .digital-font {
+    font-family: var(--font-sharetech);
+    letter-spacing: 0.05em;
   }
 }
