@@ -306,8 +306,8 @@ export const analyzeMessage = action({
       // Make OpenAI API call with enhanced retry logic and fallback handling
       const analysisAttempt = await withFallback(
         async () => {
-          // Check timeout (target: sub-2-second)
-          tracker.checkTimeout(1800) // Leave 200ms buffer
+          // Check timeout (target: sub-10-second for GPT-4o)
+          tracker.checkTimeout(9000) // Leave 1000ms buffer for GPT-4o
 
           try {
             const response = await openai.chat.completions.create(
@@ -319,7 +319,7 @@ export const analyzeMessage = action({
                 response_format: { type: 'json_object' },
               },
               {
-                timeout: 1500, // 1.5 second timeout per request
+                timeout: 8000, // 8 second timeout per request for GPT-4o
               }
             )
 
