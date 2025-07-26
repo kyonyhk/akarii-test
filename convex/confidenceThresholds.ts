@@ -27,10 +27,19 @@ export interface ConfidenceThreshold {
 // Get effective confidence thresholds for a user/team combination
 export const getEffectiveThresholds = query({
   args: {
-    userId: v.optional(v.id('users')),
+    userId: v.optional(v.string()), // Accept Clerk user ID as string
     teamId: v.optional(v.id('teams')),
   },
   handler: async (ctx, args) => {
+    // Convert Clerk user ID to Convex user ID if provided
+    let convexUserId: string | undefined
+    if (args.userId) {
+      const user = await ctx.db
+        .query('users')
+        .withIndex('by_clerk_id', q => q.eq('clerkId', args.userId!))
+        .first()
+      convexUserId = user?._id
+    }
     const thresholds = new Map<ThresholdType, number>()
 
     // Start with defaults
@@ -75,10 +84,10 @@ export const getEffectiveThresholds = query({
     }
 
     // Get user-level thresholds (if userId provided)
-    if (args.userId) {
+    if (convexUserId) {
       const userThresholds = await ctx.db
         .query('confidenceThresholds')
-        .withIndex('by_user', q => q.eq('userId', args.userId))
+        .withIndex('by_user', q => q.eq('userId', convexUserId))
         .filter(q => q.eq(q.field('isActive'), true))
         .collect()
 
@@ -99,7 +108,7 @@ export const getEffectiveThresholds = query({
 // Set confidence threshold for team or user
 export const setConfidenceThreshold = mutation({
   args: {
-    userId: v.optional(v.id('users')),
+    userId: v.optional(v.string()), // Accept Clerk user ID as string
     teamId: v.optional(v.id('teams')),
     thresholdType: v.union(
       v.literal('display_threshold'),
@@ -116,6 +125,16 @@ export const setConfidenceThreshold = mutation({
     createdBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    // Convert Clerk user ID to Convex user ID if provided
+    let convexUserId: string | undefined
+    if (args.userId) {
+      const user = await ctx.db
+        .query('users')
+        .withIndex('by_clerk_id', q => q.eq('clerkId', args.userId!))
+        .first()
+      convexUserId = user?._id
+    }
+
     // Validate confidence value
     if (args.confidenceValue < 0 || args.confidenceValue > 100) {
       throw new Error('Confidence value must be between 0 and 100')
@@ -128,7 +147,7 @@ export const setConfidenceThreshold = mutation({
       .filter(q =>
         q.and(
           q.eq(q.field('teamId'), args.teamId),
-          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('userId'), convexUserId),
           q.eq(q.field('thresholdType'), args.thresholdType),
           q.eq(q.field('isActive'), true)
         )
@@ -147,7 +166,7 @@ export const setConfidenceThreshold = mutation({
       // Create new threshold
       return await ctx.db.insert('confidenceThresholds', {
         teamId: args.teamId,
-        userId: args.userId,
+        userId: convexUserId,
         thresholdType: args.thresholdType,
         confidenceValue: args.confidenceValue,
         uiTreatment: args.uiTreatment,
@@ -163,17 +182,27 @@ export const setConfidenceThreshold = mutation({
 // Get all thresholds for a team/user
 export const getConfidenceThresholds = query({
   args: {
-    userId: v.optional(v.id('users')),
+    userId: v.optional(v.string()), // Accept Clerk user ID as string
     teamId: v.optional(v.id('teams')),
   },
   handler: async (ctx, args) => {
+    // Convert Clerk user ID to Convex user ID if provided
+    let convexUserId: string | undefined
+    if (args.userId) {
+      const user = await ctx.db
+        .query('users')
+        .withIndex('by_clerk_id', q => q.eq('clerkId', args.userId!))
+        .first()
+      convexUserId = user?._id
+    }
+
     return await ctx.db
       .query('confidenceThresholds')
       .withIndex('by_team_user')
       .filter(q =>
         q.and(
           q.eq(q.field('teamId'), args.teamId),
-          q.eq(q.field('userId'), args.userId),
+          q.eq(q.field('userId'), convexUserId),
           q.eq(q.field('isActive'), true)
         )
       )
