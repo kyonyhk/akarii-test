@@ -1256,6 +1256,9 @@ export const analyzeAndStoreMessage = action({
       }
 
       // Step 3: Store analysis results in database
+      console.log(
+        `Attempting to store analysis for message ${args.messageId}...`
+      )
       try {
         const analysisId = await ctx.runMutation(api.analyses.createAnalysis, {
           messageId: args.messageId,
