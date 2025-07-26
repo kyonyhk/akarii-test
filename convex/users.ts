@@ -7,6 +7,12 @@ export const createOrUpdateUser = mutation({
     email: v.string(),
     name: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    role: v.optional(v.union(
+      v.literal('admin'),
+      v.literal('user'),
+      v.literal('guest'),
+      v.literal('member')
+    )),
   },
   handler: async (ctx, args) => {
     // Check if user already exists
@@ -17,11 +23,18 @@ export const createOrUpdateUser = mutation({
 
     if (existingUser) {
       // Update existing user
-      await ctx.db.patch(existingUser._id, {
+      const updateData: any = {
         email: args.email,
         name: args.name,
         avatar: args.avatar,
-      })
+      }
+      
+      // Only update role if provided (preserve existing role otherwise)
+      if (args.role) {
+        updateData.role = args.role
+      }
+      
+      await ctx.db.patch(existingUser._id, updateData)
       return existingUser._id
     } else {
       // Create new user
@@ -30,7 +43,7 @@ export const createOrUpdateUser = mutation({
         email: args.email,
         name: args.name,
         avatar: args.avatar,
-        role: 'member',
+        role: args.role || 'user',
         joinedAt: Date.now(),
       })
       return userId
