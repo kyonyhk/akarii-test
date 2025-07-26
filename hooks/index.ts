@@ -7,3 +7,4 @@ export {
   useAnalysisVoteStats,
   useSortedAnalyses,
 } from './use-vote-analytics'
+export { useRole, type UserRole } from './useRole'
