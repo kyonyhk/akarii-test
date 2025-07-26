@@ -111,7 +111,6 @@ export const analyzeMessage = action({
 
     try {
       console.log(`Starting analysis for message ${args.messageId}`)
-
       if (!inputValidation.isValid) {
         console.error('Input validation failed:', inputValidation.errors)
         return {
