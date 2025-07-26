@@ -1256,15 +1256,56 @@ export const analyzeAndStoreMessage = action({
       }
 
       // Step 3: Store analysis results in database
+      console.log(
+        `Attempting to store analysis for message ${args.messageId}...`
+      )
+      console.log('Analysis data to store:', {
+        messageId: args.messageId,
+        statementType: analysisResult.statementType,
+        beliefs: analysisResult.beliefs,
+        tradeOffs: analysisResult.tradeOffs,
+        confidenceLevel: analysisResult.confidenceLevel,
+        rawDataType: typeof analysisResult.rawData,
+        rawDataExists: !!analysisResult.rawData,
+        messageIdType: typeof args.messageId,
+      })
       try {
-        const analysisId = await ctx.runMutation(api.analyses.createAnalysis, {
+        // First check if message exists
+        const messageExists = await ctx.runQuery(api.messages.getMessage, {
           messageId: args.messageId,
-          statementType: analysisResult.statementType,
-          beliefs: analysisResult.beliefs,
-          tradeOffs: analysisResult.tradeOffs,
-          confidenceLevel: analysisResult.confidenceLevel,
-          rawData: analysisResult.rawData,
         })
+        console.log('Message exists check:', !!messageExists)
+
+        console.log('About to call createAnalysis with data:', {
+          messageId: args.messageId,
+          messageIdType: typeof args.messageId,
+          statementType: analysisResult.statementType,
+          beliefs: analysisResult.beliefs?.length || 0,
+          tradeOffs: analysisResult.tradeOffs?.length || 0,
+          confidenceLevel: analysisResult.confidenceLevel,
+          rawDataExists: !!analysisResult.rawData,
+        })
+
+        let analysisId
+        try {
+          analysisId = await ctx.runMutation(api.analyses.createAnalysis, {
+            messageId: args.messageId,
+            statementType: analysisResult.statementType,
+            beliefs: analysisResult.beliefs,
+            tradeOffs: analysisResult.tradeOffs,
+            confidenceLevel: analysisResult.confidenceLevel,
+            rawData: analysisResult.rawData,
+          })
+          console.log('createAnalysis call succeeded, analysisId:', analysisId)
+        } catch (createError) {
+          console.error('createAnalysis mutation failed:', createError)
+          console.error('Error details:', {
+            name: createError.name,
+            message: createError.message,
+            stack: createError.stack,
+          })
+          throw createError
+        }
 
         console.log(
           `Analysis stored successfully for message ${args.messageId}, analysisId: ${analysisId}`

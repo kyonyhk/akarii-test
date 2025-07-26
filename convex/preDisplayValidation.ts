@@ -128,7 +128,8 @@ export async function validateForDisplay(
 
   // Critical quality issues that should block display
   const criticalFlags = qualityResult.flags.filter(f => f.severity === 'high')
-  if (criticalFlags.length > 2) {
+  if (criticalFlags.length > 5) {
+    // Increased from 2 to 5 for better usability
     blockingReasons.push(
       `Too many critical quality issues: ${criticalFlags.length}`
     )

@@ -22,8 +22,8 @@ export function useChat({ conversationId, userId, userName }: UseChatProps) {
   // Send message mutation
   const sendMessageMutation = useMutation(api.messages.sendMessage)
 
-  // Analysis action
-  const analyzeMessageAction = useAction(api.actions.analyzeMessage)
+  // Analysis action with database storage
+  const analyzeMessageAction = useAction(api.actions.analyzeAndStoreMessage)
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return
