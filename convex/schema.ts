@@ -410,4 +410,21 @@ export default defineSchema({
     .index('by_team', ['teamId'])
     .index('by_user', ['userId'])
     .index('by_team_user', ['teamId', 'userId']),
+
+  // Invitation tokens for chat conversation sharing
+  invitationTokens: defineTable({
+    conversationId: v.id('conversations'),
+    token: v.string(),
+    createdBy: v.id('users'),
+    expiresAt: v.number(),
+    isActive: v.boolean(),
+    usedBy: v.optional(v.id('users')),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_token', ['token'])
+    .index('by_conversation', ['conversationId'])
+    .index('by_created_by', ['createdBy'])
+    .index('by_expires', ['expiresAt'])
+    .index('by_active', ['isActive']),
 })

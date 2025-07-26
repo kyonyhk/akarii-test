@@ -1,0 +1,49 @@
+# Task ID: 7
+# Title: Add Thumb Vote Feedback System
+# Status: done
+# Dependencies: 5, 6
+# Priority: medium
+# Description: Implement the 👍/👎 voting system for analysis quality feedback with real-time vote counts and user interaction tracking
+# Details:
+Add vote fields to analyses schema (thumbsUp, thumbsDown, userVotes array), create thumbVote Convex mutation, build vote button components with visual feedback, implement user vote tracking to prevent duplicate votes, add vote count display in analysis rows, create aggregation queries for feedback metrics, ensure real-time vote updates across all connected clients
+
+# Test Strategy:
+Test voting functionality prevents duplicate votes per user, verify real-time vote count updates, validate vote persistence and aggregation queries
+
+# Subtasks:
+## 1. Update database schema for voting system [done]
+### Dependencies: None
+### Description: Add thumbsUp, thumbsDown, and userVotes fields to analyses table schema
+### Details:
+Extend the analyses table schema in convex/schema.ts to include vote tracking fields: thumbsUp (number), thumbsDown (number), and userVotes (array of objects with userId and voteType). Ensure proper indexing for vote queries and aggregation.
+
+## 2. Create thumbVote mutation implementation [done]
+### Dependencies: 7.1
+### Description: Build Convex mutation for handling vote operations with validation logic
+### Details:
+Create thumbVote mutation in convex/mutations.ts that accepts analysisId, userId, and voteType parameters. Implement logic to toggle votes, prevent duplicate voting by same user, and update vote counts atomically. Include proper error handling and validation.
+
+## 3. Build vote button UI components [done]
+### Dependencies: 7.2
+### Description: Create reusable thumb vote button components with visual feedback
+### Details:
+Design and implement ThumbVoteButtons component using shadcn/ui Button with thumb up/down icons. Add visual states for unvoted, user-voted, and hover states. Include vote count display and smooth animations for state changes.
+
+## 4. Implement duplicate vote prevention [done]
+### Dependencies: 7.3
+### Description: Add client-side and server-side logic to prevent users from voting multiple times
+### Details:
+Implement user authentication tracking and vote state management in React components. Add optimistic updates with rollback on server rejection. Ensure UI reflects current user's vote status and prevents double-clicking issues.
+
+## 5. Add real-time vote updates [done]
+### Dependencies: 7.4
+### Description: Implement live subscription for vote count updates across all connected clients
+### Details:
+Create Convex live query subscription for vote counts that updates all connected clients in real-time. Integrate with existing Prism Panel analysis rows to show current vote totals. Ensure smooth UI updates without flickering.
+
+## 6. Create vote aggregation queries [done]
+### Dependencies: 7.5
+### Description: Build queries for vote metrics and feedback analytics
+### Details:
+Create Convex queries for vote aggregation including total votes per analysis, most/least popular analyses, and user voting patterns. Build helper functions for vote percentage calculations and sorting analyses by vote score.
+

@@ -24,7 +24,9 @@
             "id": 2,
             "title": "Install and configure Tailwind CSS",
             "description": "Set up Tailwind CSS for styling with proper configuration and PostCSS integration",
-            "dependencies": ["1.1"],
+            "dependencies": [
+              "1.1"
+            ],
             "details": "Install tailwindcss, postcss, and autoprefixer packages, generate tailwind.config.js with proper content paths, configure globals.css with Tailwind directives, verify CSS compilation works correctly",
             "status": "done",
             "testStrategy": ""
@@ -33,7 +35,9 @@
             "id": 3,
             "title": "Setup shadcn/ui component library",
             "description": "Initialize shadcn/ui and install essential components for the application",
-            "dependencies": ["1.2"],
+            "dependencies": [
+              "1.2"
+            ],
             "details": "Run 'npx shadcn-ui@latest init' to configure components.json, install core components (Button, Input, Card, Avatar), set up lib/utils.ts with cn utility function, verify component imports work correctly",
             "status": "done",
             "testStrategy": ""
@@ -42,7 +46,9 @@
             "id": 4,
             "title": "Configure development tooling (ESLint, Prettier, TypeScript)",
             "description": "Set up code quality tools and TypeScript configuration for development workflow",
-            "dependencies": ["1.1"],
+            "dependencies": [
+              "1.1"
+            ],
             "details": "Configure ESLint with Next.js rules, set up Prettier for code formatting, optimize tsconfig.json with strict mode and path mapping, add lint-staged and husky for pre-commit hooks, create .prettierrc and .eslintrc.json",
             "status": "done",
             "testStrategy": ""
@@ -51,7 +57,9 @@
             "id": 5,
             "title": "Create project folder structure",
             "description": "Establish organized directory structure for components, utilities, and application logic",
-            "dependencies": ["1.3"],
+            "dependencies": [
+              "1.3"
+            ],
             "details": "Create /components directory with subdirectories (ui, layout, forms), create /lib directory for utilities and configurations, set up /types directory for TypeScript definitions, organize /app directory structure with proper page routing",
             "status": "done",
             "testStrategy": ""
@@ -60,7 +68,9 @@
             "id": 6,
             "title": "Initialize git repository with proper configuration",
             "description": "Set up version control with appropriate .gitignore and initial commit",
-            "dependencies": ["1.5"],
+            "dependencies": [
+              "1.5"
+            ],
             "details": "Run 'git init' to initialize repository, configure .gitignore for Next.js, Node.js, and IDE files, add environment variable templates, create initial commit with project setup, configure git hooks for linting",
             "status": "done",
             "testStrategy": ""
@@ -74,7 +84,9 @@
         "details": "Install Convex CLI and SDK, run convex dev to initialize project, define schema in convex/schema.ts for messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), and create basic mutation/query stubs",
         "testStrategy": "Verify Convex dashboard shows correct schema, test basic CRUD operations via Convex dashboard, ensure real-time subscriptions work",
         "priority": "high",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "status": "done",
         "subtasks": [
           {
@@ -90,7 +102,9 @@
             "id": 2,
             "title": "Design and Implement Database Schema",
             "description": "Define complete database schema in convex/schema.ts for all required tables",
-            "dependencies": ["2.1"],
+            "dependencies": [
+              "2.1"
+            ],
             "details": "Create schema.ts with messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), define proper field types and relationships",
             "status": "done",
             "testStrategy": ""
@@ -99,7 +113,9 @@
             "id": 3,
             "title": "Implement Messages Table Operations",
             "description": "Create Convex mutations and queries for messages CRUD operations",
-            "dependencies": ["2.2"],
+            "dependencies": [
+              "2.2"
+            ],
             "details": "Create sendMessage mutation, getMessages query for conversation, implement real-time message subscription, add message validation and error handling",
             "status": "done",
             "testStrategy": ""
@@ -108,7 +124,9 @@
             "id": 4,
             "title": "Implement Analyses and Conversations Operations",
             "description": "Create Convex functions for analyses and conversations tables",
-            "dependencies": ["2.2"],
+            "dependencies": [
+              "2.2"
+            ],
             "details": "Create storeAnalysis mutation, getAnalyses query, createConversation mutation, getConversations query, implement proper data relationships and indexes",
             "status": "done",
             "testStrategy": ""
@@ -117,7 +135,10 @@
             "id": 5,
             "title": "Test and Validate Convex Setup",
             "description": "Verify Convex configuration and test all database operations",
-            "dependencies": ["2.3", "2.4"],
+            "dependencies": [
+              "2.3",
+              "2.4"
+            ],
             "details": "Test all mutations and queries via Convex dashboard, verify schema appears correctly, test real-time subscriptions, validate data persistence and relationships, ensure proper error handling",
             "status": "done",
             "testStrategy": ""
@@ -131,7 +152,9 @@
         "details": "Create chat components using shadcn/ui (Input, ScrollArea, Button), implement sendMessage Convex mutation, create useQuery hook for live message subscription, build message list component with auto-scroll, add typing indicators, implement split-pane layout with chat on left side, ensure messages display with timestamp and author",
         "testStrategy": "Test real-time messaging between multiple browser tabs, verify messages persist on page refresh, check auto-scroll behavior and responsive design",
         "priority": "high",
-        "dependencies": [2],
+        "dependencies": [
+          2
+        ],
         "status": "done",
         "subtasks": [
           {
@@ -156,7 +179,9 @@
             "id": 3,
             "title": "Set Up Real-time Message Subscription",
             "description": "Implement Convex live query hooks for real-time message updates and subscription management",
-            "dependencies": ["3.2"],
+            "dependencies": [
+              "3.2"
+            ],
             "details": "Create useQuery hook for live message subscription, implement proper query optimization for performance, add connection state handling, ensure messages update in real-time across all connected clients",
             "status": "done",
             "testStrategy": ""
@@ -165,7 +190,10 @@
             "id": 4,
             "title": "Build Message Display Logic and List Component",
             "description": "Create message list component with proper rendering, sorting, and state management for chat history",
-            "dependencies": ["3.1", "3.3"],
+            "dependencies": [
+              "3.1",
+              "3.3"
+            ],
             "details": "Build MessageList component using shadcn/ui ScrollArea, implement message sorting by timestamp, add proper key handling for React rendering, integrate with real-time subscription data, handle loading states",
             "status": "done",
             "testStrategy": ""
@@ -174,7 +202,9 @@
             "id": 5,
             "title": "Implement Auto-scroll Functionality",
             "description": "Add intelligent auto-scroll behavior that follows new messages while preserving user scroll position when reviewing history",
-            "dependencies": ["3.4"],
+            "dependencies": [
+              "3.4"
+            ],
             "details": "Implement auto-scroll to bottom for new messages, detect user manual scrolling to disable auto-scroll, add scroll-to-bottom button when not at bottom, ensure smooth scrolling animation, handle edge cases for rapid message sending",
             "status": "done",
             "testStrategy": ""
@@ -183,7 +213,9 @@
             "id": 6,
             "title": "Add Typing Indicators and Status Features",
             "description": "Implement typing indicators and online status to enhance real-time chat experience",
-            "dependencies": ["3.3"],
+            "dependencies": [
+              "3.3"
+            ],
             "details": "Create typing indicator component, implement typing state tracking in Convex, add real-time typing status updates, create online/offline user status indicators, ensure proper cleanup of typing states",
             "status": "done",
             "testStrategy": ""
@@ -192,7 +224,10 @@
             "id": 7,
             "title": "Implement Responsive Split-pane Layout",
             "description": "Create responsive layout with chat interface positioned on left side and proper mobile/desktop adaptations",
-            "dependencies": ["3.4", "3.5"],
+            "dependencies": [
+              "3.4",
+              "3.5"
+            ],
             "details": "Implement split-pane layout with chat on left side, add responsive breakpoints for mobile/tablet/desktop, ensure proper resizing behavior, implement collapsible sidebar for smaller screens, maintain chat functionality across all screen sizes",
             "status": "done",
             "testStrategy": ""
@@ -206,7 +241,9 @@
         "details": "Install OpenAI SDK, create server action in convex/actions.ts for analyzeMessage, design prompt template for extracting statement type, beliefs, trade-offs, and confidence levels, implement JSON response parsing with error handling, add retry logic for API failures, ensure analysis completes within 2-second target, store results in analyses table linked to messageId",
         "testStrategy": "Test analysis accuracy with sample messages, verify sub-2-second response times, test error handling for API failures, validate JSON parsing and database storage",
         "priority": "high",
-        "dependencies": [2],
+        "dependencies": [
+          2
+        ],
         "status": "done",
         "subtasks": [
           {
@@ -222,7 +259,9 @@
             "id": 2,
             "title": "Prompt Template Design for Message Analysis",
             "description": "Create structured prompt template for extracting statement type, beliefs, trade-offs, and confidence levels",
-            "dependencies": ["4.1"],
+            "dependencies": [
+              "4.1"
+            ],
             "details": "Design comprehensive prompt template that instructs the AI to analyze messages and return structured data including statement classification, belief extraction, trade-off identification, and confidence scoring",
             "status": "done",
             "testStrategy": ""
@@ -231,7 +270,10 @@
             "id": 3,
             "title": "Server Action Creation and API Integration",
             "description": "Implement analyzeMessage server action in convex/actions.ts with OpenAI API calls",
-            "dependencies": ["4.1", "4.2"],
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
             "details": "Create server action that receives message content, makes OpenAI API calls using the designed prompt template, and handles the complete analysis workflow",
             "status": "done",
             "testStrategy": ""
@@ -240,7 +282,9 @@
             "id": 4,
             "title": "JSON Parsing Implementation",
             "description": "Implement robust JSON response parsing with validation and schema enforcement",
-            "dependencies": ["4.3"],
+            "dependencies": [
+              "4.3"
+            ],
             "details": "Create parsing logic to extract structured data from OpenAI responses, validate JSON format, enforce expected schema, and handle malformed responses gracefully",
             "status": "done",
             "testStrategy": ""
@@ -249,7 +293,9 @@
             "id": 5,
             "title": "Error Handling and Retry Logic",
             "description": "Implement comprehensive error handling with retry mechanisms for API failures",
-            "dependencies": ["4.3"],
+            "dependencies": [
+              "4.3"
+            ],
             "details": "Add exponential backoff retry logic for API failures, handle rate limiting, timeout errors, and invalid responses with appropriate fallback strategies",
             "status": "done",
             "testStrategy": ""
@@ -258,7 +304,10 @@
             "id": 6,
             "title": "Performance Optimization for 2-Second Target",
             "description": "Optimize analysis pipeline to meet sub-2-second response time requirement",
-            "dependencies": ["4.4", "4.5"],
+            "dependencies": [
+              "4.4",
+              "4.5"
+            ],
             "details": "Implement performance optimizations including request batching, response caching strategies, timeout configurations, and latency monitoring to ensure consistent sub-2-second analysis completion",
             "status": "done",
             "testStrategy": ""
@@ -267,7 +316,9 @@
             "id": 7,
             "title": "Database Storage Integration",
             "description": "Integrate analysis results storage with Convex analyses table linked to messageId",
-            "dependencies": ["4.4"],
+            "dependencies": [
+              "4.4"
+            ],
             "details": "Implement database storage logic to save analysis results to the analyses table with proper messageId linking, handle concurrent writes, and ensure data consistency",
             "status": "done",
             "testStrategy": ""
@@ -276,7 +327,10 @@
             "id": 8,
             "title": "Comprehensive Testing Implementation",
             "description": "Create comprehensive test suite for analysis accuracy, performance, and error handling",
-            "dependencies": ["4.6", "4.7"],
+            "dependencies": [
+              "4.6",
+              "4.7"
+            ],
             "details": "Develop test cases for analysis accuracy with sample messages, performance testing to verify sub-2-second response times, error handling validation for API failures, and database storage verification",
             "status": "done",
             "testStrategy": ""
@@ -290,7 +344,10 @@
         "details": "Build Prism Panel component using shadcn/ui (Card, Collapsible, Drawer), create analysis row components showing statement type, belief, trade-off, and confidence, implement click-to-expand drawer showing raw JSON analysis, add real-time subscription to analyses table, implement auto-scroll sync with chat, add latency indicator in corner, ensure mobile-responsive with panel hide option",
         "testStrategy": "Verify analysis appears within 2 seconds of message send, test collapsible functionality, validate raw JSON display, check mobile responsiveness and panel hide/show",
         "priority": "high",
-        "dependencies": [3, 4],
+        "dependencies": [
+          3,
+          4
+        ],
         "status": "done",
         "subtasks": [
           {
@@ -306,7 +363,9 @@
             "id": 2,
             "title": "Build analysis row components",
             "description": "Create individual analysis display components for statement type, belief, trade-off, and confidence",
-            "dependencies": ["5.1"],
+            "dependencies": [
+              "5.1"
+            ],
             "details": "Create AnalysisRow.tsx component showing analysis fields, implement confidence-based styling (grey out <0.4), add proper spacing and typography using shadcn/ui components, ensure consistent display format",
             "status": "done",
             "testStrategy": ""
@@ -315,7 +374,9 @@
             "id": 3,
             "title": "Implement collapsible functionality",
             "description": "Add collapsible behavior to analysis rows using shadcn/ui Collapsible component",
-            "dependencies": ["5.2"],
+            "dependencies": [
+              "5.2"
+            ],
             "details": "Integrate shadcn/ui Collapsible component, add expand/collapse animations, implement click handlers for row interaction, manage open/closed state for each analysis row",
             "status": "done",
             "testStrategy": ""
@@ -324,7 +385,9 @@
             "id": 4,
             "title": "Create raw JSON drawer component",
             "description": "Build click-to-expand drawer showing complete raw JSON analysis data",
-            "dependencies": ["5.2"],
+            "dependencies": [
+              "5.2"
+            ],
             "details": "Implement drawer using shadcn/ui Drawer component, add JSON syntax highlighting, create toggle button to open/close drawer, format raw analysis data for readable display, add copy-to-clipboard functionality",
             "status": "done",
             "testStrategy": ""
@@ -333,7 +396,9 @@
             "id": 5,
             "title": "Implement real-time data subscription",
             "description": "Connect panel to live analyses data using Convex queries with real-time updates",
-            "dependencies": ["5.1"],
+            "dependencies": [
+              "5.1"
+            ],
             "details": "Create useQuery hook for analyses table subscription, implement real-time updates when new analyses arrive, add loading states during analysis processing, ensure data fetching linked to current messageId",
             "status": "done",
             "testStrategy": ""
@@ -342,7 +407,9 @@
             "id": 6,
             "title": "Add auto-scroll synchronization with chat",
             "description": "Implement synchronized scrolling between chat messages and corresponding analysis results",
-            "dependencies": ["5.5"],
+            "dependencies": [
+              "5.5"
+            ],
             "details": "Create scroll synchronization logic between chat and panel, implement smooth scrolling to active analysis, add visual indicators for currently selected message/analysis pair, handle edge cases for rapid message sending",
             "status": "done",
             "testStrategy": ""
@@ -351,7 +418,9 @@
             "id": 7,
             "title": "Implement mobile responsiveness and panel controls",
             "description": "Add mobile-responsive design with panel hide/show functionality and latency indicator",
-            "dependencies": ["5.6"],
+            "dependencies": [
+              "5.6"
+            ],
             "details": "Implement responsive breakpoints for mobile/tablet views, add panel hide/show toggle button, create latency indicator in corner showing analysis processing time, ensure touch-friendly interactions on mobile devices",
             "status": "done",
             "testStrategy": ""
@@ -365,7 +434,9 @@
         "details": "Install Clerk SDK, configure Clerk dashboard for magic-link auth, create authentication components (SignIn, SignUp), integrate Clerk with Convex using ConvexProviderWithClerk, implement protected routes, add user context to messages and conversations, create invite link functionality for team collaboration, handle authentication state in UI",
         "testStrategy": "Test magic-link email delivery and authentication flow, verify protected routes work correctly, test user context in messages, validate invite link functionality",
         "priority": "medium",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "status": "done",
         "subtasks": [
           {
@@ -381,7 +452,9 @@
             "id": 2,
             "title": "Create Authentication Components",
             "description": "Build SignIn and SignUp components using Clerk's pre-built components",
-            "dependencies": ["6.1"],
+            "dependencies": [
+              "6.1"
+            ],
             "details": "Create SignIn and SignUp page components using Clerk's <SignIn /> and <SignUp /> components, configure routing for authentication pages, implement authentication redirects and fallbacks, style components to match application design",
             "status": "done",
             "testStrategy": ""
@@ -390,7 +463,10 @@
             "id": 3,
             "title": "Integrate Clerk with Convex Backend",
             "description": "Connect Clerk authentication to Convex using ConvexProviderWithClerk",
-            "dependencies": ["6.1", "6.2"],
+            "dependencies": [
+              "6.1",
+              "6.2"
+            ],
             "details": "Install @convex-dev/auth package, wrap app with ConvexProviderWithClerk, configure Convex authentication middleware, set up user synchronization between Clerk and Convex, implement authentication context throughout the app",
             "status": "done",
             "testStrategy": ""
@@ -399,7 +475,9 @@
             "id": 4,
             "title": "Implement Protected Route System",
             "description": "Create route protection middleware and components for authenticated access",
-            "dependencies": ["6.3"],
+            "dependencies": [
+              "6.3"
+            ],
             "details": "Create ProtectedRoute component that checks authentication status, implement middleware for route protection, redirect unauthenticated users to sign-in page, handle loading states during authentication check",
             "status": "done",
             "testStrategy": ""
@@ -408,7 +486,9 @@
             "id": 5,
             "title": "Add User Context to Messages and Conversations",
             "description": "Integrate authenticated user information with chat functionality",
-            "dependencies": ["6.3"],
+            "dependencies": [
+              "6.3"
+            ],
             "details": "Update Convex schema to include user ID in messages and conversations, modify sendMessage mutation to include authenticated user context, display user information in message components, implement user-specific conversation filtering",
             "status": "done",
             "testStrategy": ""
@@ -417,7 +497,10 @@
             "id": 6,
             "title": "Create Invite Link Functionality",
             "description": "Build team collaboration system with shareable invite links",
-            "dependencies": ["6.4", "6.5"],
+            "dependencies": [
+              "6.4",
+              "6.5"
+            ],
             "details": "Create invite link generation system, implement invite acceptance flow, build team/workspace management components, handle invite link validation and expiration, create team member management interface with role-based permissions",
             "status": "done",
             "testStrategy": ""
@@ -431,8 +514,11 @@
         "details": "Add vote fields to analyses schema (thumbsUp, thumbsDown, userVotes array), create thumbVote Convex mutation, build vote button components with visual feedback, implement user vote tracking to prevent duplicate votes, add vote count display in analysis rows, create aggregation queries for feedback metrics, ensure real-time vote updates across all connected clients",
         "testStrategy": "Test voting functionality prevents duplicate votes per user, verify real-time vote count updates, validate vote persistence and aggregation queries",
         "priority": "medium",
-        "dependencies": [5, 6],
-        "status": "pending",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -447,7 +533,9 @@
             "id": 2,
             "title": "Create thumbVote mutation implementation",
             "description": "Build Convex mutation for handling vote operations with validation logic",
-            "dependencies": ["7.1"],
+            "dependencies": [
+              "7.1"
+            ],
             "details": "Create thumbVote mutation in convex/mutations.ts that accepts analysisId, userId, and voteType parameters. Implement logic to toggle votes, prevent duplicate voting by same user, and update vote counts atomically. Include proper error handling and validation.",
             "status": "done",
             "testStrategy": ""
@@ -456,7 +544,9 @@
             "id": 3,
             "title": "Build vote button UI components",
             "description": "Create reusable thumb vote button components with visual feedback",
-            "dependencies": ["7.2"],
+            "dependencies": [
+              "7.2"
+            ],
             "details": "Design and implement ThumbVoteButtons component using shadcn/ui Button with thumb up/down icons. Add visual states for unvoted, user-voted, and hover states. Include vote count display and smooth animations for state changes.",
             "status": "done",
             "testStrategy": ""
@@ -465,16 +555,20 @@
             "id": 4,
             "title": "Implement duplicate vote prevention",
             "description": "Add client-side and server-side logic to prevent users from voting multiple times",
-            "dependencies": ["7.3"],
+            "dependencies": [
+              "7.3"
+            ],
             "details": "Implement user authentication tracking and vote state management in React components. Add optimistic updates with rollback on server rejection. Ensure UI reflects current user's vote status and prevents double-clicking issues.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Add real-time vote updates",
             "description": "Implement live subscription for vote count updates across all connected clients",
-            "dependencies": ["7.4"],
+            "dependencies": [
+              "7.4"
+            ],
             "details": "Create Convex live query subscription for vote counts that updates all connected clients in real-time. Integrate with existing Prism Panel analysis rows to show current vote totals. Ensure smooth UI updates without flickering.",
             "status": "done",
             "testStrategy": ""
@@ -483,7 +577,9 @@
             "id": 6,
             "title": "Create vote aggregation queries",
             "description": "Build queries for vote metrics and feedback analytics",
-            "dependencies": ["7.5"],
+            "dependencies": [
+              "7.5"
+            ],
             "details": "Create Convex queries for vote aggregation including total votes per analysis, most/least popular analyses, and user voting patterns. Build helper functions for vote percentage calculations and sorting analyses by vote score.",
             "status": "done",
             "testStrategy": ""
@@ -497,8 +593,10 @@
         "details": "Analyze thumb vote feedback data, iterate on prompt engineering for better analysis accuracy, implement confidence score thresholding (grey out <0.4 confidence), add prompt guardrails to prevent hallucination, create A/B testing framework for prompt variations, implement feedback-based prompt tuning, add analysis validation rules",
         "testStrategy": "Monitor thumb vote approval rates, test confidence score accuracy, validate prompt guardrails prevent nonsensical outputs, measure analysis quality improvements",
         "priority": "medium",
-        "dependencies": [7],
-        "status": "pending",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -513,16 +611,20 @@
             "id": 2,
             "title": "Engineer and iterate on OpenAI prompt templates",
             "description": "Refine the OpenAI prompt template based on feedback analysis to improve accuracy and reduce hallucinations",
-            "dependencies": ["8.1"],
+            "dependencies": [
+              "8.1"
+            ],
             "details": "Review current prompt template structure, incorporate feedback patterns into prompt improvements, add explicit instructions for confidence scoring, implement chain-of-thought reasoning in prompts, create prompt variations for A/B testing, add context preservation instructions, implement structured output formatting guidelines",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Implement confidence score thresholding system",
             "description": "Add confidence score validation and UI indicators to grey out low-confidence analyses",
-            "dependencies": ["8.2"],
+            "dependencies": [
+              "8.2"
+            ],
             "details": "Modify analysis pipeline to validate confidence scores, implement UI changes to grey out analyses with <0.4 confidence, add confidence indicator badges, create user education tooltips explaining confidence levels, add option to show/hide low-confidence results, implement confidence score calibration based on historical accuracy",
             "status": "done",
             "testStrategy": ""
@@ -531,36 +633,48 @@
             "id": 4,
             "title": "Create prompt guardrails and validation rules",
             "description": "Implement guardrails to prevent hallucination and ensure analysis quality standards",
-            "dependencies": ["8.2"],
+            "dependencies": [
+              "8.2"
+            ],
             "details": "Add input validation for message content, implement output validation for analysis structure, create fact-checking prompts for controversial claims, add coherence validation between belief and trade-off fields, implement safety filters for inappropriate content, create fallback responses for edge cases, add consistency checks across similar message types",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Build A/B testing framework for prompt variations",
             "description": "Create infrastructure to test different prompt versions and measure their effectiveness",
-            "dependencies": ["8.2", "8.3"],
+            "dependencies": [
+              "8.2",
+              "8.3"
+            ],
             "details": "Design A/B test infrastructure with user segmentation, create prompt version management system, implement metrics collection for each prompt variant, build statistical significance testing, create dashboard for experiment results, implement gradual rollout mechanism for winning prompts, add experiment configuration management",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Implement feedback-based prompt tuning system",
             "description": "Create automated system to incorporate user feedback into prompt improvements",
-            "dependencies": ["8.1", "8.5"],
+            "dependencies": [
+              "8.1",
+              "8.5"
+            ],
             "details": "Build feedback collection pipeline from thumb votes, create prompt update triggers based on feedback thresholds, implement automated prompt refinement suggestions, add human-in-the-loop approval for prompt changes, create feedback-to-improvement mapping system, implement continuous learning pipeline for prompt optimization",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Add comprehensive quality validation rules",
             "description": "Implement validation system to ensure analysis meets quality standards before display",
-            "dependencies": ["8.3", "8.4", "8.6"],
+            "dependencies": [
+              "8.3",
+              "8.4",
+              "8.6"
+            ],
             "details": "Create quality scoring rubric for analyses, implement pre-display validation checks, add human review triggers for borderline cases, create quality metrics dashboard, implement automatic retry for failed validations, add quality trend monitoring, create alerts for quality degradation, implement quality-based user experience adjustments",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -572,8 +686,11 @@
         "details": "Add token usage tracking to analyzeMessage action, create usage analytics schema (teamId, tokensUsed, cost, timestamp), build simple dashboard showing team token consumption, implement usage aggregation queries, add cost calculation based on OpenAI pricing, create usage alerts for approaching limits, prepare foundation for future billing integration",
         "testStrategy": "Verify accurate token counting and cost calculation, test dashboard displays correct usage data, validate team-level usage aggregation",
         "priority": "low",
-        "dependencies": [4, 6],
-        "status": "pending",
+        "dependencies": [
+          4,
+          6
+        ],
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -588,7 +705,9 @@
             "id": 2,
             "title": "Create usage analytics database schema",
             "description": "Define Convex schema for token usage tracking and cost analytics",
-            "dependencies": ["9.1"],
+            "dependencies": [
+              "9.1"
+            ],
             "details": "Create usage table schema with fields: id, messageId, teamId, tokensUsed, cost, timestamp, model, and actionType. Add indexes for efficient querying by teamId and timestamp ranges",
             "status": "done",
             "testStrategy": ""
@@ -597,7 +716,9 @@
             "id": 3,
             "title": "Build cost dashboard UI components",
             "description": "Create dashboard interface showing team token consumption and cost metrics",
-            "dependencies": ["9.2"],
+            "dependencies": [
+              "9.2"
+            ],
             "details": "Build dashboard page with usage charts, cost breakdown by time period, team member usage distribution, and current billing period summary using shadcn/ui components and recharts for visualizations",
             "status": "done",
             "testStrategy": ""
@@ -606,7 +727,9 @@
             "id": 4,
             "title": "Implement usage aggregation queries",
             "description": "Create Convex queries for aggregating token usage data by team and time periods",
-            "dependencies": ["9.2"],
+            "dependencies": [
+              "9.2"
+            ],
             "details": "Build queries for daily/weekly/monthly usage totals, team-level aggregations, cost calculations, and usage trends. Include filtering by date ranges and team members",
             "status": "done",
             "testStrategy": ""
@@ -615,7 +738,9 @@
             "id": 5,
             "title": "Add cost calculation logic based on OpenAI pricing",
             "description": "Implement accurate cost calculation using current OpenAI token pricing models",
-            "dependencies": ["9.1"],
+            "dependencies": [
+              "9.1"
+            ],
             "details": "Create utility functions to calculate costs based on model type (GPT-4, GPT-3.5), token counts for input/output, and current OpenAI pricing. Handle different pricing tiers and model variations",
             "status": "done",
             "testStrategy": ""
@@ -624,7 +749,10 @@
             "id": 6,
             "title": "Create usage alert system for team limits",
             "description": "Implement alerts and notifications when teams approach usage or cost limits",
-            "dependencies": ["9.4", "9.5"],
+            "dependencies": [
+              "9.4",
+              "9.5"
+            ],
             "details": "Build alert system with configurable thresholds, email notifications, dashboard warnings, and usage limit enforcement. Include both soft warnings and hard limits for token consumption",
             "status": "done",
             "testStrategy": ""
@@ -638,8 +766,10 @@
         "details": "Create Review Mode component with scrollable message history, implement inline analysis display integrated with messages, add conversation search and filtering capabilities, build export functionality for decision documentation, create shareable conversation links, implement conversation archiving, add analysis summary views for key insights",
         "testStrategy": "Test Review Mode navigation and message history display, verify inline analysis integration, validate export functionality and shareable links",
         "priority": "low",
-        "dependencies": [5],
-        "status": "pending",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -654,7 +784,9 @@
             "id": 2,
             "title": "Implement Message History with Scrollable Timeline",
             "description": "Build scrollable message history view with conversation timeline display",
-            "dependencies": ["10.1"],
+            "dependencies": [
+              "10.1"
+            ],
             "details": "Create MessageHistory component with virtualized scrolling for performance, implement conversation timeline with timestamps, add message grouping by time periods, ensure smooth scrolling with proper message pagination",
             "status": "done",
             "testStrategy": ""
@@ -663,7 +795,9 @@
             "id": 3,
             "title": "Integrate Inline Analysis Display",
             "description": "Add inline analysis integration within message history for contextual insights",
-            "dependencies": ["10.2"],
+            "dependencies": [
+              "10.2"
+            ],
             "details": "Embed analysis results directly in message components, create expandable analysis cards, implement hover states for quick analysis preview, ensure analysis data loads efficiently with message history",
             "status": "done",
             "testStrategy": ""
@@ -672,16 +806,21 @@
             "id": 4,
             "title": "Build Search and Filtering Functionality",
             "description": "Add comprehensive search and filtering capabilities for conversations and messages",
-            "dependencies": ["10.2"],
+            "dependencies": [
+              "10.2"
+            ],
             "details": "Implement full-text search across messages and analyses, add filters by date range, message type, analysis confidence levels, create advanced search with boolean operators, add search result highlighting",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Create Export Functionality",
             "description": "Build export capabilities for decision documentation and analysis reports",
-            "dependencies": ["10.3", "10.4"],
+            "dependencies": [
+              "10.3",
+              "10.4"
+            ],
             "details": "Implement export to PDF, JSON, and Markdown formats, create customizable export templates, add selective export of filtered results, include analysis summaries and key insights in exports",
             "status": "done",
             "testStrategy": ""
@@ -690,26 +829,443 @@
             "id": 6,
             "title": "Implement Shareable Link System",
             "description": "Create shareable conversation links with proper access controls and permissions",
-            "dependencies": ["10.3"],
+            "dependencies": [
+              "10.3"
+            ],
             "details": "Generate unique shareable URLs for conversations, implement access permissions and expiration dates, create public/private link options, add link management interface for users",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Build Conversation Archiving System",
             "description": "Implement conversation archiving with analysis summary views and insights extraction",
-            "dependencies": ["10.5", "10.6"],
+            "dependencies": [
+              "10.5",
+              "10.6"
+            ],
             "details": "Create archiving workflow with metadata preservation, implement analysis summary generation for archived conversations, build insights dashboard showing key decision patterns, add archive search and restoration capabilities",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Redesign Core Chat UI Layout and Message Bubbles",
+        "description": "Overhaul the main chat interface to align with modern aesthetics, focusing on message bubbles, timestamps, and a responsive layout as per the PRD's UI redesign requirement.",
+        "details": "Using Next.js 14 and Tailwind CSS, refactor the chat view. Create a new React component for message bubbles with variants for sent and received messages. Implement logic to group messages by sender and display timestamps smartly (e.g., once per block of messages). Use `shadcn/ui` components like `Avatar` for user icons. Ensure the layout is fully responsive using Tailwind's breakpoint system (`sm`, `md`, `lg`) for a seamless experience on both mobile and desktop.",
+        "testStrategy": "Perform visual regression testing against mockups inspired by WhatsApp/Telegram. Use Storybook to develop and test the message bubble component in isolation. Verify responsiveness using browser developer tools across various device viewports. Manually test timestamp grouping logic with different message cadences.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create `MessageBubble` Component with Variants",
+            "description": "Develop a new React component, `MessageBubble.tsx`, using Next.js and Tailwind CSS. This component will serve as the core UI for individual chat messages and will be developed in isolation.",
+            "dependencies": [],
+            "details": "The component must accept props for message content, sender type, and timestamp. Implement two primary variants: 'sent' (right-aligned, primary brand color) and 'received' (left-aligned, neutral color). Integrate the `shadcn/ui` `Avatar` component for the 'received' variant to display the sender's icon.",
+            "status": "pending",
+            "testStrategy": "Use Storybook to develop and test the component in isolation. Create stories for both 'sent' and 'received' variants, and test with various content lengths to ensure proper text wrapping."
+          },
+          {
+            "id": 2,
+            "title": "Develop Responsive Chat View Layout",
+            "description": "Construct the main container component for the chat interface, ensuring it is fully responsive across mobile, tablet, and desktop screen sizes using Tailwind CSS.",
+            "dependencies": [],
+            "details": "Use Tailwind CSS's flexbox/grid utilities and breakpoint system (`sm`, `md`, `lg`) to create a layout where the message list occupies the majority of the vertical space and is scrollable. The layout should correctly position a header and a chat input area.",
+            "status": "pending",
+            "testStrategy": "Use browser developer tools to inspect and verify the layout's responsiveness at standard breakpoints (sm, md, lg). Ensure the message list scrolls independently of the rest of the page."
+          },
+          {
+            "id": 3,
+            "title": "Implement Message Grouping and Smart Timestamp Logic",
+            "description": "Create the business logic required to group consecutive messages from the same sender and to display timestamps intelligently based on time intervals.",
+            "dependencies": [],
+            "details": "In the parent chat view component, create a function to process the array of message objects. This logic should determine if a message is the first in a new block from a sender (to show the avatar) and if enough time has passed since the last displayed timestamp (e.g., >5 minutes) to show a new one.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for the grouping/timestamp function using a mock message array. Test edge cases like single messages, messages from alternating users, and messages sent in rapid succession versus with long pauses."
+          },
+          {
+            "id": 4,
+            "title": "Integrate `MessageBubble`s into Chat View with Grouping Logic",
+            "description": "Combine the `MessageBubble` component, the responsive layout, and the grouping logic to render a complete, dynamic chat history from a data source.",
+            "dependencies": [
+              "11.1",
+              "11.2",
+              "11.3"
+            ],
+            "details": "Within the responsive chat view layout, fetch or mock message data. Map over the data, applying the grouping and timestamp logic to determine the props for each `MessageBubble` instance. Render the list of configured `MessageBubble` components.",
+            "status": "pending",
+            "testStrategy": "Manually test the integrated view with mock data representing various conversation flows. Verify that sent/received bubbles are styled correctly, avatars appear only for the first message in a group, and timestamps are displayed according to the smart logic."
+          },
+          {
+            "id": 5,
+            "title": "Perform Visual Regression and Final Responsiveness Testing",
+            "description": "Conduct final testing to ensure the redesigned chat UI matches the design mockups and functions correctly across all target devices.",
+            "dependencies": [
+              "11.4"
+            ],
+            "details": "Perform visual regression testing of the completed chat view against the reference designs (e.g., inspired by WhatsApp/Telegram). Use browser developer tools to conduct a final, thorough check of the UI's responsiveness on mobile, tablet, and desktop viewports, focusing on element alignment, text wrapping, and spacing.",
+            "status": "pending",
+            "testStrategy": "Compare screenshots of the implemented UI against design mockups. Test on at least three viewport sizes (e.g., 375px, 768px, 1440px) to confirm layout integrity. Check for any visual bugs or inconsistencies."
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Implement Role-Based Access Control (RBAC) for Admin Features",
+        "description": "Implement a robust RBAC system to hide and restrict access to admin-only sections (Experiments, Teams, Analytics) from regular users.",
+        "details": "Leverage Clerk's authentication to manage user roles by storing a 'role' (e.g., 'admin' or 'user') in the public metadata for each user. In the Convex backend, create a middleware or helper function that checks the caller's role from the auth context in relevant queries and mutations. In the Next.js frontend, create a custom hook `useRole()` that fetches the user's role. Use this hook for conditional rendering of navigation links and components. Implement page-level security, potentially in Next.js middleware or `getServerSideProps`, to redirect non-admins attempting to access admin URLs directly.",
+        "testStrategy": "Create two test users in Clerk: one with an 'admin' role and one with a 'user' role. Log in as the 'user' and verify that admin navigation links are hidden and direct URL access to `/admin/teams` or `/admin/analytics` results in a redirect or 'Access Denied' page. Log in as 'admin' and confirm full access. Write unit tests for the Convex role-checking logic.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure and Assign User Roles in Clerk Metadata",
+            "description": "Update the Clerk configuration to support a 'role' field in the publicMetadata. Manually assign the 'admin' role to a test user and ensure new users default to 'user'.",
+            "dependencies": [],
+            "details": "Log into the Clerk dashboard and navigate to the User & Organization Settings -> Custom user properties. Add a 'role' property (Type: String, Private: No). Use the Clerk dashboard to set the publicMetadata.role to 'admin' for a designated admin user. Verify that newly signed-up users are assigned a default role of 'user' or have no role set, which the application will treat as 'user'.",
+            "status": "pending",
+            "testStrategy": "Create two users. Assign one the 'admin' role via the Clerk dashboard. Leave the other as a default 'user'. Verify the metadata is correctly stored for both users by inspecting their profiles in the Clerk dashboard or fetching their data via the API."
+          },
+          {
+            "id": 2,
+            "title": "Create a Role-Checking Helper in Convex",
+            "description": "Implement a reusable function in the Convex backend that authenticates the user and verifies they have the 'admin' role based on the publicMetadata passed from Clerk.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "In the Convex codebase, create a helper function, e.g., `ensureAdmin(ctx)`. This function will take the context `ctx` object, access `ctx.auth.getUserIdentity()`, and check the `publicMetadata.role` property. If the role is not 'admin', it should throw an error. Integrate this helper at the beginning of all admin-specific queries and mutations.",
+            "status": "pending",
+            "testStrategy": "Create a test mutation in Convex protected by the new admin-checking helper. Attempt to call this mutation from a client authenticated as a 'user' and verify it fails with an unauthorized error. Call it as an 'admin' and verify it succeeds."
+          },
+          {
+            "id": 3,
+            "title": "Create `useRole` Custom Hook in Next.js",
+            "description": "Develop a custom React hook, `useRole()`, in the Next.js frontend that fetches the current user's role from their Clerk session data.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "The hook will use Clerk's `useUser` hook to access `user.publicMetadata.role`. It should return the role string (e.g., 'admin', 'user') and handle cases where the user is not logged in or the metadata is not yet loaded by returning null or a loading state.",
+            "status": "pending",
+            "testStrategy": "Create a test component that uses the `useRole` hook and displays the returned role. Log in as the 'admin' user and verify it displays 'admin'. Log in as the 'user' and verify it displays 'user'. Log out and verify it returns null or an appropriate non-authenticated state."
+          },
+          {
+            "id": 4,
+            "title": "Conditionally Render Admin UI and Navigation",
+            "description": "Use the `useRole` hook to conditionally render navigation links and other UI elements for the admin sections (Experiments, Teams, Analytics).",
+            "dependencies": [
+              "12.3"
+            ],
+            "details": "In the main navigation component, wrap the links to `/admin/teams`, `/admin/analytics`, and `/admin/experiments` in a conditional block. Use the `useRole` hook to check if `role === 'admin'`. Only render the links if the condition is true. Apply the same logic to any other admin-specific UI elements.",
+            "status": "pending",
+            "testStrategy": "Log in as the 'user' and verify that the navigation links for admin sections are not visible. Log in as the 'admin' and verify that these links are visible and clickable."
+          },
+          {
+            "id": 5,
+            "title": "Implement Page-Level Security for Admin Routes",
+            "description": "Secure the admin pages (e.g., `/admin/*`) by implementing route protection in Next.js Middleware that redirects non-admin users.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Create or update the `middleware.ts` file in the Next.js project. Configure the matcher to run on admin routes like `/admin/:path*`. Inside the middleware, use Clerk's `authMiddleware` or `getAuth` to access the user's session and check `auth().sessionClaims.publicMetadata.role`. If the role is not 'admin', redirect the user to the home page or an 'Access Denied' page.",
+            "status": "pending",
+            "testStrategy": "While logged in as a 'user', attempt to navigate directly to `/admin/teams` by typing the URL in the browser. Verify redirection to the home page. Log in as an 'admin' and navigate to the same URL, verifying successful access to the page."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Enhance Real-time Collaboration and Sharing",
+        "description": "Fix the share link functionality and implement real-time multi-user chat capabilities, including user presence and typing indicators.",
+        "details": "In Convex, create a mutation to generate a unique, secure invitation token for a chat room. Create another query/mutation to validate the token and add the joining user to the conversation's participants list. Utilize Convex's built-in presence system to track and display online/offline status. For typing indicators, have the client call a Convex mutation on input change, which updates a 'typing' status in the database for a short duration. The frontend will use Convex's `useQuery` to subscribe to real-time updates for messages, participants, and typing statuses.",
+        "testStrategy": "Open two separate browser windows. Generate a share link in window 1. Open the link in window 2 and verify the user successfully joins the chat. Send messages from both windows and confirm they appear in real-time (<100ms latency). Test that online status updates correctly when a user closes/opens the tab. Verify typing indicators appear for the other user while typing.",
+        "priority": "medium",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Convex Backend for Secure Chat Invitation Links",
+            "description": "Create the necessary Convex mutations and queries to generate and validate secure invitation tokens for chat rooms, forming the backend foundation for the share link functionality.",
+            "dependencies": [],
+            "details": "Define a new `invitationTokens` table in the Convex schema. Create a `generateInvitationToken` mutation that takes a `conversationId`, generates a unique, secure token, and stores it with an expiry. Create a `joinConversationWithToken` mutation that validates an incoming token, adds the authenticated user to the conversation's participants list, and invalidates the token after use.",
+            "status": "pending",
+            "testStrategy": "Use the Convex dashboard to call `generateInvitationToken` for a test conversation and verify token creation. Then, call `joinConversationWithToken` with the new token and a test user ID to confirm the user is added to the conversation's participants. Test with an invalid or expired token to ensure it fails gracefully."
+          },
+          {
+            "id": 2,
+            "title": "Develop Frontend UI for Share Link Generation and Handling",
+            "description": "Implement the user interface for creating a shareable link and the page flow for a new user to join a chat via that link.",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "In the chat UI, add a 'Share' button that calls the `generateInvitationToken` mutation. On success, construct the full invitation URL (e.g., `/join/[token]`) and copy it to the clipboard. Create a dynamic Next.js page at `/join/[token]` that extracts the token, calls the `joinConversationWithToken` mutation, and redirects the user to the chat room upon success, handling loading and error states.",
+            "status": "pending",
+            "testStrategy": "Click the 'Share' button in a chat and verify a link is copied. Open the link in a new browser/incognito window. After logging in as a different user, verify the user is successfully added to the chat and redirected. Test an invalid link to ensure an error page is shown."
+          },
+          {
+            "id": 3,
+            "title": "Integrate and Display Real-time User Presence",
+            "description": "Utilize Convex's built-in presence system to track and display the online/offline status of users within a specific chat room.",
+            "dependencies": [],
+            "details": "Configure Convex presence to store the user's current `conversationId`. On the frontend, use the `usePresence` hook within the chat component to subscribe to presence updates for the current conversation. Update the participant list UI to display a visual indicator (e.g., a green dot) next to the names of users who are currently online.",
+            "status": "pending",
+            "testStrategy": "Open a chat room in two different browsers with two different users. Verify both users are shown as 'online' in each other's participant list. Close one browser window and confirm that user's status updates to 'offline' in the other window within a few seconds."
+          },
+          {
+            "id": 4,
+            "title": "Add Real-time 'User is Typing...' Indicators",
+            "description": "Implement the backend and frontend logic to show when another user is actively typing a message in the chat.",
+            "dependencies": [],
+            "details": "Create a `setTypingStatus` Convex mutation that updates a user's typing status for a specific conversation. On the client, on input change, call this mutation. Use a debounce function to manage the frequency of calls and to set the status back to false after the user stops typing. Use a Convex query to subscribe to the typing status of all participants and display a 'User is typing...' message in the UI.",
+            "status": "pending",
+            "testStrategy": "With two users in a chat, start typing as User 1. Verify the 'User 1 is typing...' indicator appears for User 2 in real-time. Stop typing and confirm the indicator disappears after a short delay (e.g., 3 seconds). Ensure the indicator does not show for the user who is doing the typing."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Implement Multi-Model AI Provider Backend and UI",
+        "description": "Extend the backend to support multiple AI providers (OpenAI, Anthropic, etc.) and create a user-facing UI for model selection.",
+        "details": "In the Convex backend, refactor the AI interaction logic into a Convex `action`. Implement an adapter pattern to create a unified interface for different AI provider SDKs. Store provider API keys securely as Convex environment variables. Add a `model` field to the chat settings and a `cost` field to message logs in the database schema. In the Next.js frontend, use a `shadcn/ui` `Select` component within a settings panel to allow users to choose from a list of available models. Persist the user's choice in their profile data.",
+        "testStrategy": "Configure at least two AI providers (e.g., OpenAI and a mock/test provider). Use the UI to switch between models and send a message. Verify the backend action calls the correct provider's API. Check the database to ensure the message log correctly records which model was used and its associated cost. Test that user model preference is saved and loaded correctly across sessions.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Database Schema for Multi-Model Support",
+            "description": "Modify the Convex database schema to accommodate multiple AI models and track associated costs for each message generation.",
+            "dependencies": [],
+            "details": "In `convex/schema.ts`, update the relevant table for user or chat settings to include a new `model` field of type `string`. Modify the messages or a dedicated logging table to include a `cost` field of type `number` to store the calculated cost of the API call.",
+            "status": "pending",
+            "testStrategy": "Run `npx convex dev` and verify the schema migration completes successfully. Use the Convex dashboard to manually inspect the tables and confirm the presence and correct types of the new `model` and `cost` fields."
+          },
+          {
+            "id": 2,
+            "title": "Refactor AI Logic into a Convex Action with an Adapter Pattern",
+            "description": "Restructure the existing AI interaction logic from a mutation or query into a Convex `action` and implement a provider-agnostic adapter pattern.",
+            "dependencies": [
+              "14.1"
+            ],
+            "details": "Create a new `generate` action in a dedicated Convex file (e.g., `convex/ai.ts`). Define a TypeScript interface, `AIProvider`, that specifies a common method signature (e.g., `generate(prompt, model)`). Refactor the current OpenAI API call logic into an `OpenAIAdapter` that implements this interface. The main `generate` action will be responsible for selecting the correct adapter based on the model requested.",
+            "status": "pending",
+            "testStrategy": "Create a test for the `generate` action that uses a mock OpenAI adapter. Verify that the action correctly invokes the adapter's `generate` method with the expected parameters."
+          },
+          {
+            "id": 3,
+            "title": "Configure Secure API Key Management in Convex",
+            "description": "Set up and configure secure storage for multiple AI provider API keys using Convex environment variables.",
+            "dependencies": [],
+            "details": "In the Convex dashboard, navigate to Settings > Environment Variables and add secrets for `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. Update the adapter implementations to securely access these keys via `process.env`. Add a `.env.local` file to the project root with placeholder keys for local development and add it to `.gitignore`.",
+            "status": "pending",
+            "testStrategy": "Run the application locally and confirm that the backend actions can access the API keys from the `.env.local` file. Deploy the changes and verify that the production deployment correctly uses the keys set in the Convex dashboard."
+          },
+          {
+            "id": 4,
+            "title": "Implement Anthropic Provider Adapter",
+            "description": "Create a new adapter for the Anthropic API (Claude) to integrate it as a second AI provider option in the backend.",
+            "dependencies": [
+              "14.2",
+              "14.3"
+            ],
+            "details": "Install the Anthropic SDK (`npm install @anthropic-ai/sdk`). Create a new file, `convex/anthropicAdapter.ts`, that exports a class implementing the `AIProvider` interface. This class will handle the logic for authenticating and making API calls to an Anthropic model like Claude 3 Sonnet, using the key from the environment variables.",
+            "status": "pending",
+            "testStrategy": "Write a unit test for the `AnthropicAdapter` that mocks the Anthropic SDK. Verify that the adapter correctly formats the request and handles the response according to the `AIProvider` interface."
+          },
+          {
+            "id": 5,
+            "title": "Create Model Selection UI in Settings Panel",
+            "description": "Develop a user interface component within a settings panel to allow users to select their preferred AI model from a list of available options.",
+            "dependencies": [],
+            "details": "In the Next.js frontend, create or identify a settings component (e.g., a dialog or a dedicated page). Use the `shadcn/ui` `Select` component to build the model selector. Populate the `Select` options with a static list of available models, including their provider (e.g., 'GPT-4o Mini (OpenAI)', 'Claude 3 Sonnet (Anthropic)').",
+            "status": "pending",
+            "testStrategy": "Render the component in Storybook or on a test page. Verify that the `Select` component renders correctly, displays all model options, and that a user can click and choose an option."
+          },
+          {
+            "id": 6,
+            "title": "Persist User Model Selection and Integrate with Backend",
+            "description": "Implement the logic to save the user's selected model to their profile and ensure the backend `generate` action uses this selection to route requests.",
+            "dependencies": [
+              "14.1",
+              "14.2",
+              "14.5"
+            ],
+            "details": "Create a Convex mutation (e.g., `updateModelSelection`) that accepts a model identifier and updates the `model` field in the user's settings. In the frontend, attach an `onValueChange` handler to the `Select` component to call this mutation. Modify the `generate` Convex action to read the user's saved model preference from the database, instantiate the corresponding adapter (OpenAI or Anthropic), and execute the request.",
+            "status": "pending",
+            "testStrategy": "Perform an end-to-end test. Use the UI to select an OpenAI model and send a message; verify the database log shows the correct model. Switch to an Anthropic model in the UI and send another message; verify the backend calls the Anthropic API and the database log is updated accordingly."
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Refactor AI for Conversational, Context-Aware Responses",
+        "description": "Modify the AI prompting strategy to include conversation history and generate natural, conversational responses instead of structured data.",
+        "details": "Modify the primary AI Convex `action`. Before calling the AI provider, fetch the last N messages from the current conversation history. Implement a token-counting utility (like `tiktoken` for OpenAI models) to ensure the constructed prompt does not exceed the model's context limit, truncating the oldest messages if necessary. Update the system prompt to instruct the AI to be conversational, concise, and to always end its response with a relevant follow-up question. Format the history with appropriate user/assistant roles for the API call.",
+        "testStrategy": "Start a new conversation and ask a question. Verify the AI response is conversational. Ask a follow-up question that relies on the context of the first message. Confirm the AI's response correctly uses the previous context. Test a long conversation to ensure the context truncation works without crashing and the conversation remains coherent. Manually review AI responses for tone, conciseness, and the presence of a follow-up question.",
+        "priority": "medium",
+        "dependencies": [
+          14
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Conversation History Fetching and Formatting",
+            "description": "Create and integrate a Convex query to retrieve the last N messages for a given conversation and format them into the user/assistant role structure required by the AI provider's API.",
+            "dependencies": [],
+            "details": "Within the main AI Convex `action`, implement logic to query the `messages` table using the current `conversationId`. Fetch messages ordered by timestamp. Transform the fetched message documents into an array of objects with `role` ('user' or 'assistant') and `content` keys, preparing it for the AI API call.",
+            "status": "pending",
+            "testStrategy": "Use the Convex dashboard or a test function to execute the query with a known `conversationId`. Verify that it returns the expected messages and that the role mapping is correct based on the message author."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Token Counter and Context Truncation Logic",
+            "description": "Incorporate a token counting utility like `tiktoken` into the AI action to measure the prompt size and implement logic to truncate the oldest messages from the history if it exceeds the model's context limit.",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Install and import a token counting library (e.g., `tiktoken`). Create a utility function that calculates the total tokens for the system prompt and the formatted message history. If the total exceeds the model's context window, iteratively remove messages from the beginning of the history array (the oldest ones) until the total token count is safely within the limit.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for the truncation utility. Test with a conversation history that is well under the limit, slightly over, and significantly over. Confirm that the oldest messages are removed correctly while the system prompt and recent messages are preserved."
+          },
+          {
+            "id": 3,
+            "title": "Update System Prompt and AI API Call",
+            "description": "Revise the system prompt to instruct the AI on its new conversational persona and modify the AI provider API call to handle a chat-based history input and a natural language string output.",
+            "dependencies": [
+              "15.2"
+            ],
+            "details": "Replace the existing system prompt with new instructions for the AI to be conversational, concise, and to always end its response with a relevant follow-up question. Update the API call (e.g., to OpenAI's `chat.completions.create`) to pass the full, potentially truncated, message history array. Adjust the response handling logic to expect a simple text string instead of structured JSON.",
+            "status": "pending",
+            "testStrategy": "Trigger the AI action and use logging or a debugger to inspect the exact payload being sent to the AI provider. Verify the new system prompt and the formatted message history are present. Check that the raw response from the API is a conversational string."
+          },
+          {
+            "id": 4,
+            "title": "Store AI Response as a New Message",
+            "description": "Adapt the final step of the Convex action to take the AI's natural language response and save it as a new message in the database, effectively replacing the old logic that created structured analyses.",
+            "dependencies": [
+              "15.3"
+            ],
+            "details": "After receiving the string response from the AI, use the existing `sendMessage` mutation or similar logic to create a new document in the `messages` table. This new message should contain the AI's response content, the correct `conversationId`, and an author identifier that marks it as coming from the 'assistant'. This ensures the AI's response appears in the chat UI.",
+            "status": "pending",
+            "testStrategy": "Start a conversation in the UI and send a message. After the AI responds, check the `messages` table in the Convex dashboard to confirm a new message from the 'assistant' has been created with the correct content and `conversationId`."
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Integrate Real Data into Analytics Dashboard",
+        "description": "Replace all hardcoded and mock data in the admin analytics dashboard with real data fetched from the Convex backend.",
+        "details": "Create new Convex queries to aggregate analytics data. This includes: a query to sum the `cost` field from AI message logs (grouping by day/week/model), a query to fetch team members from the user database, and a query to get real-time usage metrics. In the Next.js analytics page, remove all mock data and use the `useQuery` hook to call these new Convex queries. Connect the fetched data to the existing chart components (e.g., using `recharts`) to visualize usage trends and costs.",
+        "testStrategy": "Generate significant test usage data across different models and users. Navigate to the analytics dashboard and verify that the charts and KPIs (Key Performance Indicators) reflect the generated data accurately. Cross-reference the dashboard's cost calculation with a manual sum from the database records. Add a new user to a team and confirm they appear in the team analytics section.",
+        "priority": "low",
+        "dependencies": [
+          12,
+          14
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Convex Analytics Aggregation Queries",
+            "description": "Create and expose the necessary Convex query functions to aggregate analytics data from the database, including cost summation, user data retrieval, and real-time metrics.",
+            "dependencies": [],
+            "details": "In a new `convex/analytics.ts` file, create three query functions. First, a query to aggregate the `cost` field from AI message logs, which can be grouped by time intervals (day, week) and by AI model. Second, a simple query to fetch all team members from the user collection. Third, a query to calculate real-time usage metrics, such as total messages or total cost in the last 24 hours.",
+            "status": "pending",
+            "testStrategy": "Use the Convex dashboard's query runner to execute the new functions with test data. Verify that cost aggregations are calculated correctly for different groupings. Confirm the user query returns all expected team members."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Convex Queries into Next.js Analytics Page",
+            "description": "Refactor the Next.js analytics page to remove all hardcoded mock data and replace it with live data fetched from the Convex backend using the `useQuery` hook.",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "In the main analytics page component (`/pages/admin/analytics.tsx`), import the `useQuery` hook and the newly created analytics queries from `convex/analytics.ts`. Remove all static arrays and objects that represent mock data. Call the new queries using `useQuery` to fetch cost trends, the team member list, and real-time KPIs. Implement loading and error states for a better user experience.",
+            "status": "pending",
+            "testStrategy": "Load the analytics page and use the browser's developer tools to inspect network requests, confirming that calls to the Convex backend are being made. Verify that loading indicators are shown and that the component's state is populated with the fetched data."
+          },
+          {
+            "id": 3,
+            "title": "Connect Fetched Data to Recharts Visualization Components",
+            "description": "Bind the live, fetched analytics data to the existing `recharts` chart components to visualize usage trends and costs accurately.",
+            "dependencies": [
+              "16.2"
+            ],
+            "details": "Take the aggregated cost and usage data fetched via `useQuery` and transform it into the data structure expected by the `recharts` `BarChart` and `LineChart` components. Ensure the chart's axes, tooltips, and data points are rendered dynamically from this data. Connect any existing UI filters (e.g., time range selector) to re-fetch or re-process the data as needed.",
+            "status": "pending",
+            "testStrategy": "Generate significant test usage data across different models and days. Navigate to the analytics dashboard and verify that the charts render and accurately reflect the generated data. Test chart interactivity, like hovering to view tooltips with correct values."
+          },
+          {
+            "id": 4,
+            "title": "Populate KPI Cards and Team Member List with Real Data",
+            "description": "Display the fetched real-time metrics and team member information in the corresponding UI components on the dashboard.",
+            "dependencies": [
+              "16.2"
+            ],
+            "details": "Use the data from the team member query to populate the list or table of users on the dashboard. Connect the real-time usage metrics query to the Key Performance Indicator (KPI) cards to display values like 'Total Cost Today' or 'Total Messages'. Ensure these components correctly display the live data.",
+            "status": "pending",
+            "testStrategy": "Cross-reference the numbers shown in the KPI cards with a manual calculation from the database to ensure accuracy. Add a new test user via the application flow and verify they appear in the team member list on the analytics dashboard."
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Implement Interactive Chat Input Features",
+        "description": "Enhance the chat input component with modern features, including a rich emoji picker and basic text formatting options.",
+        "details": "Integrate a lightweight emoji picker library, such as `emoji-picker-react`, into the chat input component. Add a button that toggles the visibility of the picker. Implement basic markdown-style formatting for user input (e.g., bold, italics). Use a library like `react-markdown` to render the formatted text correctly within the message bubbles. This task focuses on the client-side implementation within the Next.js application.",
+        "testStrategy": "Verify the emoji picker can be opened and closed. Select an emoji and confirm it is added to the input field and rendered correctly in the sent message. Type a message with markdown like `*bold*` and `_italic_` and verify it renders as bold and italic text in the chat view. Ensure these features work smoothly on both desktop and mobile layouts.",
+        "priority": "low",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Emoji Picker into Chat Input Component",
+            "description": "Install and configure a lightweight emoji picker library within the chat input component, allowing users to open the picker and insert emojis into the text field.",
+            "dependencies": [],
+            "details": "Install the `emoji-picker-react` library. Add a dedicated button to the chat input area that toggles the visibility of the emoji picker. Implement the necessary state management in the Next.js component to control the picker's open/closed state. Position the picker appropriately relative to the input field. The core functionality is to append the selected emoji character to the existing text in the input state upon user selection.",
+            "status": "pending",
+            "testStrategy": "Verify the emoji picker button is rendered. Confirm that clicking the button shows and hides the picker component. Select an emoji and ensure it is correctly added to the text in the input field at the current cursor position."
+          },
+          {
+            "id": 2,
+            "title": "Enable Markdown Rendering in Message Bubbles",
+            "description": "Update the component that displays chat messages to render basic markdown formatting, specifically for bold and italic text.",
+            "dependencies": [],
+            "details": "Install the `react-markdown` library. Identify the React component responsible for rendering individual message bubbles in the chat history. Modify this component to process the message's text content using `react-markdown`. This will convert markdown syntax like `*bold*` and `_italic_` into the corresponding HTML elements for proper visual formatting.",
+            "status": "pending",
+            "testStrategy": "After manually creating a message with content like `This is *bold* and this is _italic_` in the database, verify that it renders in the chat view as 'This is **bold** and this is *italic*', not as raw text with asterisks and underscores."
+          },
+          {
+            "id": 3,
+            "title": "Validate End-to-End Emoji and Markdown Flow",
+            "description": "Conduct a comprehensive test of the entire feature flow, from typing markdown and adding emojis in the input to verifying they are sent and rendered correctly in the chat view.",
+            "dependencies": [
+              "17.1",
+              "17.2"
+            ],
+            "details": "This subtask focuses on ensuring the two new features work together seamlessly. The chat input must send the raw string, including markdown syntax and emojis, to the backend. The primary work is testing the complete user journey: 1. Type a message with markdown. 2. Open the emoji picker. 3. Add an emoji. 4. Send the message. 5. Confirm the message appears correctly formatted in the message list.",
+            "status": "pending",
+            "testStrategy": "Perform an end-to-end test. Type a message like `This is a *test*! 👋`, using both markdown and an emoji from the picker. Send the message and verify that it appears in the chat history with the word 'test' in bold and the emoji rendered correctly."
           }
         ]
       }
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-25T06:19:15.360Z",
+      "updated": "2025-07-26T06:48:37.664Z",
       "description": "Tasks for master context"
     }
   }

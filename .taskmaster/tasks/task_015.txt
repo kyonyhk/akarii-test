@@ -1,0 +1,37 @@
+# Task ID: 15
+# Title: Refactor AI for Conversational, Context-Aware Responses
+# Status: pending
+# Dependencies: 14
+# Priority: medium
+# Description: Modify the AI prompting strategy to include conversation history and generate natural, conversational responses instead of structured data.
+# Details:
+Modify the primary AI Convex `action`. Before calling the AI provider, fetch the last N messages from the current conversation history. Implement a token-counting utility (like `tiktoken` for OpenAI models) to ensure the constructed prompt does not exceed the model's context limit, truncating the oldest messages if necessary. Update the system prompt to instruct the AI to be conversational, concise, and to always end its response with a relevant follow-up question. Format the history with appropriate user/assistant roles for the API call.
+
+# Test Strategy:
+Start a new conversation and ask a question. Verify the AI response is conversational. Ask a follow-up question that relies on the context of the first message. Confirm the AI's response correctly uses the previous context. Test a long conversation to ensure the context truncation works without crashing and the conversation remains coherent. Manually review AI responses for tone, conciseness, and the presence of a follow-up question.
+
+# Subtasks:
+## 1. Implement Conversation History Fetching and Formatting [pending]
+### Dependencies: None
+### Description: Create and integrate a Convex query to retrieve the last N messages for a given conversation and format them into the user/assistant role structure required by the AI provider's API.
+### Details:
+Within the main AI Convex `action`, implement logic to query the `messages` table using the current `conversationId`. Fetch messages ordered by timestamp. Transform the fetched message documents into an array of objects with `role` ('user' or 'assistant') and `content` keys, preparing it for the AI API call.
+
+## 2. Integrate Token Counter and Context Truncation Logic [pending]
+### Dependencies: 15.1
+### Description: Incorporate a token counting utility like `tiktoken` into the AI action to measure the prompt size and implement logic to truncate the oldest messages from the history if it exceeds the model's context limit.
+### Details:
+Install and import a token counting library (e.g., `tiktoken`). Create a utility function that calculates the total tokens for the system prompt and the formatted message history. If the total exceeds the model's context window, iteratively remove messages from the beginning of the history array (the oldest ones) until the total token count is safely within the limit.
+
+## 3. Update System Prompt and AI API Call [pending]
+### Dependencies: 15.2
+### Description: Revise the system prompt to instruct the AI on its new conversational persona and modify the AI provider API call to handle a chat-based history input and a natural language string output.
+### Details:
+Replace the existing system prompt with new instructions for the AI to be conversational, concise, and to always end its response with a relevant follow-up question. Update the API call (e.g., to OpenAI's `chat.completions.create`) to pass the full, potentially truncated, message history array. Adjust the response handling logic to expect a simple text string instead of structured JSON.
+
+## 4. Store AI Response as a New Message [pending]
+### Dependencies: 15.3
+### Description: Adapt the final step of the Convex action to take the AI's natural language response and save it as a new message in the database, effectively replacing the old logic that created structured analyses.
+### Details:
+After receiving the string response from the AI, use the existing `sendMessage` mutation or similar logic to create a new document in the `messages` table. This new message should contain the AI's response content, the correct `conversationId`, and an author identifier that marks it as coming from the 'assistant'. This ensures the AI's response appears in the chat UI.
+
