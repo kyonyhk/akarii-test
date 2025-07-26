@@ -1,99 +1,122 @@
-# Clerk Role Configuration Guide
+# Clerk Role-Based Access Control Setup Guide
 
 ## Overview
-This guide explains how to configure user roles in Clerk dashboard to enable role-based access control (RBAC) for the application.
+This guide walks through configuring role-based access control using Clerk's publicMetadata feature to store user roles that sync with our Convex database.
 
-## Step 1: Access Clerk Dashboard
+## Clerk Dashboard Configuration
 
-1. Log into your Clerk dashboard at [https://dashboard.clerk.com](https://dashboard.clerk.com)
-2. Select your application/project
+### Step 1: Access User Settings
+1. Navigate to [Clerk Dashboard](https://dashboard.clerk.com)
+2. Select your application
+3. Go to **Configure** → **User & Organization** → **User**
 
-## Step 2: Configure Custom User Properties
-
-1. Navigate to **User & Organization Settings** in the sidebar
-2. Click on **Custom User Properties**
-3. Click **+ Add Property** button
-4. Configure the role property:
+### Step 2: Add Role Property
+1. Scroll down to **Custom user properties**
+2. Click **Add property**
+3. Configure the role property:
    - **Name**: `role`
    - **Type**: `String`
-   - **Private**: `No` (this makes it part of publicMetadata)
-   - **Description**: User role for access control (admin, user, guest, member)
+   - **Private**: `No` (must be public to access via publicMetadata)
+   - **Default value**: `user` (optional, but recommended)
 
-## Step 3: Assign Admin Role to Test User
+### Step 3: Save Configuration
+Click **Save** to apply the changes.
 
-### Method 1: Via Clerk Dashboard UI
-1. Go to **Users** in the sidebar
-2. Click on a user you want to make admin
-3. Scroll to **Public metadata** section
-4. Click **Edit**
-5. Add the following JSON:
-   ```json
-   {
-     "role": "admin"
-   }
-   ```
-6. Click **Save**
+## Role Assignment
 
-### Method 2: Via API (if needed)
+### Method 1: Via Clerk Dashboard (Manual)
+1. Go to **Users** in the Clerk dashboard
+2. Select a user
+3. Scroll to **Public metadata**
+4. Add: `{"role": "admin"}` (or "user", "guest", "member")
+5. Click **Save**
+
+### Method 2: Via Clerk API (Programmatic)
 ```javascript
-// Using Clerk Backend API
+// Update user's public metadata
 await clerkClient.users.updateUserMetadata(userId, {
   publicMetadata: {
-    role: "admin"
+    role: 'admin'
   }
 });
 ```
 
-## Step 4: Verify Role Assignment
+### Method 3: Via Clerk Backend API (Webhooks)
+```javascript
+// In a webhook handler
+const { data } = evt;
+if (data.public_metadata?.role) {
+  // Role is already set
+} else {
+  // Set default role for new users
+  await clerkClient.users.updateUserMetadata(data.id, {
+    publicMetadata: {
+      role: 'user'
+    }
+  });
+}
+```
 
-### For Admin User:
-1. In Clerk dashboard, check the user's **Public metadata** section
-2. Should show: `{"role": "admin"}`
-
-### For Regular Users:
-- New users will have no role metadata initially
-- The application will default them to 'user' role
-- Existing users without role metadata will also default to 'user'
-
-## Step 5: Testing
-
-### Create Test Users:
-1. **Admin User**: Assign `"role": "admin"` in publicMetadata
-2. **Regular User**: Leave publicMetadata empty or set `"role": "user"`
-
-### Verify in Application:
-1. Sign in with both test users
-2. Check the network tab or console logs to verify:
-   - Clerk user object contains correct publicMetadata
-   - Convex database receives correct role values
-   - Application behaves differently for admin vs user
-
-## Role Values
-
-The application supports these role values:
-- `admin` - Full administrative access
+## Available Roles
+- `admin` - Full system access
 - `user` - Standard user access (default)
-- `member` - Team member access
-- `guest` - Limited guest access
+- `guest` - Limited read-only access
+- `member` - Enhanced user access
+
+## Implementation Details
+
+### Frontend Integration
+The role is automatically synced from Clerk to Convex when:
+1. User signs in
+2. User metadata changes
+3. Component mounts with authenticated user
+
+### Database Schema
+The role is stored in the Convex `users` table:
+```typescript
+role: 'admin' | 'user' | 'guest' | 'member'
+```
+
+### Default Behavior
+- New users without a role in Clerk metadata default to `'user'`
+- Existing users retain their current roles during updates
+- Role changes in Clerk automatically sync to Convex
 
 ## Troubleshooting
 
-### Role Not Syncing:
-1. Check that the property is in **publicMetadata** (not privateMetadata)
-2. Verify the property name is exactly `role`
-3. Check browser dev tools for Clerk user object
-4. Look for console errors in user sync process
+### Role Not Syncing
+1. Verify the role property is set to **Public** (not Private) in Clerk
+2. Check browser developer tools for console errors
+3. Ensure user has signed out and back in after role changes
 
-### Default Role Issues:
-- Users without role metadata will default to 'user'
-- Existing users need to sign out and back in to sync new role
-- Clear browser cache if role changes aren't reflecting
+### Role Not Appearing in Dashboard
+1. Refresh the Clerk dashboard
+2. Check that the property name is exactly `role` (case-sensitive)
+3. Verify JSON formatting in public metadata: `{"role": "admin"}`
 
-## Code Implementation Notes
+### Permission Errors
+1. Confirm the role value matches exactly: `admin`, `user`, `guest`, or `member`
+2. Check that the user's session has been refreshed
+3. Verify the role is being read correctly in the frontend
 
-The role synchronization happens in:
-- `/hooks/useUser.ts` - Reads from Clerk publicMetadata
-- `/convex/users.ts` - Stores role in Convex database
-- `/providers/auth-provider.tsx` - Provides role context to application
+## Security Considerations
 
-Role is synced on every user session load, ensuring consistency between Clerk and Convex.
+- Roles are stored in **public metadata** and are visible to the client
+- Sensitive authorization should always be verified on the backend
+- Use Convex auth checks in mutations/queries for secure operations
+- Consider implementing role hierarchies for complex permission systems
+
+## Testing
+
+### Create Test Users
+1. Sign up new test accounts
+2. Assign different roles via Clerk dashboard
+3. Verify role synchronization in application
+4. Test permission boundaries for each role
+
+### Verify Integration
+```javascript
+// In your React component
+const { user } = useUser();
+console.log('User role:', user?.role); // Should show the assigned role
+```

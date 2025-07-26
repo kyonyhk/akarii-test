@@ -22,14 +22,14 @@ export const createOrUpdateUser = mutation({
       .first()
 
     if (existingUser) {
-      // Update existing user, preserving role if not provided
+      // Update existing user
       const updateData: any = {
         email: args.email,
         name: args.name,
         avatar: args.avatar,
       }
       
-      // Only update role if provided
+      // Only update role if provided (preserve existing role otherwise)
       if (args.role) {
         updateData.role = args.role
       }
