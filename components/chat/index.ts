@@ -1,5 +1,7 @@
 export { ChatContainer } from './chat-container'
 export { ChatInput } from './chat-input'
 export { MessageBubble } from './message-bubble'
+export { MessageBubble as MessageBubbleRedesigned } from './message-bubble-redesigned'
 export { ChatPage } from './chat-page'
 export { MessageHistory } from './message-history'
+export { MessageHistoryGrouped } from './message-history-grouped'
