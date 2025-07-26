@@ -104,10 +104,11 @@ export const analyzeMessage = action({
   handler: async (ctx, args): Promise<AnalysisResponse> => {
     const tracker = createPerformanceTracker()
 
-    try {
-      // Input validation and sanitization
-      const inputValidation = validateAnalysisInput(args)
+    // Input validation and sanitization (move outside try block for scope)
+    const inputValidation = validateAnalysisInput(args)
+    const sanitizedArgs = inputValidation.sanitizedArgs || args
 
+    try {
       if (!inputValidation.isValid) {
         console.error('Input validation failed:', inputValidation.errors)
         return {
@@ -130,9 +131,6 @@ export const analyzeMessage = action({
       if (inputValidation.warnings.length > 0) {
         console.warn('Input validation warnings:', inputValidation.warnings)
       }
-
-      // Use sanitized arguments for processing
-      const sanitizedArgs = inputValidation.sanitizedArgs || args
 
       // Validate OpenAI configuration
       if (!validateOpenAIConfig()) {
