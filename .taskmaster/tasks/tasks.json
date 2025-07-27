@@ -714,7 +714,7 @@
         "testStrategy": "Perform visual regression testing against mockups inspired by WhatsApp/Telegram. Use Storybook to develop and test the message bubble component in isolation. Verify responsiveness using browser developer tools across various device viewports. Manually test timestamp grouping logic with different message cadences.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -740,7 +740,7 @@
             "description": "Create the business logic required to group consecutive messages from the same sender and to display timestamps intelligently based on time intervals.",
             "dependencies": [],
             "details": "In the parent chat view component, create a function to process the array of message objects. This logic should determine if a message is the first in a new block from a sender (to show the avatar) and if enough time has passed since the last displayed timestamp (e.g., >5 minutes) to show a new one.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write unit tests for the grouping/timestamp function using a mock message array. Test edge cases like single messages, messages from alternating users, and messages sent in rapid succession versus with long pauses."
           },
           {
@@ -749,7 +749,7 @@
             "description": "Combine the `MessageBubble` component, the responsive layout, and the grouping logic to render a complete, dynamic chat history from a data source.",
             "dependencies": ["11.1", "11.2", "11.3"],
             "details": "Within the responsive chat view layout, fetch or mock message data. Map over the data, applying the grouping and timestamp logic to determine the props for each `MessageBubble` instance. Render the list of configured `MessageBubble` components.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually test the integrated view with mock data representing various conversation flows. Verify that sent/received bubbles are styled correctly, avatars appear only for the first message in a group, and timestamps are displayed according to the smart logic."
           },
           {
@@ -758,7 +758,7 @@
             "description": "Conduct final testing to ensure the redesigned chat UI matches the design mockups and functions correctly across all target devices.",
             "dependencies": ["11.4"],
             "details": "Perform visual regression testing of the completed chat view against the reference designs (e.g., inspired by WhatsApp/Telegram). Use browser developer tools to conduct a final, thorough check of the UI's responsiveness on mobile, tablet, and desktop viewports, focusing on element alignment, text wrapping, and spacing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Compare screenshots of the implemented UI against design mockups. Test on at least three viewport sizes (e.g., 375px, 768px, 1440px) to confirm layout integrity. Check for any visual bugs or inconsistencies."
           }
         ]
@@ -771,7 +771,7 @@
         "testStrategy": "Create two test users in Clerk: one with an 'admin' role and one with a 'user' role. Log in as the 'user' and verify that admin navigation links are hidden and direct URL access to `/admin/teams` or `/admin/analytics` results in a redirect or 'Access Denied' page. Log in as 'admin' and confirm full access. Write unit tests for the Convex role-checking logic.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -788,7 +788,7 @@
             "description": "Implement a reusable function in the Convex backend that authenticates the user and verifies they have the 'admin' role based on the publicMetadata passed from Clerk.",
             "dependencies": ["12.1"],
             "details": "In the Convex codebase, create a helper function, e.g., `ensureAdmin(ctx)`. This function will take the context `ctx` object, access `ctx.auth.getUserIdentity()`, and check the `publicMetadata.role` property. If the role is not 'admin', it should throw an error. Integrate this helper at the beginning of all admin-specific queries and mutations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a test mutation in Convex protected by the new admin-checking helper. Attempt to call this mutation from a client authenticated as a 'user' and verify it fails with an unauthorized error. Call it as an 'admin' and verify it succeeds."
           },
           {
@@ -797,7 +797,7 @@
             "description": "Develop a custom React hook, `useRole()`, in the Next.js frontend that fetches the current user's role from their Clerk session data.",
             "dependencies": ["12.1"],
             "details": "The hook will use Clerk's `useUser` hook to access `user.publicMetadata.role`. It should return the role string (e.g., 'admin', 'user') and handle cases where the user is not logged in or the metadata is not yet loaded by returning null or a loading state.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a test component that uses the `useRole` hook and displays the returned role. Log in as the 'admin' user and verify it displays 'admin'. Log in as the 'user' and verify it displays 'user'. Log out and verify it returns null or an appropriate non-authenticated state."
           },
           {
@@ -806,7 +806,7 @@
             "description": "Use the `useRole` hook to conditionally render navigation links and other UI elements for the admin sections (Experiments, Teams, Analytics).",
             "dependencies": ["12.3"],
             "details": "In the main navigation component, wrap the links to `/admin/teams`, `/admin/analytics`, and `/admin/experiments` in a conditional block. Use the `useRole` hook to check if `role === 'admin'`. Only render the links if the condition is true. Apply the same logic to any other admin-specific UI elements.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Log in as the 'user' and verify that the navigation links for admin sections are not visible. Log in as the 'admin' and verify that these links are visible and clickable."
           },
           {
@@ -815,7 +815,7 @@
             "description": "Secure the admin pages (e.g., `/admin/*`) by implementing route protection in Next.js Middleware that redirects non-admin users.",
             "dependencies": ["12.1"],
             "details": "Create or update the `middleware.ts` file in the Next.js project. Configure the matcher to run on admin routes like `/admin/:path*`. Inside the middleware, use Clerk's `authMiddleware` or `getAuth` to access the user's session and check `auth().sessionClaims.publicMetadata.role`. If the role is not 'admin', redirect the user to the home page or an 'Access Denied' page.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "While logged in as a 'user', attempt to navigate directly to `/admin/teams` by typing the URL in the browser. Verify redirection to the home page. Log in as an 'admin' and navigate to the same URL, verifying successful access to the page."
           }
         ]
@@ -828,7 +828,7 @@
         "testStrategy": "Open two separate browser windows. Generate a share link in window 1. Open the link in window 2 and verify the user successfully joins the chat. Send messages from both windows and confirm they appear in real-time (<100ms latency). Test that online status updates correctly when a user closes/opens the tab. Verify typing indicators appear for the other user while typing.",
         "priority": "medium",
         "dependencies": [11],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -836,7 +836,7 @@
             "description": "Create the necessary Convex mutations and queries to generate and validate secure invitation tokens for chat rooms, forming the backend foundation for the share link functionality.",
             "dependencies": [],
             "details": "Define a new `invitationTokens` table in the Convex schema. Create a `generateInvitationToken` mutation that takes a `conversationId`, generates a unique, secure token, and stores it with an expiry. Create a `joinConversationWithToken` mutation that validates an incoming token, adds the authenticated user to the conversation's participants list, and invalidates the token after use.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use the Convex dashboard to call `generateInvitationToken` for a test conversation and verify token creation. Then, call `joinConversationWithToken` with the new token and a test user ID to confirm the user is added to the conversation's participants. Test with an invalid or expired token to ensure it fails gracefully."
           },
           {
@@ -845,7 +845,7 @@
             "description": "Implement the user interface for creating a shareable link and the page flow for a new user to join a chat via that link.",
             "dependencies": ["13.1"],
             "details": "In the chat UI, add a 'Share' button that calls the `generateInvitationToken` mutation. On success, construct the full invitation URL (e.g., `/join/[token]`) and copy it to the clipboard. Create a dynamic Next.js page at `/join/[token]` that extracts the token, calls the `joinConversationWithToken` mutation, and redirects the user to the chat room upon success, handling loading and error states.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Click the 'Share' button in a chat and verify a link is copied. Open the link in a new browser/incognito window. After logging in as a different user, verify the user is successfully added to the chat and redirected. Test an invalid link to ensure an error page is shown."
           },
           {
@@ -854,7 +854,7 @@
             "description": "Utilize Convex's built-in presence system to track and display the online/offline status of users within a specific chat room.",
             "dependencies": [],
             "details": "Configure Convex presence to store the user's current `conversationId`. On the frontend, use the `usePresence` hook within the chat component to subscribe to presence updates for the current conversation. Update the participant list UI to display a visual indicator (e.g., a green dot) next to the names of users who are currently online.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Open a chat room in two different browsers with two different users. Verify both users are shown as 'online' in each other's participant list. Close one browser window and confirm that user's status updates to 'offline' in the other window within a few seconds."
           },
           {
@@ -863,7 +863,7 @@
             "description": "Implement the backend and frontend logic to show when another user is actively typing a message in the chat.",
             "dependencies": [],
             "details": "Create a `setTypingStatus` Convex mutation that updates a user's typing status for a specific conversation. On the client, on input change, call this mutation. Use a debounce function to manage the frequency of calls and to set the status back to false after the user stops typing. Use a Convex query to subscribe to the typing status of all participants and display a 'User is typing...' message in the UI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "With two users in a chat, start typing as User 1. Verify the 'User 1 is typing...' indicator appears for User 2 in real-time. Stop typing and confirm the indicator disappears after a short delay (e.g., 3 seconds). Ensure the indicator does not show for the user who is doing the typing."
           }
         ]
@@ -876,7 +876,7 @@
         "testStrategy": "Configure at least two AI providers (e.g., OpenAI and a mock/test provider). Use the UI to switch between models and send a message. Verify the backend action calls the correct provider's API. Check the database to ensure the message log correctly records which model was used and its associated cost. Test that user model preference is saved and loaded correctly across sessions.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -884,7 +884,7 @@
             "description": "Modify the Convex database schema to accommodate multiple AI models and track associated costs for each message generation.",
             "dependencies": [],
             "details": "In `convex/schema.ts`, update the relevant table for user or chat settings to include a new `model` field of type `string`. Modify the messages or a dedicated logging table to include a `cost` field of type `number` to store the calculated cost of the API call.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `npx convex dev` and verify the schema migration completes successfully. Use the Convex dashboard to manually inspect the tables and confirm the presence and correct types of the new `model` and `cost` fields."
           },
           {
@@ -893,7 +893,7 @@
             "description": "Restructure the existing AI interaction logic from a mutation or query into a Convex `action` and implement a provider-agnostic adapter pattern.",
             "dependencies": ["14.1"],
             "details": "Create a new `generate` action in a dedicated Convex file (e.g., `convex/ai.ts`). Define a TypeScript interface, `AIProvider`, that specifies a common method signature (e.g., `generate(prompt, model)`). Refactor the current OpenAI API call logic into an `OpenAIAdapter` that implements this interface. The main `generate` action will be responsible for selecting the correct adapter based on the model requested.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a test for the `generate` action that uses a mock OpenAI adapter. Verify that the action correctly invokes the adapter's `generate` method with the expected parameters."
           },
           {
@@ -902,7 +902,7 @@
             "description": "Set up and configure secure storage for multiple AI provider API keys using Convex environment variables.",
             "dependencies": [],
             "details": "In the Convex dashboard, navigate to Settings > Environment Variables and add secrets for `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. Update the adapter implementations to securely access these keys via `process.env`. Add a `.env.local` file to the project root with placeholder keys for local development and add it to `.gitignore`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the application locally and confirm that the backend actions can access the API keys from the `.env.local` file. Deploy the changes and verify that the production deployment correctly uses the keys set in the Convex dashboard."
           },
           {
@@ -911,7 +911,7 @@
             "description": "Create a new adapter for the Anthropic API (Claude) to integrate it as a second AI provider option in the backend.",
             "dependencies": ["14.2", "14.3"],
             "details": "Install the Anthropic SDK (`npm install @anthropic-ai/sdk`). Create a new file, `convex/anthropicAdapter.ts`, that exports a class implementing the `AIProvider` interface. This class will handle the logic for authenticating and making API calls to an Anthropic model like Claude 3 Sonnet, using the key from the environment variables.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write a unit test for the `AnthropicAdapter` that mocks the Anthropic SDK. Verify that the adapter correctly formats the request and handles the response according to the `AIProvider` interface."
           },
           {
@@ -920,7 +920,7 @@
             "description": "Develop a user interface component within a settings panel to allow users to select their preferred AI model from a list of available options.",
             "dependencies": [],
             "details": "In the Next.js frontend, create or identify a settings component (e.g., a dialog or a dedicated page). Use the `shadcn/ui` `Select` component to build the model selector. Populate the `Select` options with a static list of available models, including their provider (e.g., 'GPT-4o Mini (OpenAI)', 'Claude 3 Sonnet (Anthropic)').",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Render the component in Storybook or on a test page. Verify that the `Select` component renders correctly, displays all model options, and that a user can click and choose an option."
           },
           {
@@ -929,7 +929,7 @@
             "description": "Implement the logic to save the user's selected model to their profile and ensure the backend `generate` action uses this selection to route requests.",
             "dependencies": ["14.1", "14.2", "14.5"],
             "details": "Create a Convex mutation (e.g., `updateModelSelection`) that accepts a model identifier and updates the `model` field in the user's settings. In the frontend, attach an `onValueChange` handler to the `Select` component to call this mutation. Modify the `generate` Convex action to read the user's saved model preference from the database, instantiate the corresponding adapter (OpenAI or Anthropic), and execute the request.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Perform an end-to-end test. Use the UI to select an OpenAI model and send a message; verify the database log shows the correct model. Switch to an Anthropic model in the UI and send another message; verify the backend calls the Anthropic API and the database log is updated accordingly."
           }
         ]
@@ -942,7 +942,7 @@
         "testStrategy": "Start a new conversation and ask a question. Verify the AI response is conversational. Ask a follow-up question that relies on the context of the first message. Confirm the AI's response correctly uses the previous context. Test a long conversation to ensure the context truncation works without crashing and the conversation remains coherent. Manually review AI responses for tone, conciseness, and the presence of a follow-up question.",
         "priority": "medium",
         "dependencies": [14],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -950,7 +950,7 @@
             "description": "Create and integrate a Convex query to retrieve the last N messages for a given conversation and format them into the user/assistant role structure required by the AI provider's API.",
             "dependencies": [],
             "details": "Within the main AI Convex `action`, implement logic to query the `messages` table using the current `conversationId`. Fetch messages ordered by timestamp. Transform the fetched message documents into an array of objects with `role` ('user' or 'assistant') and `content` keys, preparing it for the AI API call.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use the Convex dashboard or a test function to execute the query with a known `conversationId`. Verify that it returns the expected messages and that the role mapping is correct based on the message author."
           },
           {
@@ -959,7 +959,7 @@
             "description": "Incorporate a token counting utility like `tiktoken` into the AI action to measure the prompt size and implement logic to truncate the oldest messages from the history if it exceeds the model's context limit.",
             "dependencies": ["15.1"],
             "details": "Install and import a token counting library (e.g., `tiktoken`). Create a utility function that calculates the total tokens for the system prompt and the formatted message history. If the total exceeds the model's context window, iteratively remove messages from the beginning of the history array (the oldest ones) until the total token count is safely within the limit.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write unit tests for the truncation utility. Test with a conversation history that is well under the limit, slightly over, and significantly over. Confirm that the oldest messages are removed correctly while the system prompt and recent messages are preserved."
           },
           {
@@ -968,7 +968,7 @@
             "description": "Revise the system prompt to instruct the AI on its new conversational persona and modify the AI provider API call to handle a chat-based history input and a natural language string output.",
             "dependencies": ["15.2"],
             "details": "Replace the existing system prompt with new instructions for the AI to be conversational, concise, and to always end its response with a relevant follow-up question. Update the API call (e.g., to OpenAI's `chat.completions.create`) to pass the full, potentially truncated, message history array. Adjust the response handling logic to expect a simple text string instead of structured JSON.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger the AI action and use logging or a debugger to inspect the exact payload being sent to the AI provider. Verify the new system prompt and the formatted message history are present. Check that the raw response from the API is a conversational string."
           },
           {
@@ -977,7 +977,7 @@
             "description": "Adapt the final step of the Convex action to take the AI's natural language response and save it as a new message in the database, effectively replacing the old logic that created structured analyses.",
             "dependencies": ["15.3"],
             "details": "After receiving the string response from the AI, use the existing `sendMessage` mutation or similar logic to create a new document in the `messages` table. This new message should contain the AI's response content, the correct `conversationId`, and an author identifier that marks it as coming from the 'assistant'. This ensures the AI's response appears in the chat UI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Start a conversation in the UI and send a message. After the AI responds, check the `messages` table in the Convex dashboard to confirm a new message from the 'assistant' has been created with the correct content and `conversationId`."
           }
         ]
@@ -998,7 +998,7 @@
             "description": "Create and expose the necessary Convex query functions to aggregate analytics data from the database, including cost summation, user data retrieval, and real-time metrics.",
             "dependencies": [],
             "details": "In a new `convex/analytics.ts` file, create three query functions. First, a query to aggregate the `cost` field from AI message logs, which can be grouped by time intervals (day, week) and by AI model. Second, a simple query to fetch all team members from the user collection. Third, a query to calculate real-time usage metrics, such as total messages or total cost in the last 24 hours.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use the Convex dashboard's query runner to execute the new functions with test data. Verify that cost aggregations are calculated correctly for different groupings. Confirm the user query returns all expected team members."
           },
           {
@@ -1007,7 +1007,7 @@
             "description": "Refactor the Next.js analytics page to remove all hardcoded mock data and replace it with live data fetched from the Convex backend using the `useQuery` hook.",
             "dependencies": ["16.1"],
             "details": "In the main analytics page component (`/pages/admin/analytics.tsx`), import the `useQuery` hook and the newly created analytics queries from `convex/analytics.ts`. Remove all static arrays and objects that represent mock data. Call the new queries using `useQuery` to fetch cost trends, the team member list, and real-time KPIs. Implement loading and error states for a better user experience.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Load the analytics page and use the browser's developer tools to inspect network requests, confirming that calls to the Convex backend are being made. Verify that loading indicators are shown and that the component's state is populated with the fetched data."
           },
           {
@@ -1046,7 +1046,7 @@
             "description": "Install and configure a lightweight emoji picker library within the chat input component, allowing users to open the picker and insert emojis into the text field.",
             "dependencies": [],
             "details": "Install the `emoji-picker-react` library. Add a dedicated button to the chat input area that toggles the visibility of the emoji picker. Implement the necessary state management in the Next.js component to control the picker's open/closed state. Position the picker appropriately relative to the input field. The core functionality is to append the selected emoji character to the existing text in the input state upon user selection.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Verify the emoji picker button is rendered. Confirm that clicking the button shows and hides the picker component. Select an emoji and ensure it is correctly added to the text in the input field at the current cursor position."
           },
           {
@@ -1055,7 +1055,7 @@
             "description": "Update the component that displays chat messages to render basic markdown formatting, specifically for bold and italic text.",
             "dependencies": [],
             "details": "Install the `react-markdown` library. Identify the React component responsible for rendering individual message bubbles in the chat history. Modify this component to process the message's text content using `react-markdown`. This will convert markdown syntax like `*bold*` and `_italic_` into the corresponding HTML elements for proper visual formatting.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "After manually creating a message with content like `This is *bold* and this is _italic_` in the database, verify that it renders in the chat view as 'This is **bold** and this is *italic*', not as raw text with asterisks and underscores."
           },
           {
@@ -1072,7 +1072,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-26T20:17:50.751Z",
+      "updated": "2025-07-27T03:25:06.610Z",
       "description": "Tasks for master context"
     }
   }
