@@ -31,4 +31,11 @@ crons.hourly(
   internal.improvementMapping.updateFailurePatterns
 )
 
+// Clean up old presence entries every 5 minutes
+crons.interval(
+  'presence cleanup',
+  { minutes: 5 },
+  internal.presence.cleanupPresence
+)
+
 export default crons
