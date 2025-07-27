@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import type { Doc } from '@/convex/_generated/dataModel'
 import { format, isToday, isYesterday } from 'date-fns'
+import ReactMarkdown from 'react-markdown'
 
 type Analysis = Doc<'analyses'>
 
@@ -129,7 +130,17 @@ export function MessageBubble({
                 : 'border border-gray-200 bg-white text-gray-900 shadow-gray-200/50'
             )}
           >
-            {content}
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <span>{children}</span>,
+                strong: ({ children }) => (
+                  <strong className="font-bold">{children}</strong>
+                ),
+                em: ({ children }) => <em className="italic">{children}</em>,
+              }}
+            >
+              {content}
+            </ReactMarkdown>
 
             {/* Timestamp on hover */}
             {showTimestamp && (
@@ -225,7 +236,17 @@ export function MessageBubble({
               : 'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:shadow-gray-900/40'
           )}
         >
-          {content}
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <span>{children}</span>,
+              strong: ({ children }) => (
+                <strong className="font-bold">{children}</strong>
+              ),
+              em: ({ children }) => <em className="italic">{children}</em>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
 
           {/* Message tail/pointer */}
           <div
