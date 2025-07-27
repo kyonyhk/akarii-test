@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { ShareButton } from './share-button'
+import { InvitationShareButton } from './invitation-share-button'
 
 interface ChatContainerProps {
   children: ReactNode
@@ -34,7 +34,7 @@ export function ChatContainer({
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="flex items-center gap-2">
           {showShareButton && conversationId && isSignedIn && (
-            <ShareButton conversationId={conversationId} />
+            <InvitationShareButton conversationId={conversationId} />
           )}
           <div className="flex items-center gap-1">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
