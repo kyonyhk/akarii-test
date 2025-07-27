@@ -1,0 +1,52 @@
+# Task ID: 6
+# Title: Implement Clerk Magic-Link Authentication
+# Status: done
+# Dependencies: 1
+# Priority: medium
+# Description: Integrate Clerk authentication with magic-link login and connect to Convex for session management
+# Details:
+Install Clerk SDK, configure Clerk dashboard for magic-link auth, create authentication components (SignIn, SignUp), integrate Clerk with Convex using ConvexProviderWithClerk, implement protected routes, add user context to messages and conversations, create invite link functionality for team collaboration, handle authentication state in UI
+
+# Test Strategy:
+Test magic-link email delivery and authentication flow, verify protected routes work correctly, test user context in messages, validate invite link functionality
+
+# Subtasks:
+## 1. Install and Configure Clerk SDK [done]
+### Dependencies: None
+### Description: Set up Clerk authentication service with magic-link configuration
+### Details:
+Install @clerk/nextjs package, configure environment variables (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY), set up Clerk dashboard with magic-link authentication enabled, configure email templates and branding
+<info added on 2025-07-24T18:16:31.173Z>
+Successfully installed @clerk/nextjs v6.26.0 package. Environment variables structure confirmed and ready for configuration. Next step: Set up Clerk dashboard with magic-link authentication settings and configure email templates.
+</info added on 2025-07-24T18:16:31.173Z>
+
+## 2. Create Authentication Components [done]
+### Dependencies: 6.1
+### Description: Build SignIn and SignUp components using Clerk's pre-built components
+### Details:
+Create SignIn and SignUp page components using Clerk's <SignIn /> and <SignUp /> components, configure routing for authentication pages, implement authentication redirects and fallbacks, style components to match application design
+
+## 3. Integrate Clerk with Convex Backend [done]
+### Dependencies: 6.1, 6.2
+### Description: Connect Clerk authentication to Convex using ConvexProviderWithClerk
+### Details:
+Install @convex-dev/auth package, wrap app with ConvexProviderWithClerk, configure Convex authentication middleware, set up user synchronization between Clerk and Convex, implement authentication context throughout the app
+
+## 4. Implement Protected Route System [done]
+### Dependencies: 6.3
+### Description: Create route protection middleware and components for authenticated access
+### Details:
+Create ProtectedRoute component that checks authentication status, implement middleware for route protection, redirect unauthenticated users to sign-in page, handle loading states during authentication check
+
+## 5. Add User Context to Messages and Conversations [done]
+### Dependencies: 6.3
+### Description: Integrate authenticated user information with chat functionality
+### Details:
+Update Convex schema to include user ID in messages and conversations, modify sendMessage mutation to include authenticated user context, display user information in message components, implement user-specific conversation filtering
+
+## 6. Create Invite Link Functionality [done]
+### Dependencies: 6.4, 6.5
+### Description: Build team collaboration system with shareable invite links
+### Details:
+Create invite link generation system, implement invite acceptance flow, build team/workspace management components, handle invite link validation and expiration, create team member management interface with role-based permissions
+

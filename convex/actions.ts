@@ -1295,7 +1295,7 @@ export const analyzeAndStoreMessage = action({
         rawDataExists: !!analysisResult.rawData,
         messageIdType: typeof args.messageId,
       })
-      
+
       try {
         // First check if message exists
         const messageExists = await ctx.runQuery(api.messages.getMessage, {

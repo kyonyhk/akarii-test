@@ -15,7 +15,7 @@ export const getCostAggregation = query({
   handler: async (ctx, args) => {
     // Get usage data within the specified time range
     let usageQuery = ctx.db.query('usage')
-    
+
     if (args.startTimestamp && args.endTimestamp) {
       usageQuery = usageQuery.filter(q =>
         q.and(
@@ -28,12 +28,15 @@ export const getCostAggregation = query({
     const usage = await usageQuery.collect()
 
     // Filter by model if specified
-    const filteredUsage = args.model 
+    const filteredUsage = args.model
       ? usage.filter(record => record.model === args.model)
       : usage
 
     // Group by time interval
-    const groupedData = new Map<string, { cost: number; tokens: number; requests: number }>()
+    const groupedData = new Map<
+      string,
+      { cost: number; tokens: number; requests: number }
+    >()
 
     filteredUsage.forEach(record => {
       const date = new Date(record.timestamp)
@@ -55,7 +58,11 @@ export const getCostAggregation = query({
           key = date.toISOString().split('T')[0]
       }
 
-      const existing = groupedData.get(key) || { cost: 0, tokens: 0, requests: 0 }
+      const existing = groupedData.get(key) || {
+        cost: 0,
+        tokens: 0,
+        requests: 0,
+      }
       groupedData.set(key, {
         cost: existing.cost + record.cost,
         tokens: existing.tokens + record.tokensUsed,
@@ -78,7 +85,7 @@ export const getCostAggregation = query({
  */
 export const getTeamMembers = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async ctx => {
     const users = await ctx.db.query('users').collect()
 
     return users.map(user => ({
@@ -99,40 +106,57 @@ export const getTeamMembers = query({
  */
 export const getRealTimeMetrics = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async ctx => {
     const now = Date.now()
-    const last24Hours = now - (24 * 60 * 60 * 1000)
-    
+    const last24Hours = now - 24 * 60 * 60 * 1000
+
     // Get all usage data
     const allUsage = await ctx.db.query('usage').collect()
-    
+
     // Get usage from last 24 hours
-    const recentUsage = allUsage.filter(record => record.timestamp >= last24Hours)
-    
+    const recentUsage = allUsage.filter(
+      record => record.timestamp >= last24Hours
+    )
+
     // Get all messages for total count
     const allMessages = await ctx.db.query('messages').collect()
-    const recentMessages = allMessages.filter(message => message.timestamp >= last24Hours)
-    
+    const recentMessages = allMessages.filter(
+      message => message.timestamp >= last24Hours
+    )
+
     // Get all conversations for active count
     const allConversations = await ctx.db.query('conversations').collect()
     const activeConversations = allConversations.filter(conv => conv.isActive)
-    
+
     // Calculate totals
     const totalCost = allUsage.reduce((sum, record) => sum + record.cost, 0)
-    const totalTokens = allUsage.reduce((sum, record) => sum + record.tokensUsed, 0)
+    const totalTokens = allUsage.reduce(
+      (sum, record) => sum + record.tokensUsed,
+      0
+    )
     const totalRequests = allUsage.length
-    
+
     // Calculate 24h metrics
     const cost24h = recentUsage.reduce((sum, record) => sum + record.cost, 0)
-    const tokens24h = recentUsage.reduce((sum, record) => sum + record.tokensUsed, 0)
+    const tokens24h = recentUsage.reduce(
+      (sum, record) => sum + record.tokensUsed,
+      0
+    )
     const requests24h = recentUsage.length
     const messages24h = recentMessages.length
-    
+
     // Get model breakdown for recent usage
-    const modelBreakdown = new Map<string, { cost: number; tokens: number; requests: number }>()
-    
+    const modelBreakdown = new Map<
+      string,
+      { cost: number; tokens: number; requests: number }
+    >()
+
     recentUsage.forEach(record => {
-      const existing = modelBreakdown.get(record.model) || { cost: 0, tokens: 0, requests: 0 }
+      const existing = modelBreakdown.get(record.model) || {
+        cost: 0,
+        tokens: 0,
+        requests: 0,
+      }
       modelBreakdown.set(record.model, {
         cost: existing.cost + record.cost,
         tokens: existing.tokens + record.tokensUsed,
@@ -148,7 +172,7 @@ export const getRealTimeMetrics = query({
       totalMessages: allMessages.length,
       totalConversations: allConversations.length,
       activeConversations: activeConversations.length,
-      
+
       // Last 24 hours
       last24Hours: {
         cost: cost24h,
@@ -156,16 +180,19 @@ export const getRealTimeMetrics = query({
         requests: requests24h,
         messages: messages24h,
       },
-      
+
       // Model breakdown (last 24h)
-      modelBreakdown: Array.from(modelBreakdown.entries()).map(([model, data]) => ({
-        model,
-        ...data,
-      })),
-      
+      modelBreakdown: Array.from(modelBreakdown.entries()).map(
+        ([model, data]) => ({
+          model,
+          ...data,
+        })
+      ),
+
       // Average costs
       averageCostPerRequest: totalRequests > 0 ? totalCost / totalRequests : 0,
-      averageTokensPerRequest: totalRequests > 0 ? totalTokens / totalRequests : 0,
+      averageTokensPerRequest:
+        totalRequests > 0 ? totalTokens / totalRequests : 0,
     }
   },
 })
@@ -181,39 +208,46 @@ export const getUsageTrends = query({
   handler: async (ctx, args) => {
     const days = args.days || 30
     const now = Date.now()
-    const startTime = now - (days * 24 * 60 * 60 * 1000)
-    
+    const startTime = now - days * 24 * 60 * 60 * 1000
+
     const usage = await ctx.db
       .query('usage')
       .filter(q => q.gte(q.field('timestamp'), startTime))
       .collect()
-    
+
     // Group by day
-    const dailyData = new Map<string, { cost: number; tokens: number; requests: number }>()
-    
+    const dailyData = new Map<
+      string,
+      { cost: number; tokens: number; requests: number }
+    >()
+
     usage.forEach(record => {
       const date = new Date(record.timestamp).toISOString().split('T')[0]
-      const existing = dailyData.get(date) || { cost: 0, tokens: 0, requests: 0 }
+      const existing = dailyData.get(date) || {
+        cost: 0,
+        tokens: 0,
+        requests: 0,
+      }
       dailyData.set(date, {
         cost: existing.cost + record.cost,
         tokens: existing.tokens + record.tokensUsed,
         requests: existing.requests + 1,
       })
     })
-    
+
     // Fill in missing days with zero values
     const result = []
     for (let i = 0; i < days; i++) {
-      const date = new Date(now - (i * 24 * 60 * 60 * 1000))
+      const date = new Date(now - i * 24 * 60 * 60 * 1000)
       const dateKey = date.toISOString().split('T')[0]
       const data = dailyData.get(dateKey) || { cost: 0, tokens: 0, requests: 0 }
-      
+
       result.unshift({
         date: dateKey,
         ...data,
       })
     }
-    
+
     return result
   },
 })

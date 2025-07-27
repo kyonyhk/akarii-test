@@ -1,0 +1,43 @@
+# Task ID: 2
+# Title: Setup Convex Backend and Database Schema
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Initialize Convex project, define database schema for messages, analyses, and conversations, and configure server functions
+# Details:
+Install Convex CLI and SDK, run convex dev to initialize project, define schema in convex/schema.ts for messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), and create basic mutation/query stubs
+
+# Test Strategy:
+Verify Convex dashboard shows correct schema, test basic CRUD operations via Convex dashboard, ensure real-time subscriptions work
+
+# Subtasks:
+## 1. Install and Initialize Convex [done]
+### Dependencies: None
+### Description: Install Convex CLI and SDK, run convex dev to initialize project
+### Details:
+Install @convex-dev/cli globally, install convex package in project, run 'npx convex dev' to initialize project and create convex/ directory, configure convex deployment and get deployment URL
+
+## 2. Design and Implement Database Schema [done]
+### Dependencies: 2.1
+### Description: Define complete database schema in convex/schema.ts for all required tables
+### Details:
+Create schema.ts with messages table (id, content, authorId, conversationId, timestamp), analyses table (id, messageId, statementType, belief, tradeOff, confidence, rawData), conversations table (id, title, participants, createdAt), define proper field types and relationships
+
+## 3. Implement Messages Table Operations [done]
+### Dependencies: 2.2
+### Description: Create Convex mutations and queries for messages CRUD operations
+### Details:
+Create sendMessage mutation, getMessages query for conversation, implement real-time message subscription, add message validation and error handling
+
+## 4. Implement Analyses and Conversations Operations [done]
+### Dependencies: 2.2
+### Description: Create Convex functions for analyses and conversations tables
+### Details:
+Create storeAnalysis mutation, getAnalyses query, createConversation mutation, getConversations query, implement proper data relationships and indexes
+
+## 5. Test and Validate Convex Setup [done]
+### Dependencies: 2.3, 2.4
+### Description: Verify Convex configuration and test all database operations
+### Details:
+Test all mutations and queries via Convex dashboard, verify schema appears correctly, test real-time subscriptions, validate data persistence and relationships, ensure proper error handling
+
