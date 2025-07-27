@@ -7,11 +7,13 @@ import { PrismPanel } from '@/components/analysis'
 import { ScrollSyncProvider } from '@/contexts/scroll-sync-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useRole } from '@/hooks/useRole'
 import Link from 'next/link'
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth()
   const { user } = useUser()
+  const { role, isLoading: roleLoading } = useRole()
 
   // Demo conversation ID - in production this would come from routing or user selection
   const demoConversationId = 'demo-conversation-123'
@@ -41,11 +43,11 @@ export default function Home() {
             AI-powered real-time message analysis platform
           </p>
 
-          {/* Debug: Show user role information */}
-          {isSignedIn && user && (
+          {/* Debug: Show user role information - Admin only */}
+          {isSignedIn && user && role === 'admin' && (
             <div className="rounded-lg border bg-card p-4 text-left text-sm">
               <h3 className="mb-2 font-semibold">
-                Debug: User Role Information
+                Debug: User Role Information (Admin Only)
               </h3>
               <div className="space-y-1 font-mono">
                 <div>Email: {user.primaryEmailAddress?.emailAddress}</div>
