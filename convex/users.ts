@@ -109,3 +109,10 @@ export const updateUserPreference = mutation({
     return user._id
   },
 })
+
+export const list = query({
+  args: {},
+  handler: async ctx => {
+    return await ctx.db.query('users').collect()
+  },
+})
