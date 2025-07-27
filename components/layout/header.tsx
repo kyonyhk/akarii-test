@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useRole } from '@/hooks/useRole'
 
 interface HeaderProps {
   title?: string
@@ -25,6 +26,7 @@ interface HeaderProps {
 export function Header({ title = 'Akarii' }: HeaderProps) {
   const { isSignedIn } = useAuth()
   const { user } = useUser()
+  const { isAdmin } = useRole()
 
   return (
     <header className="border-b bg-background px-6 py-4">
@@ -43,32 +45,41 @@ export function Header({ title = 'Akarii' }: HeaderProps) {
                 </Link>
               </Button>
 
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard" className="flex items-center space-x-2">
-                  <Users className="h-4 w-4" />
-                  <span>Teams</span>
-                </Link>
-              </Button>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center space-x-2"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Teams</span>
+                  </Link>
+                </Button>
+              )}
 
-              <Button variant="ghost" size="sm" asChild>
-                <Link
-                  href="/experiments"
-                  className="flex items-center space-x-2"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Experiments</span>
-                </Link>
-              </Button>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link
+                    href="/experiments"
+                    className="flex items-center space-x-2"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Experiments</span>
+                  </Link>
+                </Button>
+              )}
 
-              <Button variant="ghost" size="sm" asChild>
-                <Link
-                  href="/cost-dashboard"
-                  className="flex items-center space-x-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  <span>Analytics</span>
-                </Link>
-              </Button>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link
+                    href="/cost-dashboard"
+                    className="flex items-center space-x-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Analytics</span>
+                  </Link>
+                </Button>
+              )}
             </nav>
           )}
         </div>
@@ -96,6 +107,15 @@ export function Header({ title = 'Akarii' }: HeaderProps) {
                   {user?.primaryEmailAddress?.emailAddress}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/settings"
+                    className="flex cursor-pointer items-center space-x-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
                 <SignOutButton>
                   <DropdownMenuItem className="flex cursor-pointer items-center space-x-2">
                     <LogOut className="h-4 w-4" />

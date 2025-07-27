@@ -4,7 +4,9 @@ import { ReactNode } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { ShareButton } from './share-button'
+import { InvitationShareButton } from './invitation-share-button'
+import { ParticipantList } from './participant-list'
+import { usePresence } from '@/hooks/use-presence'
 
 interface ChatContainerProps {
   children: ReactNode
@@ -22,6 +24,17 @@ export function ChatContainer({
   showShareButton = false,
 }: ChatContainerProps) {
   const { isSignedIn } = useAuth()
+  const { otherUsers, isLoading } = usePresence(conversationId || '')
+
+  // Convert presence data to participant format
+  const participants = otherUsers.map(user => ({
+    id: user.id,
+    name: user.name,
+    avatar: user.avatar,
+    isOnline: user.isOnline,
+    isTyping: user.isTyping,
+  }))
+
   return (
     <Card
       className={cn(
@@ -34,12 +47,17 @@ export function ChatContainer({
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="flex items-center gap-2">
           {showShareButton && conversationId && isSignedIn && (
-            <ShareButton conversationId={conversationId} />
+            <InvitationShareButton conversationId={conversationId} />
           )}
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <span className="text-sm text-muted-foreground">Online</span>
-          </div>
+          {conversationId && !isLoading && (
+            <ParticipantList participants={participants} />
+          )}
+          {!conversationId && (
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-sm text-muted-foreground">Online</span>
+            </div>
+          )}
         </div>
       </div>
 

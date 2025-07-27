@@ -67,6 +67,7 @@ import {
   createTokenUsage,
   extractTokenUsageFromResponse,
   calculateCost,
+  manageConversationContext,
 } from './token_utils'
 import { api } from './_generated/api'
 import {
@@ -1423,5 +1424,143 @@ export const analyzeBulkMessages = action({
 
     console.log(`Bulk analysis completed: ${results.length} messages processed`)
     return results
+  },
+})
+
+// Conversational AI response action
+export const generateConversationalResponse = action({
+  args: {
+    content: v.string(),
+    userId: v.string(),
+    conversationId: v.string(),
+    username: v.optional(v.string()),
+    maxHistoryMessages: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<{
+    success: boolean
+    response?: string
+    messageId?: string
+    error?: string
+    tokenUsage?: any
+  }> => {
+    const tracker = createPerformanceTracker()
+
+    try {
+      console.log(`Generating conversational response for conversation ${args.conversationId}`)
+
+      // Validate OpenAI configuration
+      if (!validateOpenAIConfig()) {
+        throw new Error('OpenAI API is not properly configured')
+      }
+
+      // Step 1: Fetch conversation history
+      const maxHistory = args.maxHistoryMessages ?? 10
+      const conversationHistory = await ctx.runQuery(
+        api.messages.getMessagesInConversation,
+        {
+          conversationId: args.conversationId,
+          limit: maxHistory,
+        }
+      )
+
+      // Step 2: Format conversation history for AI API
+      const systemPrompt = `You are a helpful, friendly AI assistant participating in a natural conversation. Your role is to:
+
+1. Respond conversationally and naturally, like a knowledgeable friend
+2. Keep responses concise but informative (typically 2-3 sentences)
+3. Consider the full conversation context when responding
+4. Always end with a thoughtful follow-up question to keep the conversation flowing
+5. Be helpful, accurate, and engaging
+
+You should respond with plain text only (no JSON, no special formatting). Based on the conversation history provided, give a natural response to the latest message and ask a relevant follow-up question.`
+
+      // Format conversation history (format messages by determining role based on userId)
+      const formattedHistory: Array<{ role: string; content: string }> = []
+      for (const msg of conversationHistory) {
+        const role = msg.userId === args.userId ? 'user' : 'assistant'
+        formattedHistory.push({
+          role,
+          content: msg.content,
+        })
+      }
+
+      // Step 3: Smart context management with token counting and truncation
+      const contextResult = manageConversationContext(
+        systemPrompt,
+        formattedHistory,
+        args.content,
+        ANALYSIS_MODEL,
+        300 // max output tokens
+      )
+
+      console.log(`Token breakdown:`, contextResult.tokenBreakdown)
+      if (contextResult.truncated) {
+        console.log(`Truncated conversation: removed ${contextResult.removedMessages} messages`)
+      }
+
+      const messages = contextResult.messages
+
+      // Step 4: Make OpenAI API call for conversational response
+      const completion = await openai.chat.completions.create({
+        model: ANALYSIS_MODEL, // Using same model as analysis for consistency
+        messages,
+        max_tokens: 300,
+        temperature: 0.7, // Higher temperature for more natural conversation
+        // No response_format specified - we want plain text, not JSON
+      })
+
+      const aiResponse = completion.choices[0]?.message?.content
+      if (!aiResponse) {
+        throw new Error('No response received from OpenAI')
+      }
+
+      // Step 5: Extract token usage
+      const apiTokenUsage = extractTokenUsageFromResponse(completion)
+      const tokenUsage = createTokenUsage(
+        apiTokenUsage.inputTokens || contextResult.tokenBreakdown.totalInputTokens,
+        apiTokenUsage.outputTokens || countTokens(aiResponse),
+        ANALYSIS_MODEL
+      )
+
+      // Step 6: Store AI response as a new message
+      const aiMessageId = await ctx.runMutation(api.messages.sendMessage, {
+        content: aiResponse,
+        userId: 'ai-assistant', // Special user ID for AI
+        conversationId: args.conversationId,
+        username: 'AI Assistant',
+      })
+
+      // Step 7: Record token usage for the conversational response
+      try {
+        await ctx.runMutation(api.usage_tracking.recordUsage, {
+          userId: args.userId,
+          model: ANALYSIS_MODEL,
+          inputTokens: tokenUsage.inputTokens,
+          outputTokens: tokenUsage.outputTokens,
+          totalTokens: tokenUsage.totalTokens,
+          cost: tokenUsage.cost,
+          operationType: 'conversation',
+        })
+      } catch (usageError) {
+        console.error('Failed to record conversational AI token usage:', usageError)
+        // Continue execution even if usage recording fails
+      }
+
+      console.log(`Conversational AI response completed in ${tracker.getElapsedMs()}ms`)
+
+      return {
+        success: true,
+        response: aiResponse,
+        messageId: aiMessageId,
+        tokenUsage,
+      }
+    } catch (error) {
+      console.error('Error generating conversational response:', error)
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      }
+    }
   },
 })

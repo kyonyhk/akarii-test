@@ -722,7 +722,7 @@
             "description": "Develop a new React component, `MessageBubble.tsx`, using Next.js and Tailwind CSS. This component will serve as the core UI for individual chat messages and will be developed in isolation.",
             "dependencies": [],
             "details": "The component must accept props for message content, sender type, and timestamp. Implement two primary variants: 'sent' (right-aligned, primary brand color) and 'received' (left-aligned, neutral color). Integrate the `shadcn/ui` `Avatar` component for the 'received' variant to display the sender's icon.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use Storybook to develop and test the component in isolation. Create stories for both 'sent' and 'received' variants, and test with various content lengths to ensure proper text wrapping."
           },
           {
@@ -731,7 +731,7 @@
             "description": "Construct the main container component for the chat interface, ensuring it is fully responsive across mobile, tablet, and desktop screen sizes using Tailwind CSS.",
             "dependencies": [],
             "details": "Use Tailwind CSS's flexbox/grid utilities and breakpoint system (`sm`, `md`, `lg`) to create a layout where the message list occupies the majority of the vertical space and is scrollable. The layout should correctly position a header and a chat input area.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use browser developer tools to inspect and verify the layout's responsiveness at standard breakpoints (sm, md, lg). Ensure the message list scrolls independently of the rest of the page."
           },
           {
@@ -779,7 +779,7 @@
             "description": "Update the Clerk configuration to support a 'role' field in the publicMetadata. Manually assign the 'admin' role to a test user and ensure new users default to 'user'.",
             "dependencies": [],
             "details": "Log into the Clerk dashboard and navigate to the User & Organization Settings -> Custom user properties. Add a 'role' property (Type: String, Private: No). Use the Clerk dashboard to set the publicMetadata.role to 'admin' for a designated admin user. Verify that newly signed-up users are assigned a default role of 'user' or have no role set, which the application will treat as 'user'.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create two users. Assign one the 'admin' role via the Clerk dashboard. Leave the other as a default 'user'. Verify the metadata is correctly stored for both users by inspecting their profiles in the Clerk dashboard or fetching their data via the API."
           },
           {
@@ -1072,7 +1072,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-26T06:48:37.664Z",
+      "updated": "2025-07-27T03:42:19.933Z",
       "description": "Tasks for master context"
     }
   }

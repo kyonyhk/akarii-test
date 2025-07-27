@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal('member')
     ),
     teamId: v.optional(v.string()),
+    preferredModel: v.optional(v.string()), // AI model preference for this user
     isActive: v.optional(v.boolean()),
     joinedAt: v.optional(v.number()),
     createdAt: v.optional(v.number()),
@@ -55,6 +56,8 @@ export default defineSchema({
     timestamp: v.number(),
     conversationId: v.optional(v.string()),
     analysisId: v.optional(v.id('analyses')),
+    model: v.optional(v.string()), // AI model used for this message
+    cost: v.optional(v.number()), // API cost for this message generation
   })
     .index('by_user', ['userId'])
     .index('by_conversation', ['conversationId'])
@@ -73,6 +76,8 @@ export default defineSchema({
     tradeOffs: v.array(v.string()),
     confidenceLevel: v.number(),
     rawData: v.any(),
+    model: v.optional(v.string()), // AI model used for this analysis
+    cost: v.optional(v.number()), // API cost for this analysis generation
     createdAt: v.number(),
     thumbsUp: v.number(),
     thumbsDown: v.number(),
@@ -429,4 +434,33 @@ export default defineSchema({
     .index('by_team_timestamp', ['teamId', 'timestamp'])
     .index('by_timestamp', ['timestamp'])
     .index('by_model', ['model']),
+
+  // Invitation tokens for chat conversation sharing
+  invitationTokens: defineTable({
+    conversationId: v.id('conversations'),
+    token: v.string(),
+    createdBy: v.id('users'),
+    expiresAt: v.number(),
+    isActive: v.boolean(),
+    usedBy: v.optional(v.id('users')),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_token', ['token'])
+    .index('by_conversation', ['conversationId'])
+    .index('by_created_by', ['createdBy'])
+    .index('by_expires', ['expiresAt'])
+    .index('by_active', ['isActive']),
+
+  // Presence tracking for real-time collaboration
+  presence: defineTable({
+    user: v.string(),
+    room: v.string(),
+    data: v.any(), // Flexible data storage for presence info
+    updated: v.number(),
+  })
+    .index('by_room', ['room'])
+    .index('by_user', ['user'])
+    .index('by_room_user', ['room', 'user'])
+    .index('by_updated', ['updated']),
 })

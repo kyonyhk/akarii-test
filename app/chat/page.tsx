@@ -58,7 +58,7 @@ export default function Chat() {
     return (
       <ProtectedRoute>
         <MainLayout title="Chat">
-          <div className="flex h-[600px] items-center justify-center">
+          <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>Setting up your chat...</span>
@@ -73,7 +73,7 @@ export default function Chat() {
     <ProtectedRoute>
       <MainLayout title="Chat">
         <ScrollSyncProvider>
-          <div className="flex h-[600px] w-full max-w-6xl gap-4">
+          <div className="flex h-[calc(100vh-8rem)] w-full max-w-6xl gap-4">
             {/* Chat Interface */}
             <div className="min-w-0 flex-1">
               <ChatPage
