@@ -12,12 +12,16 @@ export function useUser() {
 
   useEffect(() => {
     if (isLoaded && clerkUser) {
+      // Get role from Clerk publicMetadata, default to 'user' if not set
+      const role = clerkUser.publicMetadata?.role as string || 'user'
+      
       // Sync user data with Convex when Clerk user is loaded
       createOrUpdateUser({
         clerkId: clerkUser.id,
         email: clerkUser.primaryEmailAddress?.emailAddress || '',
         name: clerkUser.fullName || undefined,
         avatar: clerkUser.imageUrl || undefined,
+        role: role as 'admin' | 'user' | 'guest' | 'member',
       }).catch(error => {
         console.error('Failed to sync user with Convex:', error)
       })

@@ -1,16 +1,19 @@
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { MainLayout } from '@/components/layout/main-layout'
 import { ChatPage } from '@/components/chat'
 import { PrismPanel } from '@/components/analysis'
 import { ScrollSyncProvider } from '@/contexts/scroll-sync-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useRole } from '@/hooks/useRole'
 import Link from 'next/link'
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth()
+  const { user } = useUser()
+  const { role, isLoading: roleLoading } = useRole()
 
   // Demo conversation ID - in production this would come from routing or user selection
   const demoConversationId = 'demo-conversation-123'
@@ -39,6 +42,26 @@ export default function Home() {
           <p className="text-xl text-muted-foreground">
             AI-powered real-time message analysis platform
           </p>
+
+          {/* Debug: Show user role information - Admin only */}
+          {isSignedIn && user && role === 'admin' && (
+            <div className="rounded-lg border bg-card p-4 text-left text-sm">
+              <h3 className="mb-2 font-semibold">
+                Debug: User Role Information (Admin Only)
+              </h3>
+              <div className="space-y-1 font-mono">
+                <div>Email: {user.primaryEmailAddress?.emailAddress}</div>
+                <div>User ID: {user.id}</div>
+                <div>
+                  Public Metadata:{' '}
+                  {JSON.stringify(user.publicMetadata, null, 2)}
+                </div>
+                <div>
+                  Role from metadata: {user.publicMetadata?.role || 'undefined'}
+                </div>
+              </div>
+            </div>
+          )}
           {isSignedIn ? (
             <div className="flex justify-center gap-4">
               <Button asChild size="lg">

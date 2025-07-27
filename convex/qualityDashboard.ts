@@ -5,6 +5,7 @@
 
 import { query } from './_generated/server'
 import { v } from 'convex/values'
+import { ensureAdmin } from './rbac'
 
 export interface QualityMetricsOverview {
   totalAnalyses: number
@@ -64,6 +65,9 @@ export const getQualityOverview = query({
     teamId: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<QualityMetricsOverview> => {
+    // Ensure user has admin role
+    await ensureAdmin(ctx)
+
     const timeRange = args.timeRange || '7d'
     const cutoffTime = getCutoffTime(timeRange)
 

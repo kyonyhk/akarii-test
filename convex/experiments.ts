@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { Id } from './_generated/dataModel'
+import { ensureAdmin } from './rbac'
 
 // Create a new experiment
 export const createExperiment = mutation({
@@ -45,6 +46,9 @@ export const createExperiment = mutation({
     createdBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    // Ensure user has admin role
+    await ensureAdmin(ctx)
+
     // Validate that traffic allocations sum to 100%
     const totalAllocation = args.variants.reduce(
       (sum, variant) => sum + variant.trafficAllocation,
@@ -158,6 +162,9 @@ export const updateExperimentStatus = mutation({
     updatedBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    // Ensure user has admin role
+    await ensureAdmin(ctx)
+
     const experiment = await ctx.db.get(args.experimentId)
     if (!experiment) {
       throw new Error('Experiment not found')
