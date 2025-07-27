@@ -47,7 +47,7 @@ export function InvitationShareButton({
 
   const invitations = useQuery(
     api.conversationInvites.getConversationInvitations,
-    isValidConvexId ? { conversationId } : 'skip'
+    isValidConvexId ? { conversationId } : undefined
   )
 
   const generateToken = useMutation(
