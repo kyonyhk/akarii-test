@@ -416,6 +416,25 @@ export default defineSchema({
     .index('by_user', ['userId'])
     .index('by_team_user', ['teamId', 'userId']),
 
+  // Usage tracking for analytics
+  usage: defineTable({
+    messageId: v.id('messages'),
+    teamId: v.id('teams'),
+    tokensUsed: v.number(),
+    cost: v.number(),
+    model: v.string(),
+    actionType: v.union(
+      v.literal('analysis'),
+      v.literal('bulk_analysis'),
+      v.literal('test')
+    ),
+    timestamp: v.number(),
+  })
+    .index('by_message', ['messageId'])
+    .index('by_team_timestamp', ['teamId', 'timestamp'])
+    .index('by_timestamp', ['timestamp'])
+    .index('by_model', ['model']),
+
   // Invitation tokens for chat conversation sharing
   invitationTokens: defineTable({
     conversationId: v.id('conversations'),
