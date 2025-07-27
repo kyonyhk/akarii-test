@@ -18,8 +18,14 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        orbitron: ['var(--font-orbitron)', 'sans-serif'],
-        sharetech: ['var(--font-sharetech)', 'monospace'],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'sans-serif',
+        ],
+        system: ['var(--font-system)', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -55,17 +61,41 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        'neon-cyan': 'hsl(var(--neon-cyan))',
-        'neon-purple': 'hsl(var(--neon-purple))',
-        'neon-pink': 'hsl(var(--neon-pink))',
-        'dark-surface': 'hsl(var(--dark-surface))',
-        'darker-surface': 'hsl(var(--darker-surface))',
-        'grid-color': 'hsl(var(--grid-color))',
+        // Apple gray scale
+        gray: {
+          50: 'hsl(var(--gray-50))',
+          100: 'hsl(var(--gray-100))',
+          200: 'hsl(var(--gray-200))',
+          300: 'hsl(var(--gray-300))',
+          400: 'hsl(var(--gray-400))',
+          500: 'hsl(var(--gray-500))',
+          600: 'hsl(var(--gray-600))',
+          700: 'hsl(var(--gray-700))',
+          800: 'hsl(var(--gray-800))',
+          900: 'hsl(var(--gray-900))',
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        xs: '0.25rem',
+        sm: '0.5rem',
+        DEFAULT: 'var(--radius)',
+        md: 'var(--radius)',
+        lg: '1.25rem',
+        xl: '1.5rem',
+        '2xl': '2rem',
+        '3xl': '2.5rem',
+      },
+      boxShadow: {
+        'apple-sm': 'var(--shadow-sm)',
+        apple: 'var(--shadow)',
+        'apple-md': 'var(--shadow-md)',
+        'apple-lg': 'var(--shadow-lg)',
+        card: 'var(--card-shadow)',
+        'card-hover': 'var(--card-shadow-hover)',
+      },
+      spacing: {
+        18: '4.5rem',
+        88: '22rem',
       },
       keyframes: {
         'accordion-down': {
@@ -76,10 +106,15 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'fade-in': {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in': 'fade-in 0.3s ease-out',
       },
     },
   },

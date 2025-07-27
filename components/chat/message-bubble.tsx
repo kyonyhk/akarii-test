@@ -80,39 +80,44 @@ export function MessageBubble({
     <div
       data-message-id={messageId}
       className={cn(
-        'group flex gap-3 p-3 transition-colors hover:bg-muted/30',
+        'group flex gap-4 rounded-2xl p-6 transition-all duration-150 ease-out hover:bg-muted/20',
         isOwn && 'flex-row-reverse',
-        isActive && 'bg-accent/50 ring-2 ring-accent',
+        isActive && 'bg-accent/20 ring-2 ring-primary/20',
         className
       )}
     >
-      <Avatar className="h-8 w-8 shrink-0">
+      <Avatar className="h-10 w-10 shrink-0">
         <AvatarImage src={authorAvatar} alt={displayName} />
-        <AvatarFallback className="text-xs">
+        <AvatarFallback className="text-sm font-medium">
           {getInitials(displayName)}
         </AvatarFallback>
       </Avatar>
 
       <div
         className={cn(
-          'flex max-w-[70%] flex-col space-y-1',
+          'flex max-w-[70%] flex-col space-y-2',
           isOwn && 'items-end'
         )}
       >
         <div
           className={cn(
-            'flex items-center gap-2 text-sm text-muted-foreground',
+            'flex items-center gap-3 text-sm text-muted-foreground',
             isOwn && 'flex-row-reverse'
           )}
         >
-          <span className="font-medium">{displayName}</span>
+          <span className="font-medium text-foreground">{displayName}</span>
           <span className="text-xs">{formatTime(timestamp)}</span>
         </div>
 
         <div
           className={cn(
-            'break-words rounded-lg px-3 py-2 text-sm',
-            isOwn ? 'ml-4 bg-primary text-primary-foreground' : 'mr-4 bg-muted'
+            'break-words rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm',
+            'transition-all duration-150 ease-out',
+            'active:scale-[0.99]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
+            isOwn
+              ? 'ml-6 bg-primary text-primary-foreground'
+              : 'mr-6 border border-border bg-card hover:bg-gray-50 dark:hover:bg-gray-800/50'
           )}
         >
           <ReactMarkdown
@@ -130,12 +135,12 @@ export function MessageBubble({
 
         {/* Inline Analysis Card */}
         {showAnalysis && analysis && analysisMode !== 'none' && (
-          <div className={cn('w-full', isOwn ? 'ml-4' : 'mr-4')}>
+          <div className={cn('w-full', isOwn ? 'ml-6' : 'mr-6')}>
             <InlineAnalysisCard
               analysis={analysis}
               isCompact={analysisMode === 'compact'}
               onVote={handleVote}
-              className={cn(isOwn && 'ml-auto max-w-[calc(100%-1rem)]')}
+              className={cn(isOwn && 'ml-auto max-w-[calc(100%-1.5rem)]')}
             />
           </div>
         )}

@@ -29,15 +29,18 @@ export function Header({ title = 'Akarii' }: HeaderProps) {
   const { isAdmin } = useRole()
 
   return (
-    <header className="border-b bg-background px-6 py-4">
+    <header className="border-b border-border/50 bg-background/80 px-8 py-6 backdrop-blur-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          <Link href="/" className="text-xl font-semibold hover:text-primary">
+        <div className="flex items-center space-x-12">
+          <Link
+            href="/"
+            className="text-2xl font-semibold tracking-tight transition-colors duration-150 hover:text-primary"
+          >
             {title}
           </Link>
 
           {isSignedIn && (
-            <nav className="flex items-center space-x-4">
+            <nav className="flex items-center space-x-6">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/chat" className="flex items-center space-x-2">
                   <MessageSquare className="h-4 w-4" />
@@ -84,7 +87,7 @@ export function Header({ title = 'Akarii' }: HeaderProps) {
           )}
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           {isSignedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
