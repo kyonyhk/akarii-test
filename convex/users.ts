@@ -83,3 +83,27 @@ export const getUserByClerkId = query({
       .first()
   },
 })
+
+export const updateUserPreference = mutation({
+  args: {
+    clerkId: v.string(),
+    preferredModel: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_clerk_id', q => q.eq('clerkId', args.clerkId))
+      .first()
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    await ctx.db.patch(user._id, {
+      preferredModel: args.preferredModel,
+      updatedAt: Date.now(),
+    })
+
+    return user._id
+  },
+})

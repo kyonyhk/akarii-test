@@ -107,6 +107,15 @@ export function Header({ title = 'Akarii' }: HeaderProps) {
                   {user?.primaryEmailAddress?.emailAddress}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/settings"
+                    className="flex cursor-pointer items-center space-x-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
                 <SignOutButton>
                   <DropdownMenuItem className="flex cursor-pointer items-center space-x-2">
                     <LogOut className="h-4 w-4" />
