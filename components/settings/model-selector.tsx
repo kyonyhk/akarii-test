@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -72,24 +71,21 @@ export function ModelSelector() {
     }
   }, [currentUser])
 
-  const handleSave = async () => {
-    if (!selectedModel) {
-      toast.error('Please select a model')
-      return
-    }
-
+  const handleModelChange = async (modelId: string) => {
     if (!user?.id) {
       toast.error('User not authenticated')
       return
     }
 
+    setSelectedModel(modelId)
     setIsSaving(true)
+
     try {
       await updateUserPreference({
         clerkId: user.id,
-        preferredModel: selectedModel,
+        preferredModel: modelId,
       })
-      toast.success('Model preference saved successfully')
+      toast.success('Model preference updated')
     } catch (error) {
       console.error('Failed to save model preference:', error)
       toast.error('Failed to save model preference')
@@ -108,7 +104,7 @@ export function ModelSelector() {
         <Label htmlFor="model-select" className="text-sm font-medium">
           Preferred AI Model
         </Label>
-        <Select value={selectedModel} onValueChange={setSelectedModel}>
+        <Select value={selectedModel} onValueChange={handleModelChange}>
           <SelectTrigger id="model-select" className="w-full">
             <SelectValue placeholder="Select an AI model" />
           </SelectTrigger>
@@ -143,14 +139,12 @@ export function ModelSelector() {
         </div>
       )}
 
-      <Button
-        onClick={handleSave}
-        disabled={isSaving || !selectedModel}
-        className="w-full sm:w-auto"
-      >
-        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Save Preferences
-      </Button>
+      {isSaving && (
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Saving preference...</span>
+        </div>
+      )}
     </div>
   )
 }

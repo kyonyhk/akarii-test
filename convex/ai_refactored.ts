@@ -30,14 +30,15 @@ export const analyzeMessageWithAdapter = action({
         },
       ]
 
-      // Use the new AI adapter system
-      const result = await ctx.runAction(api.ai.generate, {
+      // Use the new AI adapter system with user's preferred model
+      const result = await ctx.runAction(api.ai.generateWithUserModel, {
         messages,
-        model,
+        clerkId: args.userId, // userId is typically the clerkId
         maxTokens: 500,
         temperature: 0.1,
         responseFormat: { type: 'json_object' },
         timeout: 8000,
+        overrideModel: args.model, // Allow override if specific model is requested
       })
 
       if (!result.success) {

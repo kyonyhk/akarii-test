@@ -97,9 +97,11 @@ main
 ./tm show 12  # Role access tasks
 ./tm show 11  # UI tasks
 
-# 2. Create descriptive task branch off the feature branch (NOT off main)
+# 2. 🚨 CRITICAL: ALWAYS pull latest changes from base feature branch FIRST
 git checkout feature/role-based-access  # Your worktree's base feature branch
+git pull origin feature/role-based-access  # Pull latest changes to avoid conflicts
 
+# 3. Create descriptive task branch off the updated feature branch (NOT off main)
 # Create descriptive branch name: feature/task-[ID]-[brief-description]
 git checkout -b feature/task-12.1-configure-user-roles    # Descriptive task branch
 
@@ -111,13 +113,13 @@ git checkout -b feature/task-12.1-configure-user-roles    # Descriptive task bra
 # feature/task-14.1-multi-model-provider-setup
 # feature/task-14.2-model-selection-ui
 
-# 3. Mark task as in-progress (centrally)
+# 4. Mark task as in-progress (centrally)
 ./tm set-status --id=12.1 --status=in-progress
 
-# 4. Do your work (code, test, etc.)
+# 5. Do your work (code, test, etc.)
 # ... implement task 12.1 ...
 
-# 5. Commit to your TASK branch
+# 6. Commit to your TASK branch
 git add .
 git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
@@ -130,10 +132,10 @@ Resolves: Task 12.1
 🤖 Generated with [Claude Code](https://claude.ai/code)
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# 6. Push to your descriptive TASK branch
+# 7. Push to your descriptive TASK branch
 git push origin feature/task-12.1-configure-user-roles
 
-# 7. Create PR: task branch → feature branch (NOT main)
+# 8. Create PR: task branch → feature branch (NOT main)
 gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "$(cat <<'EOF'
 ## Summary
 - ✅ Implemented role assignment in Clerk metadata
@@ -151,19 +153,19 @@ Ready to merge into feature/role-based-access
 EOF
 )"
 
-# 8. Merge task branch into feature branch
+# 9. Merge task branch into feature branch
 git checkout feature/role-based-access
 git merge feature/task-12.1-configure-user-roles
 git push origin feature/role-based-access
 
-# 9. Delete task branch (cleanup)
+# 10. Delete task branch (cleanup)
 git branch -d feature/task-12.1-configure-user-roles
 git push origin --delete feature/task-12.1-configure-user-roles
 
-# 10. Mark task as complete (centrally)
+# 11. Mark task as complete (centrally)
 ./tm set-status --id=12.1 --status=done
 
-# 11. When ALL tasks in your group are done, create final PR
+# 12. When ALL tasks in your group are done, create final PR
 gh pr create --base main --title "Complete Role-Based Access Control (Tasks 12.1-12.5)" --body "$(cat <<'EOF'
 ## Summary
 - ✅ Complete RBAC implementation
@@ -215,12 +217,15 @@ EOF
 
 **🚨 NEVER COMMIT DIRECTLY TO MAIN OR BASE FEATURE BRANCHES 🚨**
 
-1. **Task Branches Only**: Each task MUST be on its own `feature/task-X.Y` branch
-2. **No Direct Feature Branch Commits**: NEVER commit directly to `feature/role-based-access`
-3. **No Direct Main Commits**: NEVER `git checkout main` or commit to main
-4. **Two-Level PR Process**: task branch → feature branch → main (via PRs)
-5. **Task Management**: Use `./tm` (not direct task-master) to avoid conflicts
-6. **CLAUDE.md Reference**: Always read from main worktree (this file is always current)
+**🚨 ALWAYS PULL FROM BASE FEATURE BRANCH BEFORE CREATING TASK BRANCHES 🚨**
+
+1. **Pull First Rule**: ALWAYS `git pull origin feature/branch-name` before creating task branches
+2. **Task Branches Only**: Each task MUST be on its own `feature/task-X.Y` branch
+3. **No Direct Feature Branch Commits**: NEVER commit directly to `feature/role-based-access`
+4. **No Direct Main Commits**: NEVER `git checkout main` or commit to main
+5. **Two-Level PR Process**: task branch → feature branch → main (via PRs)
+6. **Task Management**: Use `./tm` (not direct task-master) to avoid conflicts
+7. **CLAUDE.md Reference**: Always read from main worktree (this file is always current)
 
 ### 🔄 Branch Verification Commands
 
@@ -243,6 +248,7 @@ git branch --show-current
 
 # 2. If on wrong branch, create proper descriptive task branch:
 git checkout feature/role-based-access  # Base feature branch
+git pull origin feature/role-based-access  # 🚨 CRITICAL: Pull latest changes first
 git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
 
 # 3. Never work directly on base branches:
@@ -261,21 +267,22 @@ git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branc
 # 2. See your assigned tasks for this worktree
 ./tm show 12  # Replace with your assigned task group number
 
-# 3. Create descriptive task branch for specific subtask
+# 3. 🚨 CRITICAL: Pull latest changes from base feature branch FIRST
 git checkout feature/role-based-access  # Your base feature branch
+git pull origin feature/role-based-access  # Pull latest changes to avoid conflicts
 
-# Get task details first to create descriptive branch name
+# 4. Get task details first to create descriptive branch name
 ./tm show 12.1  # Check task title and description
 
-# Create descriptive branch: feature/task-[ID]-[brief-description]
+# 5. Create descriptive branch: feature/task-[ID]-[brief-description]
 git checkout -b feature/task-12.1-configure-user-roles  # Descriptive task branch
 
-# 4. Mark task as in-progress
+# 6. Mark task as in-progress
 ./tm set-status --id=12.1 --status=in-progress
 
-# 5. Do your development work...
+# 7. Do your development work...
 
-# 6. Commit to your TASK branch (not base feature branch)
+# 8. Commit to your TASK branch (not base feature branch)
 git add .
 git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
@@ -284,21 +291,21 @@ git commit -m "feat: Complete Task 12.1 - Configure User Roles
 
 Resolves: Task 12.1"
 
-# 7. Push to your descriptive TASK branch
+# 9. Push to your descriptive TASK branch
 git push origin feature/task-12.1-configure-user-roles
 
-# 8. Create PR: task branch → feature branch
+# 10. Create PR: task branch → feature branch
 gh pr create --base feature/role-based-access --title "Complete Task 12.1 - Configure User Roles" --body "Ready for review"
 
-# 9. Merge task branch into feature branch
+# 11. Merge task branch into feature branch
 git checkout feature/role-based-access
 git merge feature/task-12.1-configure-user-roles
 git push origin feature/role-based-access
 
-# 10. Mark task complete
+# 12. Mark task complete
 ./tm set-status --id=12.1 --status=done
 
-# 11. When ALL group tasks done, create final PR to main
+# 13. When ALL group tasks done, create final PR to main
 gh pr create --base main --title "Complete Role-Based Access Control" --body "All RBAC tasks completed"
 ```
 

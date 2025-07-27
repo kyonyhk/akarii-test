@@ -1,6 +1,7 @@
 'use node'
 
 import { action, ActionCtx } from './_generated/server'
+import { api } from './_generated/api'
 import { v } from 'convex/values'
 
 // Common interface for all AI providers
@@ -276,6 +277,93 @@ export const getProviderStatus = action({
     return {
       success: true,
       providers: status,
+    }
+  },
+})
+
+// Enhanced generate action that uses user's preferred model
+export const generateWithUserModel = action({
+  args: {
+    messages: v.array(
+      v.object({
+        role: v.union(
+          v.literal('system'),
+          v.literal('user'),
+          v.literal('assistant')
+        ),
+        content: v.string(),
+      })
+    ),
+    clerkId: v.string(),
+    maxTokens: v.optional(v.number()),
+    temperature: v.optional(v.number()),
+    responseFormat: v.optional(
+      v.object({
+        type: v.union(v.literal('json_object'), v.literal('text')),
+      })
+    ),
+    timeout: v.optional(v.number()),
+    overrideModel: v.optional(v.string()), // Optional override for specific use cases
+  },
+  handler: async (ctx: ActionCtx, args) => {
+    try {
+      // Get user's preferred model
+      let modelToUse = args.overrideModel
+
+      if (!modelToUse) {
+        const user = await ctx.runQuery(api.users.getUserByClerkId, {
+          clerkId: args.clerkId,
+        })
+
+        if (!user) {
+          throw new Error('User not found')
+        }
+
+        // Use user's preferred model or default to GPT-4o Mini
+        modelToUse = user.preferredModel || 'gpt-4o-mini'
+      }
+
+      // Get the appropriate provider for the model
+      const provider = getProviderForModel(modelToUse)
+
+      // Validate that the provider is properly configured
+      if (!provider.validateConfig()) {
+        throw new Error(
+          `Provider for model ${modelToUse} is not properly configured`
+        )
+      }
+
+      // Call the provider's generate method
+      const result = await provider.generate({
+        messages: args.messages,
+        model: modelToUse,
+        maxTokens: args.maxTokens,
+        temperature: args.temperature,
+        responseFormat: args.responseFormat,
+        timeout: args.timeout,
+      })
+
+      return {
+        success: true,
+        content: result.content,
+        usage: result.usage,
+        model: result.model,
+      }
+    } catch (error) {
+      console.error('AI generation with user model failed:', error)
+
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+        content: '',
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        },
+        model: args.overrideModel || 'unknown',
+      }
     }
   },
 })
