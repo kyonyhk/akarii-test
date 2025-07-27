@@ -81,6 +81,83 @@ export const getRoomPresence = query({
   },
 })
 
+// Set typing status for a user in a conversation
+export const setTypingStatus = mutation({
+  args: {
+    conversationId: v.string(),
+    userId: v.string(),
+    isTyping: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now()
+
+    // Check if user already has presence in this room
+    const existing = await ctx.db
+      .query('presence')
+      .withIndex('by_room_user', q =>
+        q.eq('room', args.conversationId).eq('user', args.userId)
+      )
+      .unique()
+
+    const presenceData = {
+      isTyping: args.isTyping,
+      lastTypingUpdate: now,
+    }
+
+    if (existing) {
+      // Update existing presence with typing status
+      await ctx.db.patch(existing._id, {
+        data: {
+          ...existing.data,
+          ...presenceData,
+        },
+        updated: now,
+      })
+      return existing._id
+    } else {
+      // Create new presence entry with typing status
+      return await ctx.db.insert('presence', {
+        room: args.conversationId,
+        user: args.userId,
+        data: presenceData,
+        updated: now,
+      })
+    }
+  },
+})
+
+// Get typing status of users in a conversation
+export const getTypingStatus = query({
+  args: {
+    conversationId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now()
+    const typingCutoff = now - 3000 // 3 seconds cutoff for typing indicators
+
+    const presences = await ctx.db
+      .query('presence')
+      .withIndex('by_room', q => q.eq('room', args.conversationId))
+      .filter(q => q.gte(q.field('updated'), typingCutoff))
+      .collect()
+
+    // Filter for users who are actively typing
+    const typingUsers = presences
+      .filter(
+        presence =>
+          presence.data?.isTyping === true &&
+          presence.data?.lastTypingUpdate &&
+          now - presence.data.lastTypingUpdate < typingCutoff
+      )
+      .map(presence => ({
+        userId: presence.user,
+        lastTypingUpdate: presence.data.lastTypingUpdate,
+      }))
+
+    return typingUsers
+  },
+})
+
 // Clean up old presence entries (to be called periodically)
 export const cleanupPresence = mutation({
   args: {},
