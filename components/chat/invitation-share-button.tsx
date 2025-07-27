@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
+import { useAuth } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,13 +35,15 @@ interface InvitationShareButtonProps {
 export function InvitationShareButton({
   conversationId,
 }: InvitationShareButtonProps) {
+  const { isSignedIn } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [expirationHours, setExpirationHours] = useState<string>('24')
 
-  // Check if this is a valid Convex ID (not a demo ID)
-  const isValidConvexId = conversationId && !conversationId.startsWith('demo-')
+  // Check if this is a valid Convex ID (not a demo ID) and user is authenticated
+  const isValidConvexId =
+    conversationId && !conversationId.startsWith('demo-') && isSignedIn
 
   const invitations = useQuery(
     api.conversationInvites.getConversationInvitations,
@@ -133,9 +136,11 @@ export function InvitationShareButton({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                This is a demo conversation. Invitation links are only available
-                for real conversations. Sign in and create a conversation to
-                share it with others.
+                {!isSignedIn
+                  ? 'Sign in to create and share invitation links for conversations.'
+                  : conversationId?.startsWith('demo-')
+                    ? 'This is a demo conversation. Invitation links are only available for real conversations. Create a conversation to share it with others.'
+                    : 'Invitation links are only available for real conversations.'}
               </AlertDescription>
             </Alert>
           )}
