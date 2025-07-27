@@ -990,7 +990,7 @@
         "testStrategy": "Generate significant test usage data across different models and users. Navigate to the analytics dashboard and verify that the charts and KPIs (Key Performance Indicators) reflect the generated data accurately. Cross-reference the dashboard's cost calculation with a manual sum from the database records. Add a new user to a team and confirm they appear in the team analytics section.",
         "priority": "low",
         "dependencies": [12, 14],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
@@ -1015,8 +1015,8 @@
             "title": "Connect Fetched Data to Recharts Visualization Components",
             "description": "Bind the live, fetched analytics data to the existing `recharts` chart components to visualize usage trends and costs accurately.",
             "dependencies": ["16.2"],
-            "details": "Take the aggregated cost and usage data fetched via `useQuery` and transform it into the data structure expected by the `recharts` `BarChart` and `LineChart` components. Ensure the chart's axes, tooltips, and data points are rendered dynamically from this data. Connect any existing UI filters (e.g., time range selector) to re-fetch or re-process the data as needed.\n<info added on 2025-07-27T03:31:09.946Z>\nTask successfully completed. All Recharts visualization components are now connected to live Convex data with proper data transformation, dynamic filtering, and real-time updates. Critical schema fix for 'usage' table resolved initial query failures. Analytics dashboard is production-ready with full chart integration including LineChart for cost trends, BarChart for token usage, PieChart for model distribution, and responsive filtering capabilities.\n</info added on 2025-07-27T03:31:09.946Z>",
-            "status": "done",
+            "details": "Take the aggregated cost and usage data fetched via `useQuery` and transform it into the data structure expected by the `recharts` `BarChart` and `LineChart` components. Ensure the chart's axes, tooltips, and data points are rendered dynamically from this data. Connect any existing UI filters (e.g., time range selector) to re-fetch or re-process the data as needed.",
+            "status": "in-progress",
             "testStrategy": "Generate significant test usage data across different models and days. Navigate to the analytics dashboard and verify that the charts render and accurately reflect the generated data. Test chart interactivity, like hovering to view tooltips with correct values."
           },
           {
@@ -1025,7 +1025,7 @@
             "description": "Display the fetched real-time metrics and team member information in the corresponding UI components on the dashboard.",
             "dependencies": ["16.2"],
             "details": "Use the data from the team member query to populate the list or table of users on the dashboard. Connect the real-time usage metrics query to the Key Performance Indicator (KPI) cards to display values like 'Total Cost Today' or 'Total Messages'. Ensure these components correctly display the live data.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Cross-reference the numbers shown in the KPI cards with a manual calculation from the database to ensure accuracy. Add a new test user via the application flow and verify they appear in the team member list on the analytics dashboard."
           }
         ]
@@ -1038,7 +1038,7 @@
         "testStrategy": "Verify the emoji picker can be opened and closed. Select an emoji and confirm it is added to the input field and rendered correctly in the sent message. Type a message with markdown like `*bold*` and `_italic_` and verify it renders as bold and italic text in the chat view. Ensure these features work smoothly on both desktop and mobile layouts.",
         "priority": "low",
         "dependencies": [11],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
@@ -1063,8 +1063,8 @@
             "title": "Validate End-to-End Emoji and Markdown Flow",
             "description": "Conduct a comprehensive test of the entire feature flow, from typing markdown and adding emojis in the input to verifying they are sent and rendered correctly in the chat view.",
             "dependencies": ["17.1", "17.2"],
-            "details": "This subtask focuses on ensuring the two new features work together seamlessly. The chat input must send the raw string, including markdown syntax and emojis, to the backend. The primary work is testing the complete user journey: 1. Type a message with markdown. 2. Open the emoji picker. 3. Add an emoji. 4. Send the message. 5. Confirm the message appears correctly formatted in the message list.\n<info added on 2025-07-27T03:42:10.605Z>\nCOMPLETED TASK 17.3 IMPLEMENTATION - Successfully validated end-to-end emoji and markdown integration. Created comprehensive test page at /app/test-task-17-3/page.tsx validating complete user workflow. Merged Task 17.2 markdown rendering changes from feature/ui-redesign branch without conflicts. Confirmed seamless functionality: markdown syntax and emoji picker work together without interference, raw strings with markdown + emojis send properly to backend, MessageBubble components render all formatting correctly, responsive design maintained, no TypeScript errors or performance issues. Test scenarios validated include basic markdown with emojis, complex formatting combinations, and multiple emoji usage. Complete user journey from typing markdown → adding emojis → sending → rendering works flawlessly. Feature is production-ready with all dependencies properly installed and accessibility preserved.\n</info added on 2025-07-27T03:42:10.605Z>",
-            "status": "done",
+            "details": "This subtask focuses on ensuring the two new features work together seamlessly. The chat input must send the raw string, including markdown syntax and emojis, to the backend. The primary work is testing the complete user journey: 1. Type a message with markdown. 2. Open the emoji picker. 3. Add an emoji. 4. Send the message. 5. Confirm the message appears correctly formatted in the message list.",
+            "status": "pending",
             "testStrategy": "Perform an end-to-end test. Type a message like `This is a *test*! 👋`, using both markdown and an emoji from the picker. Send the message and verify that it appears in the chat history with the word 'test' in bold and the emoji rendered correctly."
           }
         ]
@@ -1072,7 +1072,7 @@
     ],
     "metadata": {
       "created": "2025-07-23T19:21:41.002Z",
-      "updated": "2025-07-27T03:42:19.933Z",
+      "updated": "2025-07-27T03:27:05.670Z",
       "description": "Tasks for master context"
     }
   }

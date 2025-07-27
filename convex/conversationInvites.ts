@@ -46,7 +46,9 @@ export const generateInvitationToken = mutation({
     // Deactivate any existing active invitation tokens for this conversation
     const existingTokens = await ctx.db
       .query('invitationTokens')
-      .withIndex('by_conversation', q => q.eq('conversationId', args.conversationId))
+      .withIndex('by_conversation', q =>
+        q.eq('conversationId', args.conversationId)
+      )
       .filter(q => q.eq(q.field('isActive'), true))
       .collect()
 
@@ -106,7 +108,10 @@ export const validateInvitationToken = query({
     // Check if the conversation still exists
     const conversation = await ctx.db.get(invitation.conversationId)
     if (!conversation || !conversation.isActive) {
-      return { valid: false, reason: 'Conversation no longer exists or is inactive' }
+      return {
+        valid: false,
+        reason: 'Conversation no longer exists or is inactive',
+      }
     }
 
     // Get creator information
@@ -216,7 +221,8 @@ export const getConversationInvitations = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) {
-      throw new Error('Not authenticated')
+      // Return empty array instead of throwing error for better UX
+      return []
     }
 
     // Verify the conversation exists and user has access
@@ -233,7 +239,9 @@ export const getConversationInvitations = query({
     // Get all invitation tokens for this conversation
     const invitations = await ctx.db
       .query('invitationTokens')
-      .withIndex('by_conversation', q => q.eq('conversationId', args.conversationId))
+      .withIndex('by_conversation', q =>
+        q.eq('conversationId', args.conversationId)
+      )
       .collect()
 
     // Enhance with creator information and expiration status
@@ -250,9 +258,11 @@ export const getConversationInvitations = query({
               }
             : null,
           usedByUser: invitation.usedBy
-            ? await ctx.db.get(invitation.usedBy).then(user => 
-                user ? { name: user.name, email: user.email } : null
-              )
+            ? await ctx.db
+                .get(invitation.usedBy)
+                .then(user =>
+                  user ? { name: user.name, email: user.email } : null
+                )
             : null,
         }
       })
