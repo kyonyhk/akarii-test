@@ -7,6 +7,7 @@ import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import type { Doc } from '@/convex/_generated/dataModel'
+import ReactMarkdown from 'react-markdown'
 
 type Analysis = Doc<'analyses'>
 
@@ -111,7 +112,17 @@ export function MessageBubbleOptimized({
             isOwn ? 'ml-4 bg-primary text-primary-foreground' : 'mr-4 bg-muted'
           )}
         >
-          {content}
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <span>{children}</span>,
+              strong: ({ children }) => (
+                <strong className="font-bold">{children}</strong>
+              ),
+              em: ({ children }) => <em className="italic">{children}</em>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
         </div>
 
         {/* Inline Analysis Card */}

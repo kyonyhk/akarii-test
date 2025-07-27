@@ -176,6 +176,56 @@ export default function TestMessageBubblePage() {
         </CardContent>
       </Card>
 
+      {/* Markdown Formatting Test */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Markdown Formatting Test</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+            <MessageBubble
+              messageId="markdown-1"
+              content="This is a **bold** text and this is *italic* text!"
+              authorId="user-123"
+              authorName="Alice Johnson"
+              timestamp={currentTime}
+              isOwn={false}
+              showAnalysis={false}
+            />
+
+            <MessageBubble
+              messageId="markdown-2"
+              content="You can use **bold** formatting and _italic_ formatting in the same message!"
+              authorId="current-user"
+              authorName="You"
+              timestamp={currentTime + 60000}
+              isOwn={true}
+              showAnalysis={false}
+            />
+
+            <MessageBubble
+              messageId="markdown-3"
+              content="This is a *test* with emoji! 👋"
+              authorId="user-456"
+              authorName="Bob Smith"
+              timestamp={currentTime + 120000}
+              isOwn={false}
+              showAnalysis={false}
+            />
+
+            <MessageBubble
+              messageId="markdown-4"
+              content="Complex example: **Bold text** with *italic text* and regular text all together!"
+              authorId="assistant"
+              authorName="AI Assistant"
+              timestamp={currentTime + 180000}
+              isOwn={false}
+              showAnalysis={false}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* User vs Assistant Styling */}
       <Card>
         <CardHeader>
