@@ -274,3 +274,172 @@ export function compareModelCosts(
     }))
     .sort((a, b) => a.cost - b.cost) // Sort by cost, cheapest first
 }
+
+/**
+ * More accurate token counting using tiktoken for GPT models
+ * Note: This is a fallback implementation for Convex server environment
+ */
+export function countTokensAccurate(text: string, model: string = 'gpt-4o'): number {
+  // For server environment, use the approximation method
+  // In a full implementation, you'd use tiktoken here
+  return countTokens(text)
+}
+
+/**
+ * Truncate conversation history to fit within context limits
+ */
+export function truncateConversationHistory(
+  messages: Array<{ role: string; content: string }>,
+  maxTokens: number,
+  preserveRecentCount: number = 3
+): {
+  truncatedMessages: Array<{ role: string; content: string }>
+  removedCount: number
+  finalTokenCount: number
+} {
+  if (messages.length === 0) {
+    return {
+      truncatedMessages: [],
+      removedCount: 0,
+      finalTokenCount: 0,
+    }
+  }
+
+  // Always preserve system message if it exists
+  const systemMessage = messages[0]?.role === 'system' ? messages[0] : null
+  const nonSystemMessages = systemMessage ? messages.slice(1) : messages
+
+  // Calculate initial token count
+  let totalTokens = countChatTokens(messages)
+
+  if (totalTokens <= maxTokens) {
+    return {
+      truncatedMessages: messages,
+      removedCount: 0,
+      finalTokenCount: totalTokens,
+    }
+  }
+
+  // Start with recent messages and system message
+  const preservedMessages = nonSystemMessages.slice(-preserveRecentCount)
+  let workingMessages = systemMessage ? [systemMessage, ...preservedMessages] : preservedMessages
+  let currentTokens = countChatTokens(workingMessages)
+
+  // Add older messages until we reach the limit
+  let addIndex = nonSystemMessages.length - preserveRecentCount - 1
+  while (addIndex >= 0 && currentTokens < maxTokens) {
+    const candidateMessage = nonSystemMessages[addIndex]
+    const candidateMessages = systemMessage 
+      ? [systemMessage, candidateMessage, ...preservedMessages]
+      : [candidateMessage, ...preservedMessages]
+    
+    const candidateTokens = countChatTokens(candidateMessages)
+    
+    if (candidateTokens <= maxTokens) {
+      workingMessages = candidateMessages
+      currentTokens = candidateTokens
+      addIndex--
+    } else {
+      break
+    }
+  }
+
+  const removedCount = (systemMessage ? nonSystemMessages.length : messages.length) - (workingMessages.length - (systemMessage ? 1 : 0))
+
+  return {
+    truncatedMessages: workingMessages,
+    removedCount,
+    finalTokenCount: currentTokens,
+  }
+}
+
+/**
+ * Smart context window management for conversational AI
+ */
+export function manageConversationContext(
+  systemPrompt: string,
+  conversationHistory: Array<{ role: string; content: string }>,
+  currentMessage: string,
+  model: string = 'gpt-4o',
+  maxOutputTokens: number = 300
+): {
+  messages: Array<{ role: string; content: string }>
+  tokenBreakdown: {
+    systemTokens: number
+    historyTokens: number
+    currentMessageTokens: number
+    totalInputTokens: number
+    remainingTokens: number
+  }
+  truncated: boolean
+  removedMessages: number
+} {
+  // Model context limits (conservative estimates)
+  const contextLimits: Record<string, number> = {
+    'gpt-4o': 128000,
+    'gpt-4o-mini': 128000,
+    'gpt-4': 8192,
+    'gpt-4-32k': 32768,
+    'gpt-4-turbo': 128000,
+    'gpt-3.5-turbo': 16384,
+  }
+
+  const maxContextTokens = contextLimits[model] || 128000
+  const maxInputTokens = maxContextTokens - maxOutputTokens - 100 // Safety buffer
+
+  // Count tokens for each component
+  const systemTokens = countTokens(systemPrompt)
+  const currentMessageTokens = countTokens(currentMessage)
+
+  // Calculate available tokens for history
+  const reservedTokens = systemTokens + currentMessageTokens
+  const availableForHistory = maxInputTokens - reservedTokens
+
+  if (availableForHistory <= 0) {
+    // System prompt and current message alone exceed limits
+    return {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: currentMessage }
+      ],
+      tokenBreakdown: {
+        systemTokens,
+        historyTokens: 0,
+        currentMessageTokens,
+        totalInputTokens: systemTokens + currentMessageTokens,
+        remainingTokens: maxInputTokens - systemTokens - currentMessageTokens,
+      },
+      truncated: true,
+      removedMessages: conversationHistory.length,
+    }
+  }
+
+  // Truncate history to fit
+  const truncationResult = truncateConversationHistory(
+    conversationHistory,
+    availableForHistory,
+    3 // Preserve last 3 messages
+  )
+
+  // Build final message array
+  const finalMessages = [
+    { role: 'system', content: systemPrompt },
+    ...truncationResult.truncatedMessages,
+    { role: 'user', content: currentMessage }
+  ]
+
+  const totalInputTokens = systemTokens + truncationResult.finalTokenCount + currentMessageTokens
+
+  return {
+    messages: finalMessages,
+    tokenBreakdown: {
+      systemTokens,
+      historyTokens: truncationResult.finalTokenCount,
+      currentMessageTokens,
+      totalInputTokens,
+      remainingTokens: maxInputTokens - totalInputTokens,
+    },
+    truncated: truncationResult.removedCount > 0,
+    removedMessages: truncationResult.removedCount,
+  }
+}

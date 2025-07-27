@@ -490,3 +490,23 @@ export const searchMessagesWithBoolean = query({
     }
   },
 })
+
+// Get messages in conversation (optimized for AI context)
+export const getMessagesInConversation = query({
+  args: {
+    conversationId: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10
+
+    // Get all messages and filter by conversation
+    const allMessages = await ctx.db.query('messages').order('desc').collect()
+    const conversationMessages = allMessages
+      .filter(message => message.conversationId === args.conversationId)
+      .slice(0, limit)
+
+    // Return in chronological order (oldest first)
+    return conversationMessages.reverse()
+  },
+})
