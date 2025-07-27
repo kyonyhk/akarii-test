@@ -31,21 +31,28 @@ interface InvitationShareButtonProps {
   conversationId: string
 }
 
-export function InvitationShareButton({ conversationId }: InvitationShareButtonProps) {
+export function InvitationShareButton({
+  conversationId,
+}: InvitationShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [expirationHours, setExpirationHours] = useState<string>('24')
 
+  // Check if this is a valid Convex ID (not a demo ID)
+  const isValidConvexId = conversationId && !conversationId.startsWith('demo-')
+
   const invitations = useQuery(
     api.conversationInvites.getConversationInvitations,
-    {
-      conversationId,
-    }
+    isValidConvexId ? { conversationId } : 'skip'
   )
-  
-  const generateToken = useMutation(api.conversationInvites.generateInvitationToken)
-  const deactivateToken = useMutation(api.conversationInvites.deactivateInvitationToken)
+
+  const generateToken = useMutation(
+    api.conversationInvites.generateInvitationToken
+  )
+  const deactivateToken = useMutation(
+    api.conversationInvites.deactivateInvitationToken
+  )
 
   const handleCopyUrl = async (url: string) => {
     try {
@@ -59,6 +66,11 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
   }
 
   const handleGenerateToken = async () => {
+    if (!isValidConvexId) {
+      toast.error('Cannot create invitation links for demo conversations')
+      return
+    }
+
     try {
       const hours = expirationHours ? parseInt(expirationHours) : 24
       const result = await generateToken({
@@ -89,13 +101,15 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
     }
   }
 
-  const activeInvitations = invitations?.filter(
-    invitation => invitation.isActive && !invitation.isExpired
-  ) || []
-  
-  const inactiveInvitations = invitations?.filter(
-    invitation => !invitation.isActive || invitation.isExpired
-  ) || []
+  const activeInvitations =
+    invitations?.filter(
+      invitation => invitation.isActive && !invitation.isExpired
+    ) || []
+
+  const inactiveInvitations =
+    invitations?.filter(
+      invitation => !invitation.isActive || invitation.isExpired
+    ) || []
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -114,8 +128,20 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Demo conversation notice */}
+          {!isValidConvexId && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                This is a demo conversation. Invitation links are only available
+                for real conversations. Sign in and create a conversation to
+                share it with others.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Create new invitation button */}
-          {!showCreateForm && (
+          {!showCreateForm && isValidConvexId && (
             <Button
               onClick={() => setShowCreateForm(true)}
               className="w-full"
@@ -127,7 +153,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
           )}
 
           {/* Create form */}
-          {showCreateForm && (
+          {showCreateForm && isValidConvexId && (
             <div className="space-y-4 rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">New Invitation Link</h3>
@@ -141,9 +167,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="expiration">
-                  Expires in (hours)
-                </Label>
+                <Label htmlFor="expiration">Expires in (hours)</Label>
                 <Input
                   id="expiration"
                   type="number"
@@ -165,7 +189,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
           )}
 
           {/* Active invitations */}
-          {activeInvitations.length > 0 && (
+          {isValidConvexId && activeInvitations.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Active Invitations</h3>
               {activeInvitations.map(invitation => {
@@ -178,9 +202,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="font-medium">
-                          Invitation Link
-                        </h4>
+                        <h4 className="font-medium">Invitation Link</h4>
                         <div className="mt-1 flex items-center space-x-4 text-sm text-gray-600">
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-3 w-3" />
@@ -193,7 +215,9 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
                             <div className="flex items-center space-x-1">
                               <Users className="h-3 w-3" />
                               <span>
-                                Created by {invitation.createdBy.name || invitation.createdBy.email}
+                                Created by{' '}
+                                {invitation.createdBy.name ||
+                                  invitation.createdBy.email}
                               </span>
                             </div>
                           )}
@@ -234,7 +258,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
           )}
 
           {/* Inactive invitations */}
-          {inactiveInvitations.length > 0 && (
+          {isValidConvexId && inactiveInvitations.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-600">
                 Inactive Invitations
@@ -250,7 +274,12 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
                       <p className="text-sm text-gray-600">
                         {invitation.isExpired ? 'Expired' : 'Deactivated'}
                         {invitation.createdBy && (
-                          <> • Created by {invitation.createdBy.name || invitation.createdBy.email}</>
+                          <>
+                            {' '}
+                            • Created by{' '}
+                            {invitation.createdBy.name ||
+                              invitation.createdBy.email}
+                          </>
                         )}
                       </p>
                     </div>
@@ -260,7 +289,7 @@ export function InvitationShareButton({ conversationId }: InvitationShareButtonP
             </div>
           )}
 
-          {invitations && invitations.length === 0 && (
+          {isValidConvexId && invitations && invitations.length === 0 && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
