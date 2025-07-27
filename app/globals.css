@@ -4,58 +4,78 @@
 
 @layer base {
   :root {
-    /* Futuristic Dark Theme */
-    --background: 200 20% 5%;
-    --foreground: 180 100% 85%;
-    --card: 200 25% 8%;
-    --card-foreground: 180 100% 85%;
-    --popover: 200 30% 6%;
-    --popover-foreground: 180 100% 85%;
-    --primary: 180 100% 50%;
-    --primary-foreground: 200 20% 5%;
-    --secondary: 195 100% 20%;
-    --secondary-foreground: 180 100% 85%;
-    --muted: 200 15% 12%;
-    --muted-foreground: 180 20% 60%;
-    --accent: 270 100% 60%;
-    --accent-foreground: 200 20% 5%;
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 200 20% 5%;
-    --border: 195 30% 15%;
-    --input: 200 25% 10%;
-    --ring: 180 100% 50%;
-    --radius: 0.75rem;
+    /* Apple-Style Design System - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 15%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 100%;
+    --ring: 211 100% 50%;
+    --radius: 1rem;
 
-    /* Futuristic custom colors */
-    --neon-cyan: 180 100% 50%;
-    --neon-purple: 270 100% 60%;
-    --neon-pink: 320 100% 60%;
-    --dark-surface: 200 25% 8%;
-    --darker-surface: 200 30% 6%;
-    --grid-color: 180 50% 25%;
+    /* Apple Extended Gray Scale */
+    --gray-50: 0 0% 98%;
+    --gray-100: 0 0% 96%;
+    --gray-200: 0 0% 90%;
+    --gray-300: 0 0% 83%;
+    --gray-400: 0 0% 64%;
+    --gray-500: 0 0% 45%;
+    --gray-600: 0 0% 32%;
+    --gray-700: 0 0% 25%;
+    --gray-800: 0 0% 15%;
+    --gray-900: 0 0% 9%;
+
+    /* Apple Shadow System */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --card-shadow: 0 2px 8px rgb(0 0 0 / 0.06);
+    --card-shadow-hover: 0 4px 12px rgb(0 0 0 / 0.08);
   }
 
   .dark {
-    /* Same colors for dark mode since this is already a dark theme */
-    --background: 200 20% 5%;
-    --foreground: 180 100% 85%;
-    --card: 200 25% 8%;
-    --card-foreground: 180 100% 85%;
-    --popover: 200 30% 6%;
-    --popover-foreground: 180 100% 85%;
-    --primary: 180 100% 50%;
-    --primary-foreground: 200 20% 5%;
-    --secondary: 195 100% 20%;
-    --secondary-foreground: 180 100% 85%;
-    --muted: 200 15% 12%;
-    --muted-foreground: 180 20% 60%;
-    --accent: 270 100% 60%;
-    --accent-foreground: 200 20% 5%;
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 200 20% 5%;
-    --border: 195 30% 15%;
-    --input: 200 25% 10%;
-    --ring: 180 100% 50%;
+    /* Apple-Style Design System - Dark Mode */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 12%;
+    --ring: 211 100% 50%;
+
+    /* Dark mode shadows - more prominent */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --card-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+    --card-shadow-hover: 0 4px 12px rgb(0 0 0 / 0.3);
   }
 }
 
@@ -65,75 +85,96 @@
   }
 
   body {
-    @apply bg-background font-orbitron text-foreground;
-    background-image: radial-gradient(
-      circle at 1px 1px,
-      hsl(var(--grid-color)) 1px,
-      transparent 0
-    );
-    background-size: 20px 20px;
-    background-attachment: fixed;
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* Clean, minimal background - no grid pattern */
   }
 
-  /* Futuristic scrollbar */
+  /* Apple-style scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: hsl(var(--muted));
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
+    background: hsl(var(--gray-400));
     border-radius: 4px;
-    box-shadow: 0 0 8px hsl(var(--primary));
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--accent));
-    box-shadow: 0 0 12px hsl(var(--accent));
+    background: hsl(var(--gray-500));
   }
 }
 
 @layer components {
-  /* Neon glow effect utility classes */
-  .neon-glow {
-    box-shadow:
-      0 0 5px hsl(var(--primary)),
-      0 0 10px hsl(var(--primary)),
-      0 0 15px hsl(var(--primary)),
-      0 0 20px hsl(var(--primary));
+  /* Apple-style component utilities */
+  .apple-card {
+    @apply bg-card border border-border rounded-2xl shadow-[var(--card-shadow)];
+    transition: box-shadow 0.2s ease-out;
   }
 
-  .neon-text {
-    color: hsl(var(--primary));
-    text-shadow:
-      0 0 5px hsl(var(--primary)),
-      0 0 10px hsl(var(--primary)),
-      0 0 15px hsl(var(--primary));
+  .apple-card:hover {
+    box-shadow: var(--card-shadow-hover);
   }
 
-  .cyber-border {
-    border: 1px solid hsl(var(--primary));
-    box-shadow:
-      inset 0 0 10px hsl(var(--primary) / 0.2),
-      0 0 10px hsl(var(--primary) / 0.3);
+  .apple-button {
+    @apply bg-primary text-primary-foreground rounded-xl px-6 py-3 font-medium;
+    @apply hover:bg-primary/90 active:bg-primary/95;
+    @apply transition-all duration-150 ease-out;
+    @apply shadow-sm hover:shadow-md;
   }
 
-  .holographic {
-    background: linear-gradient(
-      45deg,
-      hsl(var(--primary) / 0.1),
-      hsl(var(--accent) / 0.1),
-      hsl(var(--neon-pink) / 0.1)
-    );
-    backdrop-filter: blur(10px);
-    border: 1px solid hsl(var(--primary) / 0.3);
+  .apple-button-secondary {
+    @apply bg-secondary text-secondary-foreground rounded-xl px-6 py-3 font-medium;
+    @apply hover:bg-secondary/80 active:bg-secondary/90;
+    @apply transition-all duration-150 ease-out;
+    @apply border border-border;
   }
 
-  .digital-font {
-    font-family: var(--font-sharetech);
-    letter-spacing: 0.05em;
+  .apple-input {
+    @apply bg-input border border-border rounded-xl px-4 py-3;
+    @apply focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply transition-all duration-150 ease-out;
+  }
+
+  .apple-surface {
+    @apply bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl;
+  }
+
+  /* Apple Typography utilities */
+  .title-large {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+
+  .title-medium {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .title-small {
+    @apply text-xl font-semibold;
+  }
+
+  .body-large {
+    @apply text-lg font-normal;
+  }
+
+  .body-medium {
+    @apply text-base font-normal;
+  }
+
+  .body-small {
+    @apply text-sm font-normal;
+  }
+
+  .caption {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .label {
+    @apply text-sm font-medium;
   }
 }
