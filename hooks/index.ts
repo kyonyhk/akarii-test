@@ -9,3 +9,4 @@ export {
 } from './use-vote-analytics'
 export { usePresence } from './use-presence'
 export { useTypingIndicator } from './use-typing-indicator'
+export { useRole, type UserRole } from './useRole'

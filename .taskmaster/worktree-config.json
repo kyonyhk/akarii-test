@@ -1,0 +1,51 @@
+{
+  "workflowMode": "parallel-worktrees",
+  "description": "Configuration for parallel development workflow using git worktrees",
+  "activeTaskRange": {
+    "start": 11,
+    "end": 17,
+    "description": "Chat app enhancement tasks (Jan 2025)"
+  },
+  "worktrees": {
+    "/Users/kuoloonchong/Desktop/akarii-ui-redesign": {
+      "branch": "feature/ui-redesign",
+      "tasks": [11, 17],
+      "description": "UI Redesign & Chat Input Features"
+    },
+    "/Users/kuoloonchong/Desktop/akarii-share-feature": {
+      "branch": "feature/share-enhancement",
+      "tasks": [13],
+      "description": "Real-time Collaboration & Sharing"
+    },
+    "/Users/kuoloonchong/Desktop/akarii-multi-model": {
+      "branch": "feature/multi-model-support",
+      "tasks": [14],
+      "description": "Multi-Model AI Provider Backend"
+    },
+    "/Users/kuoloonchong/Desktop/akarii-conversational-ai": {
+      "branch": "feature/conversational-ai",
+      "tasks": [15],
+      "description": "Conversational, Context-Aware Responses"
+    },
+    "/Users/kuoloonchong/Desktop/akarii-role-access": {
+      "branch": "feature/role-based-access",
+      "tasks": [12],
+      "description": "Role-Based Access Control"
+    },
+    "/Users/kuoloonchong/Desktop/akarii-real-analytics": {
+      "branch": "feature/real-analytics",
+      "tasks": [16],
+      "description": "Real Analytics Data Integration"
+    }
+  },
+  "commands": {
+    "taskManager": "./tm",
+    "branchCheck": "git branch --show-current",
+    "emergencyReturn": "git checkout {assigned_branch}"
+  },
+  "rules": {
+    "noDirectMainCommits": true,
+    "requirePullRequests": true,
+    "centralizedTaskManagement": true
+  }
+}

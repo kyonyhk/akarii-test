@@ -14,7 +14,7 @@ interface AuthContextType {
         email: string
         name?: string
         avatar?: string
-        role: 'member' | 'admin'
+        role: 'admin' | 'user' | 'guest' | 'member'
         joinedAt: number
       }
     | null

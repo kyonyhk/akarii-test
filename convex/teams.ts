@@ -1,11 +1,15 @@
 import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { ensureAdmin } from './rbac'
 
 export const createTeam = mutation({
   args: {
     name: v.string(),
   },
   handler: async (ctx, args) => {
+    // Ensure user has admin role
+    await ensureAdmin(ctx)
+
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) {
       throw new Error('Not authenticated')
