@@ -13,8 +13,8 @@ export function useUser() {
   useEffect(() => {
     if (isLoaded && clerkUser) {
       // Get role from Clerk publicMetadata, default to 'user' if not set
-      const role = clerkUser.publicMetadata?.role as string || 'user'
-      
+      const role = (clerkUser.publicMetadata?.role as string) || 'user'
+
       // Sync user data with Convex when Clerk user is loaded
       createOrUpdateUser({
         clerkId: clerkUser.id,

@@ -415,4 +415,33 @@ export default defineSchema({
     .index('by_team', ['teamId'])
     .index('by_user', ['userId'])
     .index('by_team_user', ['teamId', 'userId']),
+
+  // Invitation tokens for chat conversation sharing
+  invitationTokens: defineTable({
+    conversationId: v.id('conversations'),
+    token: v.string(),
+    createdBy: v.id('users'),
+    expiresAt: v.number(),
+    isActive: v.boolean(),
+    usedBy: v.optional(v.id('users')),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_token', ['token'])
+    .index('by_conversation', ['conversationId'])
+    .index('by_created_by', ['createdBy'])
+    .index('by_expires', ['expiresAt'])
+    .index('by_active', ['isActive']),
+
+  // Presence tracking for real-time collaboration
+  presence: defineTable({
+    user: v.string(),
+    room: v.string(),
+    data: v.any(), // Flexible data storage for presence info
+    updated: v.number(),
+  })
+    .index('by_room', ['room'])
+    .index('by_user', ['user'])
+    .index('by_room_user', ['room', 'user'])
+    .index('by_updated', ['updated']),
 })

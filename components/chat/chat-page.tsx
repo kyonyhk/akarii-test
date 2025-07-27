@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ChatContainer, ChatInput, MessageBubble } from '@/components/chat'
+import {
+  ChatContainer,
+  ChatInput,
+  MessageBubble,
+  TypingIndicator,
+} from '@/components/chat'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useChat } from '@/hooks/use-chat'
 import { Loader2 } from 'lucide-react'
@@ -134,10 +139,13 @@ export function ChatPage({
         </div>
       </ScrollArea>
 
+      <TypingIndicator conversationId={conversationId} />
+
       <ChatInput
         onSendMessage={handleSendMessage}
         disabled={isLoading}
         placeholder={isLoading ? 'Sending...' : 'Type your message...'}
+        conversationId={conversationId}
       />
 
       {/* Scroll to bottom button */}
